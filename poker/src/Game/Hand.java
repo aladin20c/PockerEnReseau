@@ -3,7 +3,7 @@ package Game;
 import java.util.ArrayList;
 
 public class Hand {
-    protected ArrayList<Card> cards;
+    public ArrayList<Card> cards;
 
     //Constructor
     public Hand(){

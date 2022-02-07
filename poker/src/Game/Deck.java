@@ -1,9 +1,10 @@
 package Game;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Random;
 
 public class Deck extends Hand {
-    Random rand =new Random();
 
     /**
      * Initialise the deck with all the possible values
@@ -22,24 +23,49 @@ public class Deck extends Hand {
      * To reorder the list
      */
     public void shuffle() {
-        for (int i=cards.size()-1;i>0;i--){
-           int pick=rand.nextInt(i);
-           Card randCard=cards.get(pick);
-           Card lastCard=cards.get(i);
-           cards.set(pick,lastCard);
-           cards.set(i,randCard);
-        }
+        Collections.shuffle(cards);
     }
 
     /**
-     * To distribute cards to the hands
+     * To distribute cards to the players
      */
-    public void deal(Hand [] hands,int perHand){
+    public void dealPlayers(Hand [] hands,int perHand){
         for(int i=0;i<perHand;i++){
             for(int j=0;j<hands.length;j++){
                 this.give(cards.get(0),hands[j]);
             }
         }
     }
+    /**
+     * To put the cards on the table
+     */
+    public void deal(Hand table,int perHand){
+        for(int i=0;i<perHand;i++){
+            this.give(cards.get(0),table);
+        }
+    }
+    /**
+     * To burn the first card
+     */
+    public void burn(){
+        cards.remove(0);
+    }
 
+    /**
+     * Number of cards left
+     * @return
+     */
+    public int getNumberCardsLeft(){
+        return cards.size();
+    }
+
+    /**
+     * Get the next card
+     */
+    public Card getNextCard(){
+        if(cards.size()!=0){
+            return cards.remove(0);
+        }
+        return null;
+    }
 }

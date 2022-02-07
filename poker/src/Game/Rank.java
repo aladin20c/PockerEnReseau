@@ -11,9 +11,9 @@ public enum Rank {
     EIGHT(8,"8"),
     NINE(9,"9"),
     TEN(10,"10"),
-    JACK(10,"Jack"),
-    QUEEN(10,"Queen"),
-    KING(10,"King");
+    JACK(11,"Jack"),
+    QUEEN(12,"Queen"),
+    KING(13,"King");
 
     //private fields
     private final int rankValue;

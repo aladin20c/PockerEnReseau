@@ -11,7 +11,7 @@ public class Card {
     public Card(Rank rank, Suit suit){
         this.rank=rank;
         this.suit=suit;
-        isFaceUp=false;
+        isFaceUp=true;
     }
 
     //Public methods
