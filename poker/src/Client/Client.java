@@ -6,17 +6,18 @@ import java.net.UnknownHostException;
 import java.util.Scanner;
 
 public class Client {
+    private static final int PORT=1234;
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private String username;
 
-    public Client(Socket socket, String username) {
+    public Client(Socket socket) {
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            this.username = username;
+            this.username = "";
         }catch (IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -24,36 +25,24 @@ public class Client {
 
     /*send messages to the clientHandler(the connection that the server has spawned to handle a client)*/
     public void sendMessage(){
-        try{
-            //the client handler constructor will be waiting for the client's username to be sent over
-            bufferedWriter.write(username);
-            bufferedWriter.newLine();
-            bufferedWriter.flush();
-
-            Scanner scanner=new Scanner(System.in);
-            while (socket.isConnected()){
-                //get what the user is typing and sent it over
-                String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
-                bufferedWriter.write(username+" : "+messageToSend);
-                bufferedWriter.newLine();
-                bufferedWriter.flush();
-            }
-        }catch (IOException e){
-            closeEverything(socket,bufferedReader,bufferedWriter);
+        Scanner scanner=new Scanner(System.in);
+        while (socket.isConnected()){
+            //get what the user is typing and sent it over
+            String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
+            writeToServer(messageToSend.trim());
         }
     }
-
     /*making a seperate thread for listening for messages that has been broadCasted*/
     public void listenForMessage(){
         new Thread(new Runnable() {
             @Override
             public void run() {
-                String messageFromGroupChat;
+                String comingMessage;
 
                 while (socket.isConnected()){
                     try{
-                        messageFromGroupChat=bufferedReader.readLine();
-                        System.out.println(messageFromGroupChat);
+                        comingMessage=bufferedReader.readLine();
+                        System.out.println(comingMessage);
                     }catch (IOException e){
                         closeEverything(socket,bufferedReader,bufferedWriter);
                     }
@@ -61,6 +50,9 @@ public class Client {
             }
         }).start();
     }
+
+
+
 
     public void closeEverything(Socket socket,BufferedReader bufferedReader,BufferedWriter bufferedWriter){
         try{
@@ -72,28 +64,42 @@ public class Client {
             e.printStackTrace();
         }
     }
-
-
-    public static void main(String[] args) {
+    public void writeToServer(String messageToSend){
         try {
-            Scanner scanner = new Scanner(System.in);
-            System.out.println("Enter your username !!!");
-            String username = scanner.nextLine();
-            Socket socket = new Socket("localhost", 1234);
-            Client client = new Client(socket, username);
-            client.listenForMessage();
-            client.sendMessage();
+            bufferedWriter.write(messageToSend);
+            bufferedWriter.newLine();
+            bufferedWriter.flush();
         }catch (IOException e){
-            e.printStackTrace();
+            closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
 
 
+    public static void main(String[] args) {
+        try {
 
+            Socket socket = new Socket("localhost", PORT);
+            Client client = new Client(socket);
 
+            //setting the name
+            Scanner scanner = new Scanner(System.in);
+            while (client.username.isEmpty()){
+                System.out.println("please enter your name");
+                String username = scanner.nextLine().trim();
+                client.writeToServer("100 HELLO PLAYER "+username);
+                String comingMessage=client.bufferedReader.readLine();
+                System.out.println("SERVER :"+comingMessage);
+                if(comingMessage.equals("101 WELCOME "+username)) client.username=username;
+            }
 
+            //after the client has connected, he can now listen and write messages to server
+            client.listenForMessage();
+            client.sendMessage();
 
-
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
 
 }
