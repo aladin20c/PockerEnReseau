@@ -10,6 +10,9 @@ public class Hand {
         cards=new ArrayList<Card>();
     }
 
+    public ArrayList<Card> getCards(){
+        return cards;
+    }
     /**
      * To clear the list
      */
