@@ -1,6 +1,7 @@
 package Game;
 
 import java.util.ArrayList;
+import java.util.Collections;
 
 public class Hand {
     public ArrayList<Card> cards;
@@ -62,5 +63,23 @@ public class Hand {
         for(Card c:cards){
             c.flipCard();
         }
+    }
+
+    /**
+     * Sort cards according to theirs suit
+     */
+    public void sortBySuit(){
+        for(int i=0;i<cards.size()-1;i++){
+            for(int j=i+1;j>0;j--){
+                if(cards.get(j).getSuit().ordinal()<cards.get(j-1).getSuit().ordinal()){
+                    Card c=cards.get(j);
+                    cards.set(j,cards.get(j-1));
+                    cards.set(j-1,c);
+                }
+            }
+        }
+    }
+    public void sortBySuit2(){
+        Collections.sort(cards,SortBy.SUIT.getComparator());
     }
 }

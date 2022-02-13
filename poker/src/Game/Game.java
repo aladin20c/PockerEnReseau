@@ -12,18 +12,21 @@ public class Game {
         d.populate();
         d.shuffle();
 
-        d.dealPlayers(h,3);
+        d.dealPlayers(h,5);
         System.out.println("Distributing cards ");
 
         h[0].flipCards();
         h[1].flipCards();
+        h[0].sortBySuit2();
+        h[1].sortBySuit2();
+
         System.out.println("Hand 1 is :\n"+h[0].showHand()
                 +" \nHand 2 is :\n"+h[1].showHand());
 
-        Rank r= Rank.FOUR;
+       /* Rank r= Rank.FOUR;
         Rank [] t=Rank.values();
         for(int i=0;i<t.length;i++){
             System.out.println(t[r.ordinal()+1]);
-        }
+        }*/
     }
 }

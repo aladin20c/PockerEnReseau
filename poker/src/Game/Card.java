@@ -20,8 +20,9 @@ public class Card {
      * To get the suit
      * @return
      */
-    public String getSuit(){
-        return suit.printSuit();
+
+    public Suit getSuit(){
+        return suit;
     }
 
     /**
