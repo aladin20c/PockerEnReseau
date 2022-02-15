@@ -23,7 +23,7 @@ public class ClientHandler implements Runnable{
 
     public static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
 
-    private Room currentRoom;
+    private SRoom currentRoom;
     //used to establish a connection between the client and server
     private Socket socket;
 
@@ -131,7 +131,7 @@ public class ClientHandler implements Runnable{
                 else if(data[2]<=0) writeToClient("904 Incorrect minimal bet");
                 else if(data[3]<= data[2]*20) writeToClient("904 Incorrect stack");
                 else{
-                    currentRoom=new Room(data[0],data[1],data[2],data[3]);
+                    currentRoom=new SRoom(data[0],data[1],data[2],data[3]);
                     writeToClient("110 GAME CREATED id");
                 }
 
@@ -166,5 +166,11 @@ public class ClientHandler implements Runnable{
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
+
+
+
+
+
+    public String getClientUsername() {return clientUsername;}
 
 }

@@ -8,7 +8,7 @@ import java.util.ArrayList;
 public class Server {
 
     private static final int PORT=1234;
-    protected static ArrayList<Room> rooms=new ArrayList<>();
+    protected static ArrayList<SRoom> rooms=new ArrayList<>();
     private static Server server;
     private ServerSocket serverSocket;
 
