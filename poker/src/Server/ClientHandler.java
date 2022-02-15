@@ -185,7 +185,27 @@ public class ClientHandler implements Runnable{
                     writeToClient("121 MESS "+i+" "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
                 }
 
-                
+            }else if(messageFromClient.matches(JOIN_ROOM_REQUEST)){
+
+                if(playerIsInARoom()){
+                    writeToClient("907 u are already in room");
+                    return;
+                }
+                int id=Integer.parseInt(messageFromClient.substring(9));
+                for(SRoom room:Server.rooms){
+                    if(room.getId()==id ){
+                        if(!room.hasRoomLeft()){
+                            writeToClient("131 room is full");
+                            return;
+                        }else {
+                            currentRoom=room;
+                            this.stack=room.getInitStack();
+                            writeToClient("131 GAME " + room.getId() + " JOINED");
+                            broadCastMessage("140 " + clientUsername + " JOINED");
+                            return;
+                        }
+                    }
+                }
 
             }else if(messageFromClient.matches(ECHO)){
                 writeToClient(messageFromClient.substring(9));
