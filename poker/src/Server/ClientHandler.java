@@ -1,27 +1,14 @@
 package Server;
 
+import Game.Utils.Request;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class ClientHandler implements Runnable{
-    private static String JOIN_REQUEST="100 HELLO PLAYER .+";
-    private static String CREATE_ROOM_REQUEST="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";
-    private static String GET_ROOMS_REQUEST="120 GETLIST";
-    private static String JOIN_ROOM_REQUEST="130 JOIN -?\\d+";
-    private static String ACK_Player="141 .+ ACK";
-    private static String START_ROUND_REQUEST="150 REQUEST START";
-    private static String ACTION_RECIEVED="500 RECIEVED";
-    private static String CARD_RECIEVED="600 RECIEVED";
-    private static String CHANGE_REQUEST="710 CHANGE \\d+(\\s+[DCST](\\d|1[0123]))+";
-    private static String CHANGE_RECIEVED="701 RECIEVED";
-    private static String QUIT_REQUEST="210 QUIT";
-    private static String QUIT_RECIEVED="201 RECIEVED";
-    private static String ECHO="000 echo .+";
-
-
-
+    
 
     //used to establish a connection between the client and server
     private Socket socket;
@@ -129,7 +116,7 @@ public class ClientHandler implements Runnable{
         if(messageFromClient.matches("\\d\\d\\d.*")){
 
 
-            if(messageFromClient.matches(JOIN_REQUEST) ){
+            if(messageFromClient.matches(Request.JOIN) ){
 
                 //if name is not empty then the name is already set
                 if(!clientUsername.isEmpty()){
@@ -150,7 +137,7 @@ public class ClientHandler implements Runnable{
                     System.out.println(name+" has successfully connected");
                 }
 
-            }else if(messageFromClient.matches(CREATE_ROOM_REQUEST)){
+            }else if(messageFromClient.matches(Request.CREATE_ROOM)){
 
                 if(playerIsInARoom()){
                     writeToClient("907 u are already in room");
@@ -173,7 +160,7 @@ public class ClientHandler implements Runnable{
                 }
 
 
-            }else if(messageFromClient.matches(GET_ROOMS_REQUEST)){
+            }else if(messageFromClient.matches(Request.GET_ROOMS)){
 
                 if(playerIsInARoom()){
                     writeToClient("907 u are already in room");
@@ -185,7 +172,7 @@ public class ClientHandler implements Runnable{
                     writeToClient("121 MESS "+i+" "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
                 }
 
-            }else if(messageFromClient.matches(JOIN_ROOM_REQUEST)){
+            }else if(messageFromClient.matches(Request.JOIN_ROOM)){
 
                 if(playerIsInARoom()){
                     writeToClient("907 u are already in room");
@@ -207,7 +194,74 @@ public class ClientHandler implements Runnable{
                     }
                 }
 
-            }else if(messageFromClient.matches(ECHO)){
+            }else if(messageFromClient.matches(Request.ACK_Player)){
+
+                //there s nothing to do here
+
+            }else if(messageFromClient.matches(Request.START_ROUND)){
+
+                if(playerIsInARoom()){
+                    writeToClient("907 u are already in room");
+                    return;
+                }else if(currentRoom.startRequested()){
+                    writeToClient("155 start already requested");
+                    return;
+                }else if(isPlaying()){
+                    writeToClient("156 u are currently playing");
+                    return;
+                }else if(!currentRoom.isAdmin(this.clientUsername)){
+                    writeToClient("157 u are not the admin");
+                    return;
+                }else{
+                    //when a player initialize a start request does he say yes automatically___________________??????????????
+                    this.currentRoom.requestStart();
+                    broadCastMessage("152 START REQUESTED");
+                }
+
+            }else if(messageFromClient.matches(Request.START_RESPONSE)){
+
+                if(!playerIsInARoom() || !currentRoom.startRequested() ){
+                    writeToClient("158 there's no start request");
+                }else{
+                    String response=messageFromClient.substring(10);
+                    if(response.equals("YES")) currentRoom.respond(this,true);
+                    else currentRoom.respond(this,false);
+
+                    if(currentRoom.allPlayersResponded()){
+
+                        if(currentRoom.startApproved()){
+                            currentRoom.setGameStarted(true);
+                            broadCastMessageToEveryone("153 GAME STARTED");
+                        }else {
+                            ArrayList<String> playersWhoRefused= currentRoom.getPlayersWhoSaidNo();
+                            int k=playersWhoRefused.size();
+                            broadCastMessageToEveryone("153 GAME ABORDED "+k);
+
+                            int i=0;
+                            for(;i<playersWhoRefused.size()/5;i++){
+                                broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
+                                        +playersWhoRefused.get(i*5)+" "
+                                        +playersWhoRefused.get(i*5+1)+" "
+                                        +playersWhoRefused.get(i*5+2)+" "
+                                        +playersWhoRefused.get(i*5+3)+" "
+                                        +playersWhoRefused.get(i*5+4)
+                                );
+                            }
+                            if(i*5<k){
+                                broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
+                                        +playersWhoRefused.get(i*5)+" "
+                                        +( (i*5+1<k)? playersWhoRefused.get(i+1)+" ":"")
+                                        +( (i*5+2<k)? playersWhoRefused.get(i+2)+" ":"")
+                                        +( (i*5+3<k)? playersWhoRefused.get(i+3):"")
+                                );
+                            }
+
+                        }
+                        currentRoom.abortStartRequested();
+                    }
+                }
+
+            }else if(messageFromClient.matches(Request.ECHO)){
                 writeToClient(messageFromClient.substring(9));
             }else{
                 writeToClient("999 ERROR");//method is wrong
