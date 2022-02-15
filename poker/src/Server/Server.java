@@ -8,6 +8,7 @@ import java.util.ArrayList;
 public class Server {
 
     private static final int PORT=1234;
+    public static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
     protected static ArrayList<SRoom> rooms=new ArrayList<>();
     private static Server server;
     private ServerSocket serverSocket;
@@ -53,7 +54,12 @@ public class Server {
         }
     }
 
-
+    public static boolean containsName(String name){
+        for(ClientHandler ch:clientHandlers){
+            if(ch.getClientUsername().equals(name)) return true;
+        }
+        return false;
+    }
 
 
     public static Server get(ServerSocket serverSocket){
