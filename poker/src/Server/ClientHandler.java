@@ -156,7 +156,9 @@ public class ClientHandler implements Runnable{
                 else if(initialStack<= minBet*20) writeToClient("904 Incorrect stack");
                 else{
                     currentRoom=new SRoom(type,numberOfPlayers,minBet,initialStack);
-                    writeToClient("110 GAME CREATED id");
+                    currentRoom.clientHandlers.add(this);
+                    Server.rooms.add(currentRoom);
+                    writeToClient("110 GAME CREATED "+currentRoom.getId());
                 }
 
 
@@ -166,10 +168,10 @@ public class ClientHandler implements Runnable{
                     writeToClient("907 u are already in room");
                     return;
                 }
-                writeToClient("121 NUMBER"+Server.rooms.size());
-                for(int i=1;i<= Server.rooms.size();i++){
+                writeToClient("121 NUMBER "+Server.rooms.size());
+                for(int i=0;i< Server.rooms.size();i++){
                     SRoom r=Server.rooms.get(i);
-                    writeToClient("121 MESS "+i+" "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
+                    writeToClient("121 MESS "+(i+1)+" "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
                 }
 
             }else if(messageFromClient.matches(Request.JOIN_ROOM)){
@@ -186,6 +188,7 @@ public class ClientHandler implements Runnable{
                             return;
                         }else {
                             currentRoom=room;
+                            currentRoom.clientHandlers.add(this);
                             this.stack=room.getInitStack();
                             writeToClient("131 GAME " + room.getId() + " JOINED");
                             broadCastMessage("140 " + clientUsername + " JOINED");
@@ -193,15 +196,17 @@ public class ClientHandler implements Runnable{
                         }
                     }
                 }
+                writeToClient("902 wrong id");
 
             }else if(messageFromClient.matches(Request.ACK_Player)){
 
                 //there s nothing to do here
+                //TODO
 
             }else if(messageFromClient.matches(Request.START_ROUND)){
 
-                if(playerIsInARoom()){
-                    writeToClient("907 u are already in room");
+                if(!playerIsInARoom()){
+                    writeToClient("907 u are not in a room");
                     return;
                 }else if(currentRoom.startRequested()){
                     writeToClient("155 start already requested");
@@ -215,7 +220,7 @@ public class ClientHandler implements Runnable{
                 }else{
                     //when a player initialize a start request does he say yes automatically___________________??????????????
                     this.currentRoom.requestStart();
-                    broadCastMessage("152 START REQUESTED");
+                    broadCastMessageToEveryone("152 START REQUESTED");
                 }
 
             }else if(messageFromClient.matches(Request.START_RESPONSE)){
@@ -228,12 +233,12 @@ public class ClientHandler implements Runnable{
                     else currentRoom.respond(this,false);
 
                     if(currentRoom.allPlayersResponded()){
-
                         if(currentRoom.startApproved()){
                             currentRoom.setGameStarted(true);
                             broadCastMessageToEveryone("153 GAME STARTED");
                         }else {
                             ArrayList<String> playersWhoRefused= currentRoom.getPlayersWhoSaidNo();
+                            System.out.println(playersWhoRefused.toString());
                             int k=playersWhoRefused.size();
                             broadCastMessageToEveryone("153 GAME ABORDED "+k);
 

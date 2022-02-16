@@ -1,8 +1,15 @@
 package Client;
 
+import Game.Room;
+import Game.Utils.Request;
+import Server.SRoom;
+import Server.Server;
+
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
@@ -10,7 +17,16 @@ public class Client {
     private Socket socket;
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
+
+    private PlayerInformations playerInformations;
+    private CRoom futureRoom;
+    private CRoom[] roomsList;
+    private CRoom currentRoom;
     private String username;
+
+
+
+
 
     public Client(Socket socket) {
         try {
@@ -22,38 +38,6 @@ public class Client {
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
-
-    /*send messages to the clientHandler(the connection that the server has spawned to handle a client)*/
-    public void sendMessage(){
-        Scanner scanner=new Scanner(System.in);
-        while (socket.isConnected()){
-            //get what the user is typing and sent it over
-            String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
-            writeToServer(messageToSend.trim());
-        }
-    }
-    /*making a seperate thread for listening for messages that has been broadCasted*/
-    public void listenForMessage(){
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                String comingMessage;
-
-                while (socket.isConnected()){
-                    try{
-                        comingMessage=bufferedReader.readLine();
-                        System.out.println(comingMessage);
-                    }catch (IOException e){
-                        closeEverything(socket,bufferedReader,bufferedWriter);
-                    }
-                }
-            }
-        }).start();
-    }
-
-
-
-
     public void closeEverything(Socket socket,BufferedReader bufferedReader,BufferedWriter bufferedWriter){
         try{
             //closing the outer wrapper will close the underlying streams (ex:outputStreamReader)
@@ -73,6 +57,158 @@ public class Client {
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
+    /*send messages to the clientHandler(the connection that the server has spawned to handle a client)*/
+    public void sendMessage(){
+        Scanner scanner=new Scanner(System.in);
+        while (socket.isConnected()){
+            //get what the user is typing and sent it over
+            String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
+            messageToSend=messageToSend.trim();
+            //analyseMessageToSend(messageToSend);
+            writeToServer(messageToSend);
+        }
+    }
+    /*making a seperate thread for listening for messages that has been broadCasted*/
+    public void listenForMessage(){
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                String comingMessage;
+
+                while (socket.isConnected()){
+                    try{
+                        comingMessage=bufferedReader.readLine();
+                        //analyseComingMessage(comingMessage);
+                        System.out.println(comingMessage);
+                    }catch (IOException e){
+                        closeEverything(socket,bufferedReader,bufferedWriter);
+                    }
+                }
+            }
+        }).start();
+    }
+
+    public void analyseMessageToSend(String messageToSend){
+        if(messageToSend.matches(Request.CREATE_ROOM)){
+            String[] words=messageToSend.substring(11).split("\\s*[a-zA-Z]+\\s+");
+
+            int type=Integer.parseInt(words[0]);
+            int numberOfPlayers=Integer.parseInt(words[1]);
+            int minBet=Integer.parseInt(words[2]);
+            int initialStack=Integer.parseInt(words[3]);
+
+            //id problem____________________
+            if(futureRoom==null) futureRoom=new CRoom(type,numberOfPlayers,minBet,initialStack);
+
+        }
+    }
+    public void analyseComingMessage(String comingMessage){
+
+        if(comingMessage.matches(Request.GAME_CREATED)){
+
+            int gameId= Integer.parseInt(comingMessage.substring(17));
+            if(!attemptingToCreateARoom()){
+                System.out.println("player is not attempting to create a room");
+                closeEverything(socket,bufferedReader,bufferedWriter);
+            }else{
+                currentRoom=futureRoom;
+                currentRoom.setId(gameId);
+                joinRoom(currentRoom);
+            }
+
+        }else if(comingMessage.matches(Request.LIST_LENGTH)){
+
+            int length=Integer.parseInt(comingMessage.substring(11));
+            this.roomsList=new CRoom[length];
+
+        }else if (comingMessage.matches(Request.ROOM_INFOS)){
+
+            int index=Integer.parseInt(comingMessage.substring(9,comingMessage.indexOf(" ID")));
+            String Infos=comingMessage.substring(comingMessage.indexOf("ID")+2);
+            String[] attributes= Infos.split("\\s+");
+
+            int id=Integer.parseInt(attributes[1]);
+            int type=Integer.parseInt(attributes[2]);
+            int numberOfPlayers=Integer.parseInt(attributes[3]);
+            int minBet=Integer.parseInt(attributes[4]);
+            int initialStack=Integer.parseInt(attributes[5]);
+            int existingPlayers=Integer.parseInt(attributes[6]);
+
+            this.roomsList[index]=new CRoom(id,type,numberOfPlayers,minBet,initialStack);
+            //what do we do about the players____________??????
+
+        }else if(comingMessage.matches(Request.ROOM_JOINED)){
+
+            int id=Integer.parseInt(comingMessage.substring(9,comingMessage.indexOf(" JOINED")));
+            if (!attemptingToJoinARoom()){
+                System.out.println("player is not attempting to join a room");
+                closeEverything(socket,bufferedReader,bufferedWriter);
+            }else {
+               for (CRoom r : roomsList){
+                   if(r.getId()==id){
+                       joinRoom(r);
+                   }
+               }
+            }
+            if (!joinedARoom()){
+                System.out.println("wrong room id from the server");
+                closeEverything(socket,bufferedReader,bufferedWriter);
+            }
+
+        }else if(comingMessage.matches(Request.PLAYER_JOINED)){
+
+            String name=(comingMessage.replace("141 ","")).replace(" JOINED","");
+            currentRoom.addPlayer(name);
+            writeToServer("141 "+name+" ACK");
+
+        }else if(comingMessage.matches(Request.START_IS_REQUESTED)){
+
+            currentRoom.setStartRequested(true);
+
+        }else if(comingMessage.matches(Request.GAME_STARTED)){
+
+            currentRoom.setStartRequested(false);
+            currentRoom.setGameStarted(true);
+
+        }else if(comingMessage.matches(Request.GAME_ABORDED)){
+
+            currentRoom.setStartRequested(false);
+            currentRoom.setGameStarted(false);
+
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+    public boolean attemptingToCreateARoom(){
+        return futureRoom!=null;
+    }
+    public boolean attemptingToJoinARoom(){
+        return roomsList!=null;
+    }
+    public boolean joinedARoom(){
+        return currentRoom!=null;
+    }
+
+    public void joinRoom(CRoom room){
+        this.playerInformations=new PlayerInformations(username,currentRoom.getInitStack());
+        currentRoom.players.add(this.playerInformations);
+        futureRoom=null;
+        roomsList=null;
+    }
+
+
+
+
+
+
 
 
     public static void main(String[] args) {
@@ -100,6 +236,5 @@ public class Client {
             e.printStackTrace();
         }
     }
-
 
 }
