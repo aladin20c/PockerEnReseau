@@ -2,82 +2,128 @@ package Game;
 
 import java.util.ArrayList;
 
-public class PokerGame {
-    private ArrayList<Player> players;
-    private Player currentPlayer;
-    private Hand table;
-    private Deck deck;
-    private int pot;
-    //private pokerHandEvaluator evaluator;
-    //private dealer dealer;
+public abstract class PokerGame {
+   protected ArrayList<Player> players;
+   protected Player dealer;
+   protected Player winner;
+   protected Deck deck;
+   protected int bidAmount=0;
+   protected int totalBidOnTable=0;
+   protected int bidTurn=0;
+   protected int totalCheck=0;
+   protected int foldedPlayers=0;
+   protected boolean isBidRaised=false;
+   protected boolean isOneTurnCompleted=false;
+   protected boolean isGameFinished=false;
 
-    public PokerGame(){
-        players=new ArrayList<Player>();
-        currentPlayer=null;
-        table=new Hand();
-        deck=new Deck();
-        pot=0;
-        //evaluator=new PokerHandEvaluator();
-        //dealer=new Dealer();
-    }
-    public Player getCurrentPlayer(){
-        return currentPlayer;
-    }
-    public void setCurrentPlayer(Player player){
-        currentPlayer=player;
-    }
-    public void addPlayer(Player player){
-        players.add(player);
-        setCurrentPlayer(players.get(0));
-    }
-    public Player nextPlayer(){
-        int position=players.indexOf(currentPlayer);
-        if(position<(players.size()-1)){
-            setCurrentPlayer( players.get(position+1));
-        }else{
-            setCurrentPlayer( players.get(0));
-        }
-        return currentPlayer;
-    }
-    public ArrayList<Player> getPlayers(){
-        return players;
-    }
-    public int getPot(){
-        return pot;
-    }
-    public void setPot(int p){
-        pot=p;
-    }
-    public void addToPot(int bet){
-        pot+=bet;
-    }
-    public Hand getTable(){
-        return table;
-    }
-    public void clearTable(){
-        table.clear();
-    }
-    public void clearHands(){
-        for(Player p:players){
-            p.getHand().clear();
+   public PokerGame(ArrayList<Player> players){
+       deck = new Deck();
+       isGameFinished=false;
+       this.players=players;
+       //creer une fonction qui initialise les joueur et pour chaque joueur on fait un setGame
+   }
+
+   public void makeBid(String betType, int raiseAmount, int callAmount){
+       switch(betType){
+            case "CALL":
+                call(callAmount);
+                break;
+            case "RAISE":
+                raise(raiseAmount,callAmount);
+                break;
+            default :
+                //Lancer une exception
+       }
+   }
+   public void makeBid(String betType) {
+        switch(betType){
+            case "CHECK":
+                check();
+               break;
+            case "FOLD":
+                fold();
+               break;
+            default :
+             //Lancer une exception
         }
     }
-    public ArrayList<Hand> getPlayerHands(){
-        ArrayList<Hand> playerHands=new ArrayList<Hand>();
-        for(Player p:players){
-            playerHands.add(p.getHand());
-        }
-        return playerHands;
+    public void fold(){
+        foldedPlayers++;
     }
-    public Hand combineHandAndTable(Player player){
-        Hand handAndTable=new Hand();
-        for(Card c:table.getCards()){
-            table.give(c,handAndTable);
+    public void check(){
+        int nbPlayer = players.size()-foldedPlayers;
+        if(totalCheck == nbPlayer ){
+            isOneTurnCompleted = true;
+            bidTurn++;
+            isBidRaised=false;
+            totalCheck =0;
         }
-        for(Card c:player.getHand().getCards()){
-            player.getHand().give(c,handAndTable);
+        else{
+            totalCheck++;
         }
-        return handAndTable;
+
+    }
+    public void call(int callAmount){
+        totalBidOnTable += callAmount;
+        check();
+
+    }
+    public void raise(int raiseAmount,int callAmount){
+        bidAmount += raiseAmount;
+        totalBidOnTable += raiseAmount+callAmount;
+        if(!isBidRaised && totalCheck == 0)
+        totalCheck++;
+        else {
+            totalCheck = 0;
+        }
+        isBidRaised = true;
+
     }
 
+    public int getBidAmount(){
+        return bidAmount;
+    }
+    public int getTotalCheck() {
+        return totalCheck;
+    }
+    public int getFoldedPlayerNumber() {
+        return foldedPlayers;
+    }
+    public void resetBidTurn() {
+        bidTurn = 0;
+        isBidRaised = false;
+        totalCheck = 0;
+        totalBidOnTable = 0;
+        bidAmount = 0;
+    }
+    public boolean isOneTurnCompleted() {
+        return isOneTurnCompleted;
+    }
+    public void setIsOneTurnCompleted(boolean b) {
+        isOneTurnCompleted=b;
+    }
+    public void setBidAmount(int bidAmount) {
+        this.bidAmount = bidAmount;
+    }
+
+    public int getTotalBidOnTable() {
+        return totalBidOnTable;
+    }
+    public boolean isBidRaised() {
+        return isBidRaised;
+    }
+
+    public abstract boolean isGameTurnFinished(); //Aredéfinir dans les classes 
+    /*    if(this instanceof TexasHoldem){
+            return bidTurn == 4;
+        }
+        else{
+            return bidTurn == 4;
+        }
+       
+    }*/
+    public abstract void playGame();
+    //public void initTableCard(); dans la classe TexasHoldem seulement
+    public abstract boolean checkEndOfTurn(); //et affiche aussi le joueur gagnant
+    public abstract void initPlayerDeck();
 }
