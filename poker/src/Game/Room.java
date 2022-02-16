@@ -12,6 +12,15 @@ public abstract class Room {
     private int minBid;
     private int initStack;
 
+    public Room(int id,int type, int minPlayers, int minBid, int initStack) {
+        this.type = type;
+        this.minPlayers = minPlayers;
+        this.minBid = minBid;
+        this.initStack = initStack;
+        this.startRequested=false;
+        this.gameStarted=false;
+        this.id = id;
+    }
     public Room(int type, int minPlayers, int minBid, int initStack) {
         this.type = type;
         this.minPlayers = minPlayers;
@@ -27,6 +36,7 @@ public abstract class Room {
     public int getMinPlayers() {return minPlayers;}
     public int getMinBid() {return minBid;}
     public int getInitStack() {return initStack;}
+    public void setId(int id) {this.id = id;}
 
     public boolean gameStarted() {return gameStarted;}
     public boolean startRequested(){return startRequested;}
