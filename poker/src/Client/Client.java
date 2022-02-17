@@ -98,7 +98,7 @@ public class Client {
             int initialStack=Integer.parseInt(words[3]);
 
             //id problem____________________
-            if(futureRoom==null) futureRoom=new CRoom(type,numberOfPlayers,minBet,initialStack);
+            if(futureRoom==null) futureRoom=new CRoom(0,type,numberOfPlayers,minBet,initialStack);
 
         }
     }

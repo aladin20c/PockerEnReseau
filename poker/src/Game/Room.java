@@ -11,6 +11,9 @@ public abstract class Room {
     private int minPlayers;
     private int minBid;
     private int initStack;
+    private int tableMoney;
+    private int highestBid;
+    
 
     public Room(int id,int type, int minPlayers, int minBid, int initStack) {
         this.type = type;

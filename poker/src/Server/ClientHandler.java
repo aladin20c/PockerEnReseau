@@ -22,6 +22,8 @@ public class ClientHandler implements Runnable{
     private SRoom currentRoom;
     private String clientUsername;
     private int stack;
+    private int currentPlayerBids;
+    private boolean hasFolded;
 
     public ClientHandler(Socket socket) {
         try {
@@ -29,6 +31,7 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             clientUsername="";
+            hasFolded = false;
         }catch(IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -266,6 +269,8 @@ public class ClientHandler implements Runnable{
                     }
                 }
 
+            }else if(messageFromClient.matches(Request.PLAYER.CALL)){
+                //A écrire....
             }else if(messageFromClient.matches(Request.ECHO)){
                 writeToClient(messageFromClient.substring(9));
             }else{

@@ -16,6 +16,10 @@ public class Request {
     public static String CHANGE_RECIEVED="701 RECIEVED";
     public static String QUIT="210 QUIT";
     public static String QUIT_RECIEVED="201 RECIEVED";
+    public static String PLAYER_FOLD = "410 FOLD"
+    public static String PLAYER_CALL="412 CALL";
+    public static String PLAYER_CHECK = "411 CHECK";
+    public static String PLAYER_RAISE = "413 RAISE \\d+";
 
     public static String ECHO="000 echo .+";
 
