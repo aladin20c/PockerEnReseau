@@ -1,5 +1,7 @@
 package Server;
 
+import Game.Utils.Request;
+
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -7,7 +9,7 @@ import java.util.ArrayList;
 
 public class Server {
 
-    private static final int PORT=1234;
+
     public static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
     protected static ArrayList<SRoom> rooms=new ArrayList<>();
     private static Server server;
@@ -69,7 +71,7 @@ public class Server {
 
     public static void main(String[] args) {
         try{
-            ServerSocket serverSocket=new ServerSocket(PORT);
+            ServerSocket serverSocket=new ServerSocket(Request.PORT);
             Server server=Server.get(serverSocket);
             server.startServer();
         }catch (IOException e){
