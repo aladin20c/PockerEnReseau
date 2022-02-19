@@ -90,8 +90,9 @@ public class ClientHandler implements Runnable{
     }
     public void removeClientHandler(){
         Server.clientHandlers.remove(this);
+        broadCastMessage("211 "+currentRoom+" QUIT");
         if(playerIsInARoom()) currentRoom.clientHandlers.remove(this);
-        broadCastMessage("Server: "+clientUsername+" has left !");
+        System.out.println("Server: "+clientUsername+" has left !");
     }
 
     @Override
@@ -104,7 +105,7 @@ public class ClientHandler implements Runnable{
             try{
                 messageFromClient=bufferedReader.readLine();
                 analyseRequest(messageFromClient);
-            }catch(IOException e){
+            }catch(Exception e){
                 closeEverything(socket,bufferedReader,bufferedWriter);
                 break;//when the client disconnects, we get out of the while loop
             }
@@ -171,10 +172,10 @@ public class ClientHandler implements Runnable{
                     writeToClient("907 u are already in room");
                     return;
                 }
-                writeToClient("121 NUMBER "+Server.rooms.size());
+                writeToClient("120 NUMBER "+Server.rooms.size());
                 for(int i=0;i< Server.rooms.size();i++){
                     SRoom r=Server.rooms.get(i);
-                    writeToClient("121 MESS "+(i+1)+" "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
+                    writeToClient("121 MESS "+(i+1)+" ID "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
                 }
 
             }else if(messageFromClient.matches(Request.JOIN_ROOM)){
@@ -269,11 +270,34 @@ public class ClientHandler implements Runnable{
                     }
                 }
 
-            }else if(messageFromClient.matches(Request.PLAYER.CALL)){
-                //A écrire....
+            }else if(messageFromClient.matches(Request.PLAYER_CALL)){
+
+                //TODO
+
+            }else if(messageFromClient.matches(Request.QUIT)){
+
+                if(playerIsInARoom()) {
+                    if(currentRoom.startRequested()){
+                        broadCastMessageToEveryone("153 GAME ABORDED "+1);
+                        currentRoom.abortStartRequested();
+                    }
+                    writeToClient(Request.QUIT_ACCEPTED);
+                    broadCastMessage("211 " + currentRoom + " QUIT");
+                    currentRoom.clientHandlers.remove(this);
+                    currentRoom = null;
+                    this.stack=0;
+                }
+
+            }else if(messageFromClient.matches(Request.QUIT_RECIEVED)){
+
+                //nothing to do here(probably)
+
             }else if(messageFromClient.matches(Request.ECHO)){
+
                 writeToClient(messageFromClient.substring(9));
+
             }else{
+
                 writeToClient("999 ERROR");//method is wrong
             }
         }else {
@@ -293,3 +317,6 @@ public class ClientHandler implements Runnable{
     public String getClientUsername() {return clientUsername;}
 
 }
+//mutex java thread pour la partie serveur.
+//when playe rleaves game he syas no!.
+//can t join game when there S a start request.
