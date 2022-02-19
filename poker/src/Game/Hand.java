@@ -69,17 +69,52 @@ public class Hand {
      * Sort cards according to theirs suit
      */
     public void sortBySuit(){
-        for(int i=0;i<cards.size()-1;i++){
-            for(int j=i+1;j>0;j--){
-                if(cards.get(j).getSuit().ordinal()<cards.get(j-1).getSuit().ordinal()){
-                    Card c=cards.get(j);
-                    cards.set(j,cards.get(j-1));
-                    cards.set(j-1,c);
-                }
-            }
-        }
-    }
-    public void sortBySuit2(){
         Collections.sort(cards,SortBy.SUIT.getComparator());
     }
+
+    /**
+     * Sort cards according to theirs rank
+     */
+    public void sortByRank(){
+        Collections.sort(cards,SortBy.RANK.getComparator());
+    }
+
+    public boolean has5Cards(){
+        return cards.size()==5;
+    }
+    //********CHECKING FOR HANS'S VALUES***********//
+
+    public boolean isFlush(){
+        sortBySuit();
+        int size= cards.size();
+        return cards.get(0).getSuit().equals(cards.get(size-1).getSuit());//If the first and last cards have the same suit
+    }
+
+    public boolean isStraight(){
+        sortByRank();
+        if(cards.get(0).getRank()==Rank.ACE.getRank()){
+            boolean weekStr=(cards.get(1).getRank()==Rank.DEUCE.getRank())
+                    &&(cards.get(2).getRank()==Rank.THREE.getRank())
+                    &&(cards.get(3).getRank()==Rank.FOUR.getRank())
+                    &&(cards.get(4).getRank()==Rank.FIVE.getRank());
+            boolean strongStr=(cards.get(1).getRank()==Rank.TEN.getRank())
+                    &&(cards.get(2).getRank()==Rank.JACK.getRank())
+                    &&(cards.get(3).getRank()==Rank.QUEEN.getRank())
+                    &&(cards.get(4).getRank()==Rank.KING.getRank());
+            return (weekStr || strongStr) ;
+        }else{
+            int size= cards.size();
+            int rank=cards.get(0).getRank();
+            return cards.get(size-1).getRank()==(rank+5)-1;
+        }
+    }
+
+    public boolean isRoyalFlush(){
+        int size= cards.size();
+        sortByRank();
+        return (isFlush() && isStraight()
+                && (cards.get(0).getRank()==Rank.ACE.getRank()
+                && cards.get(size-1).getRank()==Rank.KING.getRank() ));
+    }
+
 }

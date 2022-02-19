@@ -2,31 +2,24 @@ package Game;
 
 public class Game {
     public static void main (String [] args){
-        Hand h3=new Hand();
-        Hand h4=new Hand();
-        Hand h[]=new Hand[2];
-        h[0]=h3;
-        h[1]=h4;
+        Hand h=new Hand();
 
-        Deck d=new Deck();
-        d.populate();
-        d.shuffle();
 
-        d.dealPlayers(h,5);
-        System.out.println("Distributing cards ");
+        Card c1=new Card(Rank.KING,Suit.DIAMONDS);
+        Card c2=new Card(Rank.QUEEN,Suit.DIAMONDS);
+        Card c3=new Card(Rank.JACK,Suit.DIAMONDS);
+        Card c4=new Card(Rank.TEN,Suit.DIAMONDS);
+        Card c5=new Card(Rank.ACE,Suit.DIAMONDS);
 
-        h[0].flipCards();
-        h[1].flipCards();
-        h[0].sortBySuit2();
-        h[1].sortBySuit2();
+        h.add(c1);
+        h.add(c2);
+        h.add(c3);
+        h.add(c4);
+        h.add(c5);
 
-        System.out.println("Hand 1 is :\n"+h[0].showHand()
-                +" \nHand 2 is :\n"+h[1].showHand());
+        System.out.println(h.isRoyalFlush());
 
-       /* Rank r= Rank.FOUR;
-        Rank [] t=Rank.values();
-        for(int i=0;i<t.length;i++){
-            System.out.println(t[r.ordinal()+1]);
-        }*/
+
+
     }
 }

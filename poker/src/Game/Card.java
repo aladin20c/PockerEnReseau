@@ -53,4 +53,5 @@ public class Card {
     public void flipCard(){
         isFaceUp=!isFaceUp;
     }
+
 }
