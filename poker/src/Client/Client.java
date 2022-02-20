@@ -192,6 +192,15 @@ public class Client {
             this.roomsList=null;
             this.currentRoom=null;
 
+        }else if(comingMessage.matches("510 .+ FOLD")){
+            String name = comingMessage.substring(3,comingMessage.length()-3);
+            for(CRoom r : roomsList){
+                for(PlayerInformations pI : r.players){
+                    if(pI.userName.equals(name)){
+                        pI.hasFolded = true;
+                    }
+                }
+            }
         }else if(comingMessage.matches(Request.PLAYER_QUIT)){
             String name=(comingMessage.replace("211 ","")).replace(" QUIT","");
             currentRoom.playerQuit(name);

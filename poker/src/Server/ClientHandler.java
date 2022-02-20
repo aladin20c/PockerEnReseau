@@ -292,6 +292,78 @@ public class ClientHandler implements Runnable{
 
                 //nothing to do here(probably)
 
+            }else if(messageFromClient.matches(Request.PLAYER_FOLD)){
+                //Fonction chrono à ajouter
+                if(playerIsInARoom() && currentRoom.gameStarted()){
+                    this.hasFolded = true;
+                    broadCastMessage("510 "+ clientUsername +" FOLD");
+                    writeToClient("400 ACCEPTED");
+
+
+
+                    //
+                    //Le joueur ne peut plus alors jouer mais assiste à la partie en cours
+                    //-> A chaque fin de tour (donc début d'une nouvelle partie) on ré-initialise tous les 
+                    //hasFolded à false
+                }
+                
+
+            }else if(messageFromClient.matches(Request.PLAYER_CHECK)){
+                if(playerIsInARoom() && currentRoom.gameStarted()){
+                    if(hasFolded){
+                        writeToClient("907 Invalid Command");
+                    }else{
+                        if(this.stack == currentRoom.getHighestBid() || currentRoom.getHighestBid() == 0){
+                            writeToClient("400 ACCEPTED");
+                            broadCastMessage("511 "+ clientUsername +" CHECK");
+                        }
+                        else  writeToClient("907 Invalid Command");
+                    }
+
+
+                }
+
+            }else if(messageFromClient.matches(Request.PLAYER_CALL)){
+                if(playerIsInARoom() && currentRoom.gameStarted()){
+                    if(hasFolded){
+                        writeToClient("907 Invalid Command");
+                    }else{
+                       if(this.stack >= currentRoom.getHighestBid()){// ou bien this.stack - currentRoom.getHighestBid() >= 0 (règle du poker) ???
+                           this.currentPlayerBids = currentRoom.getHighestBid();
+                           if(this.stack - currentRoom.getHighestBid() < 0) this.stack = 0;
+                           else this.stack = this.stack - currentRoom.getHighestBid();
+                           writeToClient("400 ACCEPTED");
+                           broadCastMessage("512 "+ clientUsername +" CALL");
+                       }
+                       else{
+                           writeToClient("907 Invalid Command");
+                       }
+                    }
+
+
+                }
+                
+            }else if(messageFromClient.matches(Request.PLAYER_RAISE)){
+                int x = Integer.parseInt(messageFromClient.split(" ")[2]);
+                if(playerIsInARoom() && currentRoom.gameStarted()){
+                    if(hasFolded || x < currentRoom.getHighestBid()){
+                        writeToClient("907 Invalid Command"); 
+                    }else{
+                        if(this.stack >= x){
+                            this.currentPlayerBids = x;
+                            if(this.stack - x < 0) this.stack = 0;
+                            else this.stack = this.stack - x;
+                            writeToClient("400 ACCEPTED");
+                            broadCastMessage("513 "+ clientUsername +" RAISE");
+                        }
+                        else{
+                            writeToClient("907 Invalid Command");
+                        }
+                    }
+
+
+                }
+                
             }else if(messageFromClient.matches(Request.ECHO)){
 
                 writeToClient(messageFromClient.substring(9));
