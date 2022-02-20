@@ -1,7 +1,6 @@
-package Game;
+package Game.definitions;
 
 public enum Rank {
-    ACE(1,"Ace"),
     DEUCE(2,"Deuce"),
     THREE(3,"3"),
     FOUR(4,"4"),
@@ -13,7 +12,8 @@ public enum Rank {
     TEN(10,"10"),
     JACK(11,"Jack"),
     QUEEN(12,"Queen"),
-    KING(13,"King");
+    KING(13,"King"),
+    ACE(14,"Ace");
 
     //private fields
     private final int rankValue;

@@ -1,5 +1,8 @@
 package Game;
 
+import Game.definitions.Rank;
+import Game.definitions.Suit;
+
 public class Card {
 
     //Private fields
@@ -29,8 +32,8 @@ public class Card {
      * To get the rank
      * @return
      */
-    public int getRank(){
-        return rank.getRank();
+    public Rank getRank(){
+        return rank;
     }
 
     /**

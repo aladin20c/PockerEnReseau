@@ -1,4 +1,6 @@
-package Game;
+package Game.definitions;
+
+import Game.Card;
 
 import java.util.Comparator;
 
@@ -7,8 +9,8 @@ public enum SortBy {
 
         @Override
         public int compare(Card first, Card second) {
-            Integer firstVal=Integer.valueOf(first.getRank());
-            Integer secondVal=Integer.valueOf(second.getRank());
+            Integer firstVal=Integer.valueOf(first.getRank().getRank());
+            Integer secondVal=Integer.valueOf(second.getRank().getRank());
 
             int comparison=firstVal.compareTo(secondVal);
             if(comparison==0){
@@ -30,8 +32,8 @@ public enum SortBy {
 
             int comparison=firstSuit.compareTo(secondSuit);
             if(comparison==0){
-                Integer firstVal=Integer.valueOf(first.getRank());
-                Integer secondVal=Integer.valueOf(second.getRank());
+                Integer firstVal=Integer.valueOf(first.getRank().getRank());
+                Integer secondVal=Integer.valueOf(second.getRank().getRank());
 
                 return firstVal.compareTo(secondVal);
             }

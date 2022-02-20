@@ -1,4 +1,4 @@
-package Game;
+package Game.definitions;
 
 public enum Suit {
     CLUBS("c","Clubs"),

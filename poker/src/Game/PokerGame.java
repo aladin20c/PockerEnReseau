@@ -1,8 +1,7 @@
 package Game;
-
 import java.util.ArrayList;
 
-public class PokerGame<ArrayList> {
+public class PokerGame{
     private ArrayList<Player> players;
     private Player currentPlayer;
     private Hand table;

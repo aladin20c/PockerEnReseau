@@ -1,8 +1,9 @@
 package Game;
 
-import java.util.Collection;
+import Game.definitions.Rank;
+import Game.definitions.Suit;
+
 import java.util.Collections;
-import java.util.Random;
 
 public class Deck extends Hand {
 
