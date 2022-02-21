@@ -83,17 +83,26 @@ public class CardsManipUtil {
         }
         return afterRemove;
     }
-/*
-    public static List<Card> getHighestSubList(int size, List<Card> cards, List<Card> toRemove) {
+
+    public static List<Card> getHighestSubListExcept(int size, List<Card> cards, List<Card> toRemove) {
         List<Card> highest = remove(cards, toRemove);
         Collections.sort(highest, SortBy.RANK.getComparator());
 
+        //If we have ace 2 3 ... we need to put the ACE at the beginning
+        // Its rank order is 14 (the highest one) so we need to replace it
+        // when it precedes deuce
+        Card lastCard=highest.get(highest.size()-1);
+        if(lastCard.getRank()==Rank.ACE && highest.get(0).getRank()==Rank.DEUCE){
+            highest.add(0,lastCard);
+            highest.remove(highest.size()-1);
+        }
+        Collections.reverse(highest);//TODO pay attention to the order
         if (highest.size() <= size) {
             return highest;
         }
         return highest.subList(highest.size() - size, highest.size());
     }
-*/
+
 
     /**
      * Helps to get the longest and highest consecutive cards of the list cards
@@ -101,7 +110,7 @@ public class CardsManipUtil {
      * @return
      */
     public static List<Card> getLongestConsecutiveSubList(List<Card> cards) {
-        List<Card> sorted = sortBy(SortBy.RANK,cards);
+        List<Card> sorted = removeDuplicatesAndSortByRank(cards);//We need first to remove duplicates
         List<Card> longest = new ArrayList<>();
 
         //If we find an ACE we should add another copy at the beginning
