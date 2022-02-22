@@ -6,16 +6,16 @@ public class PlayerInformations{
     protected String userName;
     protected int stack;
     protected boolean hasFolded;
+    protected int bids;
 
     public PlayerInformations(String userName, int stack) {
         this.userName = userName;
         this.stack = stack;
+        this.hasFolded=false;
+        this.bids=0;
     }
 
     public String getUserName() {
         return userName;
     }
-    public int getStack() {return stack;}
-    public void setStack(int stack) {this.stack = stack;}
-
 }

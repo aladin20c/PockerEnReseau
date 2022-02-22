@@ -23,6 +23,7 @@ public class Client {
     private CRoom[] roomsList;
     private CRoom currentRoom;
     private String username;
+    private String futureAction;
 
 
 
@@ -34,6 +35,7 @@ public class Client {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = "";
+            this.futureAction="";
         }catch (IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -65,6 +67,7 @@ public class Client {
             String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
             messageToSend=messageToSend.trim();
             analyseMessageToSend(messageToSend);
+            writeToServer(messageToSend);
         }
     }
     /*making a seperate thread for listening for messages that has been broadCasted*/
@@ -95,7 +98,6 @@ public class Client {
     public void analyseMessageToSend(String messageToSend){
         if(joinedARoom() && currentRoom.startRequested() && !messageToSend.matches(Request.START_RESPONSE)){
             System.out.println("u must respond to the start request first !!!!!");
-            return;
         } else if(messageToSend.matches(Request.CREATE_ROOM)){
             String[] words=messageToSend.substring(11).split("\\s*[a-zA-Z]+\\s+");
 
@@ -107,104 +109,170 @@ public class Client {
             //preparing the room that will be created by the user and that he ll join
             if(futureRoom==null) futureRoom=new CRoom(type,numberOfPlayers,minBet,initialStack);
 
+        }else if(messageToSend.matches(Request.FOLD)){
+
+            futureAction="510 "+username+" FOLD";
+
+        }else if(messageToSend.matches(Request.CHECK)){
+
+            futureAction="511 "+username+" CHECK";
+
+        }else if(messageToSend.matches(Request.CALL)){
+
+            futureAction="512 "+username+" CALL";
+
+        }else if(messageToSend.matches(Request.RAISE)){
+
+            int raise = Integer.parseInt(messageToSend.substring(10));
+            futureAction="513 "+username+" RAISE "+raise;
+
+        }else if(messageToSend.matches(Request.CHANGE)){
+
+            //TODO
+
         }
-        writeToServer(messageToSend);
     }
-    public void analyseComingMessage(String comingMessage){
 
-        if(comingMessage.matches(Request.GAME_CREATED)){
 
-            int gameId= Integer.parseInt(comingMessage.substring(17));
-            if(!attemptingToCreateARoom()){
+
+    public void analyseComingMessage(String comingMessage) {
+
+        if (comingMessage.matches(Request.GAME_CREATED)) {
+
+            int gameId = Integer.parseInt(comingMessage.substring(17));
+            if (!attemptingToCreateARoom()) {
                 System.out.println("player is not attempting to create a room");
-                closeEverything(socket,bufferedReader,bufferedWriter);
-            }else{
-                currentRoom=futureRoom;
+                closeEverything(socket, bufferedReader, bufferedWriter);
+            } else {
+                currentRoom = futureRoom;
                 currentRoom.setId(gameId);
                 joinRoom(currentRoom);
             }
 
-        }else if(comingMessage.matches(Request.LIST_LENGTH)){
+        } else if (comingMessage.matches(Request.LIST_LENGTH)) {
 
-            int length=Integer.parseInt(comingMessage.substring(11));
-            if(length!=0){
-                this.roomsList=new CRoom[length];
+            int length = Integer.parseInt(comingMessage.substring(11));
+            if (length != 0) {
+                this.roomsList = new CRoom[length];
             }
 
-        }else if (comingMessage.matches(Request.ROOM_INFOS)){
+        } else if (comingMessage.matches(Request.ROOM_INFOS)) {
 
-            int index=Integer.parseInt(comingMessage.substring(9,comingMessage.indexOf(" ID")));
-            String Infos=comingMessage.substring(comingMessage.indexOf("ID")+2);
-            String[] attributes= Infos.split("\\s+");
+            int index = Integer.parseInt(comingMessage.substring(9, comingMessage.indexOf(" ID")));
+            String Infos = comingMessage.substring(comingMessage.indexOf("ID") + 2);
+            String[] attributes = Infos.split("\\s+");
 
-            int id=Integer.parseInt(attributes[1]);
-            int type=Integer.parseInt(attributes[2]);
-            int numberOfPlayers=Integer.parseInt(attributes[3]);
-            int minBet=Integer.parseInt(attributes[4]);
-            int initialStack=Integer.parseInt(attributes[5]);
-            int existingPlayers=Integer.parseInt(attributes[6]);
+            int id = Integer.parseInt(attributes[1]);
+            int type = Integer.parseInt(attributes[2]);
+            int numberOfPlayers = Integer.parseInt(attributes[3]);
+            int minBet = Integer.parseInt(attributes[4]);
+            int initialStack = Integer.parseInt(attributes[5]);
+            int existingPlayers = Integer.parseInt(attributes[6]);
 
-            this.roomsList[index-1]=new CRoom(id,type,numberOfPlayers,minBet,initialStack);
+            this.roomsList[index - 1] = new CRoom(id, type, numberOfPlayers, minBet, initialStack);
             //what do we do about the players____________??????
 
-        }else if(comingMessage.matches(Request.ROOM_JOINED)){
+        } else if (comingMessage.matches(Request.ROOM_JOINED)) {
 
-            int id=Integer.parseInt(comingMessage.substring(9,comingMessage.indexOf(" JOINED")));
-            if (!attemptingToJoinARoom()){
+            int id = Integer.parseInt(comingMessage.substring(9, comingMessage.indexOf(" JOINED")));
+            if (!attemptingToJoinARoom()) {
                 System.out.println("player is not attempting to join a room");
-                closeEverything(socket,bufferedReader,bufferedWriter);
-            }else {
-                for (CRoom r : roomsList){
-                    if(r.getId()==id){
+                closeEverything(socket, bufferedReader, bufferedWriter);
+            } else {
+                for (CRoom r : roomsList) {
+                    if (r.getId() == id) {
                         joinRoom(r);
                     }
                 }
             }
-            if (!joinedARoom()){
+            if (!joinedARoom()) {
                 System.out.println("wrong room id from the server");
-                closeEverything(socket,bufferedReader,bufferedWriter);
+                closeEverything(socket, bufferedReader, bufferedWriter);
             }
 
-        }else if(comingMessage.matches(Request.PLAYER_JOINED)){
+        } else if (comingMessage.matches(Request.PLAYER_JOINED)) {
 
-            String name=(comingMessage.replace("141 ","")).replace(" JOINED","");
+            String name = (comingMessage.replace("141 ", "")).replace(" JOINED", "");
             currentRoom.addPlayer(name);
-            writeToServer("141 "+name+" ACK");
+            writeToServer("141 " + name + " ACK");
 
-        }else if(comingMessage.matches(Request.START_IS_REQUESTED)){
+        } else if (comingMessage.matches(Request.START_IS_REQUESTED)) {
 
             currentRoom.setStartRequested(true);
 
-        }else if(comingMessage.matches(Request.GAME_STARTED)){
+        } else if (comingMessage.matches(Request.GAME_STARTED)) {
 
             currentRoom.setStartRequested(false);
             currentRoom.setGameStarted(true);
 
-        }else if(comingMessage.matches(Request.GAME_ABORDED)){
+        } else if (comingMessage.matches(Request.GAME_ABORDED)) {
 
             currentRoom.setStartRequested(false);
             currentRoom.setGameStarted(false);
 
-        }else if(comingMessage.matches(Request.QUIT_ACCEPTED)){
+        } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
-            this.playerInformations=null;
-            this.futureRoom=null;
-            this.roomsList=null;
-            this.currentRoom=null;
+            this.playerInformations = null;
+            this.futureRoom = null;
+            this.roomsList = null;
+            this.currentRoom = null;
 
-        }else if(comingMessage.matches("510 .+ FOLD")){
-            String name = comingMessage.substring(3,comingMessage.length()-3);
-            for(CRoom r : roomsList){
-                for(PlayerInformations pI : r.players){
-                    if(pI.userName.equals(name)){
-                        pI.hasFolded = true;
-                    }
-                }
-            }
-        }else if(comingMessage.matches(Request.PLAYER_QUIT)){
-            String name=(comingMessage.replace("211 ","")).replace(" QUIT","");
+        } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
+
+            String name = (comingMessage.replace("211 ", "")).replace(" QUIT", "");
             currentRoom.playerQuit(name);
             writeToServer(Request.QUIT_ACCEPTED);
+
+        } else if (comingMessage.matches(Request.PLAYER_FOLD)) {
+
+            String username = comingMessage.substring(4, comingMessage.length() - 5);
+            PlayerInformations player = currentRoom.getPlayer(username);
+            if(player==null) throw new RuntimeException("player is not found");
+            player.hasFolded=true;
+            writeToServer(Request.ACTION_RECIEVED);
+
+        } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
+
+            String username = comingMessage.substring(4, comingMessage.length() - 5);
+            PlayerInformations player = currentRoom.getPlayer(username);
+            if(player==null) throw new RuntimeException("player is not found");
+            writeToServer(Request.ACTION_RECIEVED);
+
+        } else if (comingMessage.matches(Request.PLAYER_CALL)) {
+
+            String username = comingMessage.substring(4, comingMessage.length() - 5);
+            PlayerInformations player = currentRoom.getPlayer(username);
+            if(player==null) throw new RuntimeException("player is not found");
+            player.stack=player.stack-(currentRoom.getHighestBid()-player.bids);
+            player.bids=currentRoom.getHighestBid();
+            writeToServer(Request.ACTION_RECIEVED);
+
+        }
+        else if (comingMessage.matches(Request.PLAYER_RAISE)) {
+
+            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")));
+            String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
+            PlayerInformations player = currentRoom.getPlayer(username);
+            if(player==null) throw new RuntimeException("player is not found");
+            player.stack=player.stack-(currentRoom.getHighestBid()+raise-player.bids);
+            currentRoom.incrementHighestBid(raise);
+            player.bids=currentRoom.getHighestBid();
+            writeToServer(Request.ACTION_RECIEVED);
+
+        } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
+
+            if(futureAction.equals("")) throw new RuntimeException("there is no acction sent");
+            analyseComingMessage(futureAction);
+            futureAction="";
+
+        }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
+
+            //TODO
+
+        }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {
+
+            //TODO
+
         }
     }
 
@@ -230,9 +298,7 @@ public class Client {
         roomsList=null;
     }
 
-
     
-
     public static void main(String[] args) {
         try {
 

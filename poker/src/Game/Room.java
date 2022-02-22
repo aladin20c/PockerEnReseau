@@ -11,6 +11,7 @@ public abstract class Room {
     private int minPlayers;
     private int minBid;
     private int initStack;
+
     private int tableMoney;
     private int highestBid;
     
@@ -40,6 +41,8 @@ public abstract class Room {
     public int getMinBid() {return minBid;}
     public int getInitStack() {return initStack;}
     public void setId(int id) {this.id = id;}
+    public int getHighestBid() {return highestBid;}
+    public void incrementHighestBid(int raise) {this.highestBid += raise;}
 
     public boolean gameStarted() {return gameStarted;}
     public boolean startRequested(){return startRequested;}

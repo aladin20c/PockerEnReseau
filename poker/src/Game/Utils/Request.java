@@ -8,25 +8,27 @@ public class Request {
 
     //from client to server
     public static String JOIN="100 HELLO PLAYER .+";
-    //110 CREATE 0 PLAYER 5 MIN 5 STACK 10000
-    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";
+    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 0 PLAYER 5 MIN 5 STACK 10000
     public static String GET_ROOMS="120 GETLIST";
     public static String JOIN_ROOM="130 JOIN -?\\d+";
     public static String ACK_Player="141 .+ ACK";
     public static String START_ROUND="150 REQUEST START";
     public static String START_RESPONSE="152 START (YES|NO)";
 
+
+
+
+
+
+    public static String FOLD = "410 FOLD";
+    public static String CHECK = "411 CHECK";
+    public static String CALL="412 CALL";
+    public static String RAISE = "413 RAISE \\d+";
     public static String ACTION_RECIEVED="500 RECIEVED";
+
     public static String CARDS_RECIEVED="600 RECIEVED";
-    public static String CHANGE="710 CHANGE \\d+(\\s+[DCST](\\d|1[0123]))+";
+    public static String CHANGE="710 CHANGE \\d+(\\s+[DCST](\\d|1[0123]))+\\s*";
     public static String CHANGE_RECIEVED="701 RECIEVED";
-
-
-    public static String PLAYER_FOLD = "410 FOLD";
-    public static String PLAYER_CALL="412 CALL";
-    public static String PLAYER_CHECK = "411 CHECK";
-    public static String PLAYER_RAISE = "413 RAISE \\d+";
-
 
     public static String QUIT="210 QUIT";
     public static String QUIT_RECIEVED="201 RECIEVED";
@@ -47,7 +49,18 @@ public class Request {
     public static String GAME_STARTED="153 GAME STARTED";
     public static String GAME_ABORDED="154 START ABORDED \\d+";
 
-    public static String QUIT_ACCEPTED="200 ACCEPTED";
+    public static String ACTION_ACCEPTED="400 ACCEPTED";
+    public static String PLAYER_FOLD = "510 .+ FOLD";
+    public static String PLAYER_CHECK = "511 .+ CHECK";
+    public static String PLAYER_CALL="512 .+ CALL";
+    public static String PLAYER_RAISE = "513 .+ RAISE \\d+";
+
+    public static String PLAYER_CHANGED_CARDS="720 .+ Change \\d+";
+    public static String CHANGE_ACCEPTED="700 ACCEPTED";
+
     public static String PLAYER_QUIT="211 .+ QUIT";
+    public static String QUIT_ACCEPTED="200 ACCEPTED";
+
+
 
 }

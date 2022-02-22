@@ -34,4 +34,10 @@ public class CRoom extends Room {
         if(players.isEmpty()) return false;
         return players.get(0).getUserName().equals(userName);
     }
+    public PlayerInformations getPlayer(String username){
+        for(PlayerInformations player : players){
+            if(player.userName.equals(username)) return player;
+        }
+        return null;
+    }
 }
