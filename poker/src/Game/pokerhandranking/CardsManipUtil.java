@@ -87,7 +87,7 @@ public class CardsManipUtil {
     public static List<Card> getHighestSubListExcept(int size, List<Card> cards, List<Card> toRemove) {
         List<Card> highest = remove(cards, toRemove);
         Collections.sort(highest, SortBy.RANK.getComparator());
-        System.out.println(highest);
+
         //If we have ace 2 3 ... we need to put the ACE at the beginning
         // Its rank order is 14 (the highest one) so we need to replace it
         // when it precedes deuce
