@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Hand {
-        protected List<Card> cards;
+    protected List<Card> cards;
     private PokerHandType handType;
 
     //Constructor

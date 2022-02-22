@@ -32,54 +32,54 @@ public class HandTypeRankingUtil {
         try{
             return isThreeOfaKind(cards);
         }catch (Exception e){}
-        /*try{
+        try{
             return isTwoPair(cards);
         }catch (Exception e){}
         try{
             return isOnePair(cards);
         }catch (Exception e){}
-*/
-        return null;
+
+        return isHighCard(cards);
     }
 
 
     /**
      * Analysis the cards and define if there is a royal flush combination
-     * @param cards
-     * @return
+     * @param cards players cards + table for exemple
+     * @return the best hand possible
      */
     private static Hand isRoyalFlush(List<Card> cards) {
         Map<Suit,List<Card>> sortedCards=CardsManipUtil.suitClassification(cards);
-        List<Card> royalflushHand=null;
+        List<Card> royalFlushHand=null;
         for(Map.Entry<Suit,List<Card>> entry :sortedCards.entrySet()){
             if(entry.getValue().size()>= PokerHandType.ROYAL_FLUSH.getNbCardsRequired()){
-                royalflushHand=entry.getValue();
+                royalFlushHand=entry.getValue();
                 break;
             }
         }
-        if(royalflushHand==null){
+        if(royalFlushHand==null){
             throw new RuntimeException("Has not a royal flush hand");
         }
         /***********
          * METHODS TO TAKE LE 5 HIGHEST CARDS OF THE LIST
          */
-        royalflushHand=CardsManipUtil.getLongestConsecutiveSubList(royalflushHand);
+        royalFlushHand=CardsManipUtil.getLongestConsecutiveSubList(royalFlushHand);
         int required = PokerHandType.ROYAL_FLUSH.getNbCardsRequired();
-        if(royalflushHand.size()<required){
+        if(royalFlushHand.size()<required){
             throw new RuntimeException("Has not a royal flush hand");
         }
 
-        royalflushHand=royalflushHand.subList(royalflushHand.size()-required,royalflushHand.size());
+        royalFlushHand=royalFlushHand.subList(royalFlushHand.size()-required,royalFlushHand.size());
 
         int counter=0;
         for(Rank r : EnumSet.range(Rank.TEN, Rank.ACE)) {
-            if (r!= royalflushHand.get(counter).getRank()) {
+            if (r!= royalFlushHand.get(counter).getRank()) {
                 throw new RuntimeException("Has not a royal flush hand");
             }
             counter++;
         }
 
-        return new Hand(royalflushHand,PokerHandType.ROYAL_FLUSH);
+        return new Hand(royalFlushHand,PokerHandType.ROYAL_FLUSH);
     }
     /**
      * Analysis the cards and define if there is a straight flush combination
@@ -137,8 +137,7 @@ public class HandTypeRankingUtil {
         for(Map.Entry<Rank,List<Card>> entry:sortedCards.entrySet()){
             if(entry.getValue().size()>=PokerHandType.THREE_OF_A_KIND.getNbCardsRequired()
                 &&(threeOfaKindHand==null
-                    ||(threeOfaKindHand!=null
-                        && threeOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
+                    ||(threeOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
                 threeOfaKindHand=entry.getValue();
             }
         }
@@ -146,12 +145,12 @@ public class HandTypeRankingUtil {
             if(entry.getValue().size()>=PokerHandType.ONE_PAIR.getNbCardsRequired()
                     &&((threeOfaKindHand!=null && threeOfaKindHand.get(0).getRank()!=entry.getKey())
                     && (twoOfaKindHand==null
-                        || twoOfaKindHand!=null && twoOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
+                        || (twoOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank())))){
                 twoOfaKindHand=entry.getValue();
             }
         }
 
-        if(twoOfaKindHand==null || threeOfaKindHand==null){
+        if(threeOfaKindHand==null || twoOfaKindHand==null){
             throw new RuntimeException("Has not a full house hand");
         }
 
@@ -183,11 +182,10 @@ public class HandTypeRankingUtil {
         return new Hand(flushHand,PokerHandType.FLUSH);
     }
     private static Hand isStraight(List<Card> cards) {
-        List<Card> straightFlushHand=null;
+        List<Card> straightFlushHand=CardsManipUtil.getLongestConsecutiveSubList(cards);
 
-        straightFlushHand=CardsManipUtil.getLongestConsecutiveSubList(cards);
-
-        if(straightFlushHand.size()<PokerHandType.STRAIGHT.getNbCardsRequired()){//If the list of consecutive values does not satisfy the number of required cards
+        if(straightFlushHand==null ||
+                straightFlushHand.size()<PokerHandType.STRAIGHT.getNbCardsRequired()){//If the list of consecutive values does not satisfy the number of required cards
             throw new RuntimeException("Has not a straight hand");
         }
 
@@ -205,8 +203,7 @@ public class HandTypeRankingUtil {
         for(Map.Entry<Rank,List<Card>> entry:sortedCards.entrySet()){
             if(entry.getValue().size()>=PokerHandType.THREE_OF_A_KIND.getNbCardsRequired()
                     &&(threeOfaKindHand==null
-                        ||(threeOfaKindHand!=null
-                            && threeOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
+                        ||(threeOfaKindHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
                 threeOfaKindHand=entry.getValue();
             }
         }
@@ -223,6 +220,68 @@ public class HandTypeRankingUtil {
         return new Hand(threeOfaKindHand, PokerHandType.THREE_OF_A_KIND);
 
     }
+
+    private static Hand isTwoPair(List<Card> cards) {
+        Map<Rank, List<Card>> sortedCards=CardsManipUtil.rankClassification(cards);//Classify the cards according to their rank
+        List<Card> onePairHand=null;
+        List<Card> secondPair=null;
+        for(Map.Entry<Rank,List<Card>> entry:sortedCards.entrySet()){
+            if(entry.getValue().size()>=PokerHandType.ONE_PAIR.getNbCardsRequired()
+                    &&(onePairHand==null
+                    ||(onePairHand.get(0).getRank().getRank()<entry.getKey().getRank()))){
+                onePairHand=entry.getValue();
+            }
+        }
+        for(Map.Entry<Rank,List<Card>> entry:sortedCards.entrySet()){
+            if(entry.getValue().size()>=PokerHandType.ONE_PAIR.getNbCardsRequired()
+                    &&((onePairHand!=null && onePairHand.get(0).getRank()!=entry.getKey())
+                    && (secondPair==null
+                    || (secondPair.get(0).getRank().getRank()<entry.getKey().getRank())))){
+                secondPair=entry.getValue();
+            }
+        }
+
+        if(onePairHand==null || secondPair==null){
+            throw new RuntimeException("Has not a two pairs hand");
+        }
+
+        List<Card> twoPairsHand=new ArrayList<>();
+        onePairHand=onePairHand.subList(0,PokerHandType.ONE_PAIR.getNbCardsRequired());
+        secondPair=secondPair.subList(0,PokerHandType.ONE_PAIR.getNbCardsRequired());
+        twoPairsHand.addAll(onePairHand);
+        twoPairsHand.addAll(secondPair);
+
+        List<Card> lastCard=CardsManipUtil.getHighestSubListExcept(5-PokerHandType.TWO_PAIRS.getNbCardsRequired(),cards,twoPairsHand);
+        twoPairsHand.addAll(lastCard);
+        return new Hand(twoPairsHand, PokerHandType.TWO_PAIRS);
+
+    }
+
+    private static Hand isOnePair(List<Card> cards) {
+        Map<Rank, List<Card>> sortedCards=CardsManipUtil.rankClassification(cards);//Classify the cards according to their rank
+        List<Card> onePairHand=null;
+        for(Map.Entry<Rank,List<Card>> entry:sortedCards.entrySet()){
+            if(entry.getValue().size()>=PokerHandType.ONE_PAIR.getNbCardsRequired()){
+                onePairHand=entry.getValue();
+                break;
+            }
+        }
+
+        if(onePairHand==null ){
+            throw new RuntimeException("Has not a one pair hand");
+        }
+        onePairHand=onePairHand.subList(0,PokerHandType.ONE_PAIR.getNbCardsRequired());
+
+        List<Card> lastCard=CardsManipUtil.getHighestSubListExcept(5-PokerHandType.ONE_PAIR.getNbCardsRequired(),cards,onePairHand);
+        onePairHand.addAll(lastCard);
+        return new Hand(onePairHand, PokerHandType.ONE_PAIR);
+    }
+
+    private static Hand isHighCard(List<Card> cards) {
+        List<Card> highCardHand=CardsManipUtil.getHighestSubListExcept(5,cards,null);
+        return new Hand(highCardHand, PokerHandType.HIGH_CARD);
+    }
+
 
 
 
