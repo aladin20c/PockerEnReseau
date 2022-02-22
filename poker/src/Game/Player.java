@@ -8,20 +8,19 @@ public class Player {
     private int bidPerRound=0;
     private PokerGame round;
 
-    public Player(String name, int stack, PokerGame round){
+    public Player(String name, int stack){
         this.name=name;
         userHand = new Hand();
         isFold=false;
         this.stack=stack;
-        this.round=round;
     }
-
     public void receiveCard(Card c){
         userHand.add(c);
     }
     public boolean canCall(){
         return ( round.getBidAmount()-bidPerRound)<=stack;
     }
+    //Cette methode je dois la supprimer pttr
     public boolean canCheck(){
         return bidPerRound== round.getBidAmount();
     }
@@ -30,12 +29,18 @@ public class Player {
         isFold=true;
     }
     public void call(){
+        if(canCall()){
+            int callAmount = round.getBidAmount()-bidPerRound;
+            bidPerRound += callAmount;
+            stack -= callAmount;
+            round.makeBid("CALL",0,  callAmount);
+        }
 
     }
     public void raise(int raiseAmount){
         int callAmount = round.getBidAmount()-bidPerRound;
-        bidPerRound += callAmount+raiseAmount;
-        stack -= callAmount-raiseAmount;
+        bidPerRound = bidPerRound + callAmount+raiseAmount;
+        stack = stack- callAmount-raiseAmount;
         round.makeBid("RAISE", raiseAmount, callAmount);
     }
     public void check(){
@@ -78,7 +83,14 @@ public class Player {
     public String getName() {
         return name;
     }
-
-    
+    public void setRound(PokerGame round){
+        this.round=round;
+    }
+    public void afficher(){
+        System.out.println("nom : "+name+" stack : "+stack);
+    }
+    public void removeCard(int pos){
+        userHand.removeCard(pos);
+    }
     
 }

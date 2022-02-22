@@ -63,4 +63,10 @@ public class Hand {
             c.flipCard();
         }
     }
+    public int nbCards(){
+        return cards.size();
+    }
+    public Card getCard(int pos){
+        return cards.get(pos);
+    }
 }
