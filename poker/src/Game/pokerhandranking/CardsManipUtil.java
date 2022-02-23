@@ -87,7 +87,7 @@ public class CardsManipUtil {
     public static List<Card> getHighestSubListExcept(int size, List<Card> cards, List<Card> toRemove) {
         List<Card> highest = remove(cards, toRemove);
         Collections.sort(highest, SortBy.RANK.getComparator());
-
+/*
         //If we have ace 2 3 ... we need to put the ACE at the beginning
         // Its rank order is 14 (the highest one) so we need to replace it
         // when it precedes deuce
@@ -96,6 +96,7 @@ public class CardsManipUtil {
             highest.add(0,lastCard);
             highest.remove(highest.size()-1);
         }
+ */
        Collections.reverse(highest);//TODO pay attention to the order
         if (highest.size() <= size) {
             return highest;
@@ -111,6 +112,7 @@ public class CardsManipUtil {
      */
     public static List<Card> getLongestConsecutiveSubList(List<Card> cards) {
         List<Card> sorted = removeDuplicatesAndSortByRank(cards);//We need first to remove duplicates
+
         List<Card> longest = new ArrayList<>();
 
         //If we find an ACE we should add another copy at the beginning
@@ -147,7 +149,7 @@ public class CardsManipUtil {
             satisfy the if condition)
         */
         if ((startPosition < sorted.size() - 1)
-                && (sorted.size() - startPosition > longest.size())) {
+                && (sorted.size() - startPosition >= longest.size())) {
             longest = sorted.subList(startPosition, sorted.size());
         }
 

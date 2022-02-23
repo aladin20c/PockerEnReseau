@@ -54,7 +54,6 @@ public class HandTypeRankingUtil {
         for(Map.Entry<Suit,List<Card>> entry :sortedCards.entrySet()){
             if(entry.getValue().size()>= PokerHandType.ROYAL_FLUSH.getNbCardsRequired()){
                 royalFlushHand=entry.getValue();
-                break;
             }
         }
         if(royalFlushHand==null){
@@ -64,6 +63,7 @@ public class HandTypeRankingUtil {
          * METHODS TO TAKE LE 5 HIGHEST CARDS OF THE LIST
          */
         royalFlushHand=CardsManipUtil.getLongestConsecutiveSubList(royalFlushHand);
+
         int required = PokerHandType.ROYAL_FLUSH.getNbCardsRequired();
         if(royalFlushHand.size()<required){
             throw new RuntimeException("Has not a royal flush hand");
@@ -122,12 +122,13 @@ public class HandTypeRankingUtil {
         if(fourOfaKindHand==null){
             throw new RuntimeException("Has not a four of a kind hand");
         }
+        fourOfaKindHand=fourOfaKindHand.subList(0,PokerHandType.FOUR_OF_A_KIND.getNbCardsRequired());
         List<Card> lastCard=CardsManipUtil.getHighestSubListExcept(
                 5-PokerHandType.FOUR_OF_A_KIND.getNbCardsRequired(),
                 cards,
                 fourOfaKindHand);
 
-        fourOfaKindHand.add(lastCard.get(lastCard.size()-1));
+        fourOfaKindHand.addAll(lastCard);
         return new Hand(fourOfaKindHand,PokerHandType.FOUR_OF_A_KIND);
     }
     private static Hand isFullHouse(List<Card> cards) {
