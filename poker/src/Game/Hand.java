@@ -1,17 +1,31 @@
 package Game;
 
+import Game.definitions.PokerHandType;
+import Game.definitions.SortBy;
+
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Hand {
-    public ArrayList<Card> cards;
+    protected List<Card> cards;
+    private PokerHandType handType;
 
     //Constructor
     public Hand(){
-        cards=new ArrayList<Card>();
+        cards=new ArrayList<>();
+        handType=PokerHandType.NOTHING;
     }
 
-    public ArrayList<Card> getCards(){
+    public Hand(List<Card> cards, PokerHandType handType){
+        this.cards=cards;
+        this.handType=handType;
+    }
+    public List<Card> getCards(){
         return cards;
+    }
+    public PokerHandType getHandType(){
+        return handType;
     }
     /**
      * To clear the list
@@ -63,4 +77,57 @@ public class Hand {
             c.flipCard();
         }
     }
+
+    /**
+     * Sort cards according to theirs suit
+     */
+    public void sortBySuit(){
+        Collections.sort(cards, SortBy.SUIT.getComparator());
+    }
+
+    /**
+     * Sort cards according to theirs rank
+     */
+    public void sortByRank(){
+        Collections.sort(cards,SortBy.RANK.getComparator());
+    }
+
+    public boolean has5Cards(){
+        return cards.size()==5;
+    }
+    //********CHECKING FOR HANS'S VALUES***********//
+
+    public boolean isFlush(){
+        sortBySuit();
+        int size= cards.size();
+        return cards.get(0).getSuit().equals(cards.get(size-1).getSuit());//If the first and last cards have the same suit
+    }
+/*
+    public boolean isStraight(){
+        sortByRank();
+        if(cards.get(0).getRank().getRank()== Rank.ACE.getRank()){
+                boolean weekStr=(cards.get(1).getRank()==Rank.DEUCE.getRank())
+                    &&(cards.get(2).getRank()==Rank.THREE.getRank())
+                    &&(cards.get(3).getRank()==Rank.FOUR.getRank())
+                    &&(cards.get(4).getRank()==Rank.FIVE.getRank());
+            boolean strongStr=(cards.get(1).getRank()==Rank.TEN.getRank())
+                    &&(cards.get(2).getRank()==Rank.JACK.getRank())
+                    &&(cards.get(3).getRank()==Rank.QUEEN.getRank())
+                    &&(cards.get(4).getRank()==Rank.KING.getRank());
+            return (weekStr || strongStr) ;
+        }else{
+            int size= cards.size();
+            int rank=cards.get(0).getRank();
+            return cards.get(size-1).getRank()==(rank+5)-1;
+        }
+    }
+
+    public boolean isRoyalFlush(){
+        int size= cards.size();
+        sortByRank();
+        return (isFlush() && isStraight()
+                && (cards.get(0).getRank()==Rank.ACE.getRank()
+                && cards.get(size-1).getRank()==Rank.KING.getRank() ));
+    }
+*/
 }
