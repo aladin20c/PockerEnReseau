@@ -13,7 +13,9 @@ public class SRoom extends Room {
         this.clientHandlers=new ArrayList<>();
     }
 
-    public boolean hasRoomLeft(){return clientHandlers.size()<this.getMinPlayers();}
+    public boolean hasRoomLeft(){
+        return clientHandlers.size()<this.getMaxPlayers();
+    }
     public int numberOfPlayers(){return clientHandlers.size();}
     public boolean isAdmin(String userName){
         if(clientHandlers.isEmpty()) return false;
@@ -54,6 +56,10 @@ public class SRoom extends Room {
             }
         }
         return res;
+    }
+
+    public boolean hasEnoughPlayersToStart(){
+        return (getType()==0 && clientHandlers.size()>=3) || (getType()==1 && clientHandlers.size()>=2);
     }
 
 

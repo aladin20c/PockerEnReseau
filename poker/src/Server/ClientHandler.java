@@ -1,11 +1,13 @@
 package Server;
 
+import Game.Card;
 import Game.Utils.Request;
+
 
 import java.io.*;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
+
 
 public class ClientHandler implements Runnable{
     
@@ -25,17 +27,19 @@ public class ClientHandler implements Runnable{
 
     private int currentPlayerBids;
     private boolean hasFolded;
+    private boolean dealer;
+    private ArrayList<Card> cards;
 
     public ClientHandler(Socket socket) {
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            clientUsername="";
+            this.clientUsername="";
 
-            hasFolded = false;
-            currentPlayerBids=0;
-
+            this.hasFolded = false;
+            this.currentPlayerBids=0;
+            this.dealer=false;
         }catch(IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -180,7 +184,7 @@ public class ClientHandler implements Runnable{
             writeToClient("120 NUMBER "+Server.rooms.size());
             for(int i=0;i< Server.rooms.size();i++){
                 SRoom r=Server.rooms.get(i);
-                writeToClient("121 MESS "+(i+1)+" ID "+r.getId()+" "+r.getType()+" "+r.getMinPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
+                writeToClient("121 MESS "+(i+1)+" ID "+r.getId()+" "+r.getType()+" "+r.getMaxPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
             }
 
         }else if(messageFromClient.matches(Request.JOIN_ROOM)){
@@ -192,8 +196,8 @@ public class ClientHandler implements Runnable{
             int id=Integer.parseInt(messageFromClient.substring(9));
             for(SRoom room:Server.rooms){
                 if(room.getId()==id ){
-                    if(!room.hasRoomLeft()){
-                        writeToClient("131 room is full");
+                    if(!room.hasRoomLeft() || room.startRequested() || room.gameStarted()) {
+                        writeToClient("131 room uavailable");
                         return;
                     }else {
                         currentRoom=room;
@@ -220,11 +224,14 @@ public class ClientHandler implements Runnable{
             }else if(currentRoom.startRequested()){
                 writeToClient("155 start already requested");
                 return;
-            }else if(isPlaying()){
+            }else if(currentRoom.gameStarted()){
                 writeToClient("156 u are currently playing");
                 return;
-            }else if(!currentRoom.isAdmin(this.clientUsername)){
+            }else if(!currentRoom.isAdmin(this.clientUsername)) {
                 writeToClient("157 u are not the admin");
+                return;
+            }else if(!currentRoom.hasEnoughPlayersToStart()){
+                writeToClient("158 not enough players");
                 return;
             }else{
                 //when a player initialize a start request does he say yes automatically___________________??????????????
@@ -278,14 +285,17 @@ public class ClientHandler implements Runnable{
         }else if(messageFromClient.matches(Request.FOLD)){
 
             //Fonction chrono à ajouter
-            if(playerIsInARoom() && currentRoom.gameStarted() && !hasFolded){
+            if(!playerIsInARoom() || !currentRoom.gameStarted() || hasFolded){
+                writeToClient("907 Invalid Command");
+            }else {
                 this.hasFolded = true;
-                broadCastMessage("510 "+ clientUsername +" FOLD");
+                broadCastMessage("510 " + clientUsername + " FOLD");
                 writeToClient("400 ACCEPTED");
                 //Le joueur ne peut plus alors jouer mais assiste à la partie en cours
                 //-> A chaque fin de tour (donc début d'une nouvelle partie) on ré-initialise tous les
                 //hasFolded à false
             }
+
 
         }else if(messageFromClient.matches(Request.CHECK)){
 
@@ -322,13 +332,28 @@ public class ClientHandler implements Runnable{
         }else if(messageFromClient.matches(Request.ACTION_RECIEVED)){
 
             //Nothing here (probably)
-            //TODO
+
+        }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
+
+            //Nothing here (probably)
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
+            if(!playerIsInARoom() || !currentRoom.gameStarted() || currentRoom.getType()==1 || cards==null){
+                writeToClient("999 ERROR");
+                return;
+            }
+            String[] data=messageFromClient.split("\\s+");
+            int numberOfCards=Integer.parseInt(data[2]);
+            if(data.length!=numberOfCards+3){
+                writeToClient("999 ERROR");
+                return;
+            }
             //TODO
+            writeToClient("700 ACCEPTED");
+            broadCastMessage("720 "+clientUsername+" Change "+numberOfCards);
 
-        }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
+        }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
 
             //Nothing here (probably)
 
@@ -363,14 +388,7 @@ public class ClientHandler implements Runnable{
     }
 
 
-
-
-
-
-
-
     private boolean playerIsInARoom(){return currentRoom!=null;}
-    public boolean isPlaying() {return currentRoom!=null && currentRoom.gameStarted();}
     public String getClientUsername() {return clientUsername;}
 
 }

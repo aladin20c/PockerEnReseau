@@ -4,8 +4,6 @@ public class Request {
 
     public static final int PORT=1234;
 
-
-
     //from client to server
     public static String JOIN="100 HELLO PLAYER .+";
     public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 0 PLAYER 5 MIN 5 STACK 10000
@@ -14,11 +12,6 @@ public class Request {
     public static String ACK_Player="141 .+ ACK";
     public static String START_ROUND="150 REQUEST START";
     public static String START_RESPONSE="152 START (YES|NO)";
-
-
-
-
-
 
     public static String FOLD = "410 FOLD";
     public static String CHECK = "411 CHECK";
@@ -33,9 +26,6 @@ public class Request {
     public static String QUIT="210 QUIT";
     public static String QUIT_RECIEVED="201 RECIEVED";
     public static String ECHO="000 echo .+";
-
-
-
 
 
 
@@ -55,12 +45,11 @@ public class Request {
     public static String PLAYER_CALL="512 .+ CALL";
     public static String PLAYER_RAISE = "513 .+ RAISE \\d+";
 
+    public static String CARDS_DISTRIBUTION="610 CARDS \\d+(\\s+[DCST](\\d|1[0123]))+\\s*";
     public static String PLAYER_CHANGED_CARDS="720 .+ Change \\d+";
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
 
     public static String PLAYER_QUIT="211 .+ QUIT";
     public static String QUIT_ACCEPTED="200 ACCEPTED";
-
-
 
 }

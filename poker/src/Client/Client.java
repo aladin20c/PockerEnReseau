@@ -1,15 +1,11 @@
 package Client;
 
-import Game.Room;
-import Game.Utils.Request;
-import Server.SRoom;
-import Server.Server;
 
+import Game.Card;
+import Game.Utils.Request;
 import java.io.*;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Scanner;
 
 public class Client {
@@ -23,7 +19,11 @@ public class Client {
     private CRoom[] roomsList;
     private CRoom currentRoom;
     private String username;
+
     private String futureAction;
+    private String futureChange;
+
+    ArrayList<Card> cards;
 
 
 
@@ -36,6 +36,7 @@ public class Client {
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.username = "";
             this.futureAction="";
+            this.futureChange="";
         }catch (IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
@@ -128,7 +129,7 @@ public class Client {
 
         }else if(messageToSend.matches(Request.CHANGE)){
 
-            //TODO
+            futureChange=messageToSend;
 
         }
     }
@@ -210,18 +211,6 @@ public class Client {
             currentRoom.setStartRequested(false);
             currentRoom.setGameStarted(false);
 
-        } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
-
-            this.playerInformations = null;
-            this.futureRoom = null;
-            this.roomsList = null;
-            this.currentRoom = null;
-
-        } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
-
-            String name = (comingMessage.replace("211 ", "")).replace(" QUIT", "");
-            currentRoom.playerQuit(name);
-            writeToServer(Request.QUIT_ACCEPTED);
 
         } else if (comingMessage.matches(Request.PLAYER_FOLD)) {
 
@@ -233,7 +222,7 @@ public class Client {
 
         } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
 
-            String username = comingMessage.substring(4, comingMessage.length() - 5);
+            String username = comingMessage.substring(4, comingMessage.length() - 6);
             PlayerInformations player = currentRoom.getPlayer(username);
             if(player==null) throw new RuntimeException("player is not found");
             writeToServer(Request.ACTION_RECIEVED);
@@ -261,18 +250,39 @@ public class Client {
 
         } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
 
-            if(futureAction.equals("")) throw new RuntimeException("there is no acction sent");
+            if (futureAction.equals("")) throw new RuntimeException("there is no acction sent");
             analyseComingMessage(futureAction);
-            futureAction="";
+            futureAction = "";
+
+        }else if(comingMessage.matches(Request.CARDS_DISTRIBUTION)){
+
+            //TODO
 
         }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
 
             //TODO
+            this.futureChange="";
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {
 
-            //TODO
+            String username = comingMessage.substring(4, comingMessage.lastIndexOf(" CHANGE"));
+            PlayerInformations player = currentRoom.getPlayer(username);
+            if(player==null) throw new RuntimeException("player is not found");
+            int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE ")));
+            writeToServer(Request.CHANGE_RECIEVED);
 
+        } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
+
+        this.playerInformations = null;
+        this.futureRoom = null;
+        this.roomsList = null;
+        this.currentRoom = null;
+
+        } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
+
+            String name = (comingMessage.replace("211 ", "")).replace(" QUIT", "");
+            currentRoom.playerQuit(name);
+            writeToServer(Request.QUIT_ACCEPTED);
         }
     }
 
@@ -298,7 +308,7 @@ public class Client {
         roomsList=null;
     }
 
-    
+
     public static void main(String[] args) {
         try {
 
