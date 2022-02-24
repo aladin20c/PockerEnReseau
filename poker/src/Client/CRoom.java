@@ -28,10 +28,19 @@ public class CRoom extends Room {
         }
     }
     public void addPlayer(String userName) {this.players.add(new PlayerInformations(userName,getInitStack()));}
-    public boolean hasRoomLeft(){return players.size()<this.getMinPlayers();}
+    public boolean hasRoomLeft(){return players.size()<this.getMaxPlayers();}
     public int numberOfPlayers(){return players.size();}
     public boolean isAdmin(String userName){
         if(players.isEmpty()) return false;
         return players.get(0).getUserName().equals(userName);
+    }
+    public PlayerInformations getPlayer(String username){
+        for(PlayerInformations player : players){
+            if(player.userName.equals(username)) return player;
+        }
+        return null;
+    }
+    public boolean hasEnoughPlayersToStart(){
+        return (getType()==0 && players.size()>=3) || (getType()==1 && players.size()>=2);
     }
 }
