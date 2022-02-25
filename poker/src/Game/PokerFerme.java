@@ -6,7 +6,7 @@ public class PokerFerme extends PokerGame{
         super.bidAmount=bidAmount;
     }
     
-    public void start(){
+    public void firstRound(){
         int nbPlayers = players.size()-foldedPlayers;
         int index = dealer;
         for(int i=0 ; i<nbPlayers ; i++){
@@ -47,10 +47,10 @@ public class PokerFerme extends PokerGame{
             int nbCards = sc.nextInt();
             if(nbCards!=0){
                 for(int j=0 ; j<nbCards ; j++){
-                    System.out.println("Entrez l'indice de la "+j+" éme carte que vous voulez faire changer : ");
-                    int pos = sc.nextInt();
-                    deck.add(players.get(index).getHand().getCard(pos));
-                    players.get(index).removeCard(pos);
+                    System.out.println("Entrez la carte : ");
+                    String s = sc.next();
+                    Card c = players.get(index).getHand().removeCard(s);
+                    deck.add(c);
                 }
             }
         }
@@ -61,7 +61,8 @@ public class PokerFerme extends PokerGame{
         int index = dealer;
         for(int i=0 ; i<nbPlayers ; i++){
             index=nextPlayer(index);
-            for(int j=0 ; j<(5-players.get(index).getHand().nbCards()) ; j++){
+            int n=5-players.get(index).getHand().nbCards();
+            for(int j=0 ; j<n ; j++){
                 Card c = deck.getNextCard();
                 players.get(index).getHand().add(c);
             }
@@ -70,13 +71,17 @@ public class PokerFerme extends PokerGame{
     }
 
     public void playGame(){
-        start();
+        deck.populate();
+        firstRound();
         deck.shuffle();
         distributeCard(5);
-        biddingRound();
+        CardsOfPlayers();
+        biddingRound(nextPlayer(dealer),false);
         discard();
+        CardsOfPlayers();
         redistributeCard();
-        biddingRound();
+        CardsOfPlayers();
+        biddingRound(nextPlayer(dealer),false);
     }
     public boolean checkEndOfTurn(){
         return false;
@@ -84,4 +89,6 @@ public class PokerFerme extends PokerGame{
     public boolean isGameTurnFinished(){
         return false;
     }
+
+
 }

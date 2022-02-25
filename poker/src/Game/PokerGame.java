@@ -17,7 +17,6 @@ public abstract class PokerGame {
  
     public PokerGame(ArrayList<Player> players){
         deck = new Deck();
-        deck.populate();
         this.players=players;
         dealer=0;
         initPlayer();
@@ -145,11 +144,13 @@ public abstract class PokerGame {
           
      }
      
-     public void biddingRound(){
-         int index = nextPlayer(dealer);
+     public void biddingRound(int firstPlayer , boolean firstRound){
+         int index = firstPlayer;
          Player player = players.get(index);
          resetBidPerRoundOfPlayers();
-         bidAmount=0;
+         if(!firstRound){
+             bidAmount=0;
+         }
          totalCheck=0;
          while(foldedPlayers<players.size()-1 && totalCheck<(players.size()-foldedPlayers) ){
              System.out.println("Le joueur "+player.getName()+" doit choisir :");
@@ -161,6 +162,9 @@ public abstract class PokerGame {
                      break;
                  case "1":
                      player.fold();
+                     if(index==dealer){
+                         dealer = nextPlayer(dealer);
+                     }
                      break;
                  case "2" :
                      player.check();

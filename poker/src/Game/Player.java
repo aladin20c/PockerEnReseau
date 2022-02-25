@@ -86,11 +86,6 @@ public class Player {
     public void setRound(PokerGame round){
         this.round=round;
     }
-    public void afficher(){
-        System.out.println("nom : "+name+" stack : "+stack);
-    }
-    public void removeCard(int pos){
-        userHand.removeCard(pos);
-    }
+    
     
 }
