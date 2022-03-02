@@ -5,7 +5,7 @@ import Game.Room;
 import java.util.ArrayList;
 
 public class CRoom extends Room {
-    ArrayList<PlayerInformations> players;
+    ArrayList<Player> players;
 
     public CRoom(int id,int type, int minPlayers, int minBid, int initStack) {
         super(id,type, minPlayers, minBid, initStack);
@@ -20,22 +20,22 @@ public class CRoom extends Room {
 
 
     public void playerQuit(String name){
-        for(PlayerInformations p : players){
+        for(Player p : players){
             if(p.userName.equals(name)){
                 p.hasFolded=true;
                 return;
             }
         }
     }
-    public void addPlayer(String userName) {this.players.add(new PlayerInformations(userName,getInitStack()));}
+    public void addPlayer(String userName) {this.players.add(new Player(userName,getInitStack()));}
     public boolean hasRoomLeft(){return players.size()<this.getMaxPlayers();}
     public int numberOfPlayers(){return players.size();}
     public boolean isAdmin(String userName){
         if(players.isEmpty()) return false;
         return players.get(0).getUserName().equals(userName);
     }
-    public PlayerInformations getPlayer(String username){
-        for(PlayerInformations player : players){
+    public Player getPlayer(String username){
+        for(Player player : players){
             if(player.userName.equals(username)) return player;
         }
         return null;

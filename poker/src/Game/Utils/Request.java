@@ -6,12 +6,12 @@ public class Request {
 
     //from client to server
     public static String JOIN="100 HELLO PLAYER .+";
-    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 0 PLAYER 5 MIN 5 STACK 10000
+    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 5 STACK 10000
     public static String GET_ROOMS="120 GETLIST";
     public static String JOIN_ROOM="130 JOIN -?\\d+";
     public static String ACK_Player="141 .+ ACK";
     public static String START_ROUND="150 REQUEST START";
-    public static String START_RESPONSE="152 START (YES|NO)";
+    public static String START_RESPONSE="152 START (YES|NO)";//152 START YES  ||  152 START NO
 
     public static String FOLD = "410 FOLD";
     public static String CHECK = "411 CHECK";
@@ -51,5 +51,9 @@ public class Request {
 
     public static String PLAYER_QUIT="211 .+ QUIT";
     public static String QUIT_ACCEPTED="200 ACCEPTED";
+
+
+    //missing methods from the project instructions
+    public static String EXISTING_PLAYER="800(\\s+.+)+";
 
 }

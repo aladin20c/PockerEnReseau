@@ -29,7 +29,6 @@ public enum Rank {
     public int getRank(){
         return rankValue;
     }
-
     public String printRank(){
         return rankString;
     }
