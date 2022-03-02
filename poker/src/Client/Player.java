@@ -1,6 +1,6 @@
 package Client;
 
-public class PlayerInformations{
+public class Player{
 
 
     protected String userName;
@@ -9,7 +9,7 @@ public class PlayerInformations{
     protected int bids;
     protected boolean dealer;
 
-    public PlayerInformations(String userName, int stack) {
+    public Player(String userName, int stack) {
         this.userName = userName;
         this.stack = stack;
         this.hasFolded=false;

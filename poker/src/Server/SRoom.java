@@ -27,6 +27,7 @@ public class SRoom extends Room {
     public void requestStart(){
         setStartRequested(true);
         startRequestResponses=new Boolean[clientHandlers.size()];
+        startRequestResponses[0]=true;
     }
     public void abortStartRequested(){
         setStartRequested(false);
@@ -34,7 +35,7 @@ public class SRoom extends Room {
     }
     public void respond(ClientHandler c,boolean response){
         int index=this.clientHandlers.indexOf(c);
-        startRequestResponses[index]=response;
+        if(startRequestResponses[index]==null)startRequestResponses[index]=response;
     }
     public boolean allPlayersResponded(){
         for(Boolean b : startRequestResponses){

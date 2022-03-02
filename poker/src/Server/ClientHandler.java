@@ -21,13 +21,15 @@ public class ClientHandler implements Runnable{
     //used to sent data (specifically messages ) to the client
     private BufferedWriter bufferedWriter;
 
+
     private SRoom currentRoom;
     private String clientUsername;
-    private int stack;
 
+    private int stack;
     private int currentPlayerBids;
     private boolean hasFolded;
     private boolean dealer;
+    private boolean hasRoomsList;
     private ArrayList<Card> cards;
 
     public ClientHandler(Socket socket) {
@@ -37,15 +39,15 @@ public class ClientHandler implements Runnable{
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.clientUsername="";
 
-            this.hasFolded = false;
+            this.stack=0;
             this.currentPlayerBids=0;
+            this.hasFolded = false;
             this.dealer=false;
+            this.hasRoomsList=false;
         }catch(IOException e){
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
-
-
     public void broadCastMessage(String messageToSend){
         if(playerIsInARoom()) {
             for (ClientHandler clientHandler : currentRoom.clientHandlers) {
@@ -83,8 +85,6 @@ public class ClientHandler implements Runnable{
             }
         }
     }
-
-
     public void closeEverything(Socket socket,BufferedReader bufferedReader,BufferedWriter bufferedWriter){
         removeClientHandler();
         try{
@@ -98,10 +98,18 @@ public class ClientHandler implements Runnable{
     }
     public void removeClientHandler(){
         Server.clientHandlers.remove(this);
-        broadCastMessage("211 "+currentRoom+" QUIT");
-        if(playerIsInARoom()) currentRoom.clientHandlers.remove(this);
+        if(playerIsInARoom()) {
+            if(currentRoom.startRequested()){
+                broadCastMessageToEveryone("153 GAME ABORDED "+0);
+                currentRoom.abortStartRequested();
+            }
+            broadCastMessage("211 "+clientUsername+" QUIT");
+            currentRoom.clientHandlers.remove(this);
+        }
         System.out.println("Server: "+clientUsername+" has left !");
     }
+
+    //TODO when Exception and theres a start request
 
     @Override
     public void run(){
@@ -127,7 +135,9 @@ public class ClientHandler implements Runnable{
         //if a command begins with three numbers, it is considered as a command, else it is considered as a chat function
         if(!messageFromClient.matches("\\d\\d\\d.*")) {
             broadCastMessage(clientUsername + " : " + messageFromClient);
+            return;
         }
+
 
         if(messageFromClient.matches(Request.JOIN) ){
 
@@ -186,11 +196,12 @@ public class ClientHandler implements Runnable{
                 SRoom r=Server.rooms.get(i);
                 writeToClient("121 MESS "+(i+1)+" ID "+r.getId()+" "+r.getType()+" "+r.getMaxPlayers()+" "+r.getMinBid()+" "+r.getInitStack()+" "+r.numberOfPlayers());
             }
+            this.hasRoomsList=true;
 
         }else if(messageFromClient.matches(Request.JOIN_ROOM)){
 
-            if(playerIsInARoom()){
-                writeToClient("907 u are already in room");
+            if(playerIsInARoom() || !hasRoomsList){
+                writeToClient("907 u can't join a room");
                 return;
             }
             int id=Integer.parseInt(messageFromClient.substring(9));
@@ -203,8 +214,14 @@ public class ClientHandler implements Runnable{
                         currentRoom=room;
                         currentRoom.clientHandlers.add(this);
                         this.stack=room.getInitStack();
+                        //_________????_________????_________????_________????_________????_________????
                         writeToClient("131 GAME " + room.getId() + " JOINED");
-                        broadCastMessage("140 " + clientUsername + " JOINED");
+                        broadCastMessage("141 " + clientUsername + " JOINED");
+                        String existingPlayers="800";
+                        for (ClientHandler ch : currentRoom.clientHandlers){
+                            existingPlayers+=" "+ch.getClientUsername();
+                        }
+                        writeToClient(existingPlayers);
                         return;
                     }
                 }
@@ -220,21 +237,15 @@ public class ClientHandler implements Runnable{
 
             if(!playerIsInARoom()){
                 writeToClient("907 u are not in a room");
-                return;
             }else if(currentRoom.startRequested()){
                 writeToClient("155 start already requested");
-                return;
             }else if(currentRoom.gameStarted()){
                 writeToClient("156 u are currently playing");
-                return;
             }else if(!currentRoom.isAdmin(this.clientUsername)) {
                 writeToClient("157 u are not the admin");
-                return;
             }else if(!currentRoom.hasEnoughPlayersToStart()){
                 writeToClient("158 not enough players");
-                return;
             }else{
-                //when a player initialize a start request does he say yes automatically___________________??????????????
                 this.currentRoom.requestStart();
                 broadCastMessageToEveryone("152 START REQUESTED");
             }
@@ -243,59 +254,55 @@ public class ClientHandler implements Runnable{
 
             if(!playerIsInARoom() || !currentRoom.startRequested() ){
                 writeToClient("158 there's no start request");
-            }else{
-                String response=messageFromClient.substring(10);
-                if(response.equals("YES")) currentRoom.respond(this,true);
-                else currentRoom.respond(this,false);
+                return;
+            }
 
-                if(currentRoom.allPlayersResponded()){
-                    if(currentRoom.startApproved()){
-                        currentRoom.setGameStarted(true);
-                        broadCastMessageToEveryone("153 GAME STARTED");
-                    }else {
-                        ArrayList<String> playersWhoRefused= currentRoom.getPlayersWhoSaidNo();
-                        System.out.println(playersWhoRefused.toString());
-                        int k=playersWhoRefused.size();
-                        broadCastMessageToEveryone("153 GAME ABORDED "+k);
+            String response=messageFromClient.substring(10);
+            if(response.equals("YES")) currentRoom.respond(this,true);
+            else currentRoom.respond(this,false);
 
-                        int i=0;
-                        for(;i<playersWhoRefused.size()/5;i++){
-                            broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
-                                    +playersWhoRefused.get(i*5)+" "
-                                    +playersWhoRefused.get(i*5+1)+" "
-                                    +playersWhoRefused.get(i*5+2)+" "
-                                    +playersWhoRefused.get(i*5+3)+" "
-                                    +playersWhoRefused.get(i*5+4)
-                            );
-                        }
-                        if(i*5<k){
-                            broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
-                                    +playersWhoRefused.get(i*5)+" "
-                                    +( (i*5+1<k)? playersWhoRefused.get(i+1)+" ":"")
-                                    +( (i*5+2<k)? playersWhoRefused.get(i+2)+" ":"")
-                                    +( (i*5+3<k)? playersWhoRefused.get(i+3):"")
-                            );
-                        }
+            if(currentRoom.allPlayersResponded()){
+                if(currentRoom.startApproved()){
+                    currentRoom.setGameStarted(true);
+                    broadCastMessageToEveryone("153 GAME STARTED");
+                }else {
+                    ArrayList<String> playersWhoRefused= currentRoom.getPlayersWhoSaidNo();
+                    System.out.println(playersWhoRefused.toString());
+                    int k=playersWhoRefused.size();
+                    broadCastMessageToEveryone("154 START ABORDED "+k);
 
+                    int i=0;
+                    for(;i<playersWhoRefused.size()/5;i++){
+                        broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
+                                +playersWhoRefused.get(i*5)+" "
+                                +playersWhoRefused.get(i*5+1)+" "
+                                +playersWhoRefused.get(i*5+2)+" "
+                                +playersWhoRefused.get(i*5+3)+" "
+                                +playersWhoRefused.get(i*5+4)
+                        );
                     }
-                    currentRoom.abortStartRequested();
+                    if(i*5<k){
+                        broadCastMessageToEveryone("154 MESS "+(i+1)+" PLAYER "
+                                +playersWhoRefused.get(i*5)+" "
+                                +( (i*5+1<k)? playersWhoRefused.get(i+1)+" ":"")
+                                +( (i*5+2<k)? playersWhoRefused.get(i+2)+" ":"")
+                                +( (i*5+3<k)? playersWhoRefused.get(i+3):"")
+                        );
+                    }
+
                 }
+                currentRoom.abortStartRequested();
             }
 
         }else if(messageFromClient.matches(Request.FOLD)){
 
-            //Fonction chrono à ajouter
             if(!playerIsInARoom() || !currentRoom.gameStarted() || hasFolded){
                 writeToClient("907 Invalid Command");
             }else {
                 this.hasFolded = true;
                 broadCastMessage("510 " + clientUsername + " FOLD");
                 writeToClient("400 ACCEPTED");
-                //Le joueur ne peut plus alors jouer mais assiste à la partie en cours
-                //-> A chaque fin de tour (donc début d'une nouvelle partie) on ré-initialise tous les
-                //hasFolded à false
             }
-
 
         }else if(messageFromClient.matches(Request.CHECK)){
 
@@ -361,7 +368,7 @@ public class ClientHandler implements Runnable{
 
             if(playerIsInARoom()) {
                 if(currentRoom.startRequested()){
-                    broadCastMessageToEveryone("153 GAME ABORDED "+1);
+                    broadCastMessageToEveryone("153 GAME ABORDED "+0);
                     currentRoom.abortStartRequested();
                 }
                 writeToClient(Request.QUIT_ACCEPTED);
@@ -393,5 +400,3 @@ public class ClientHandler implements Runnable{
 
 }
 //mutex java thread pour la partie serveur.
-//when playe rleaves game he syas no!.
-//can t join game when there S a start request.

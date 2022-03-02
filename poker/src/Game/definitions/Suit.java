@@ -1,19 +1,19 @@
 package Game.definitions;
 
 public enum Suit {
-    CLUBS("c","Clubs"),
-    DIAMONDS("d","Diamonds"),
-    HEARTS("h","Hearts"),
-    SPADES("s","Spades");
+    CLUBS("T","Clubs"),
+    DIAMONDS("D","Diamonds"),
+    HEARTS("C","Hearts"),
+    SPADES("S","Spades");
 
     //private fields
-    private final String suitText;
     private final String shortName;
+    private final String suitText;
 
     //Constructor
-    private Suit(String suitText,String shortName){
-        this.suitText=suitText;
+    private Suit(String shortName,String suitText){
         this.shortName=shortName;
+        this.suitText=suitText;
     }
 
     //Public methods
