@@ -11,17 +11,15 @@ import java.util.List;
 public class Test {
     public static void main (String [] args){
         Hand h=new Hand();
+        Hand h2=new Hand();
 
-        Card c1=new Card(Rank.TEN, Suit.DIAMONDS);
-        Card c2=new Card(Rank.QUEEN,Suit.CLUBS);
-        Card c3=new Card(Rank.SIX,Suit.DIAMONDS);
-        Card c4=new Card(Rank.KING,Suit.HEARTS);
-        Card c5=new Card(Rank.ACE,Suit.CLUBS);
-        Card c6=new Card(Rank.NINE,Suit.HEARTS);
-        Card c7=new Card(Rank.DEUCE,Suit.CLUBS);
-        Card c8=new Card(Rank.FOUR,Suit.HEARTS);
-        Card c9=new Card(Rank.FIVE,Suit.DIAMONDS);
 
+        Card c1=new Card(Rank.DEUCE, Suit.DIAMONDS);
+        Card c2=new Card(Rank.THREE,Suit.DIAMONDS);
+        Card c3=new Card(Rank.FOUR,Suit.DIAMONDS);
+        Card c4=new Card(Rank.QUEEN,Suit.DIAMONDS);
+        Card c5=new Card(Rank.ACE,Suit.DIAMONDS);
+        Card c6=new Card(Rank.ACE,Suit.HEARTS);
 
         h.add(c1);
         h.add(c2);
@@ -29,14 +27,30 @@ public class Test {
         h.add(c4);
         h.add(c5);
         h.add(c6);
-        h.add(c7);
-        h.add(c8);
-        h.add(c9);
 
-        //Collections.shuffle(h.cards);
-        Hand d= HandTypeRankingUtil.getBestHand(h.cards);
-        System.out.println(d.getHandType());
-        System.out.println(d.cards);
+        Card c21=new Card(Rank.DEUCE, Suit.DIAMONDS);
+        Card c22=new Card(Rank.THREE,Suit.DIAMONDS);
+        Card c23=new Card(Rank.FOUR,Suit.DIAMONDS);
+        Card c24=new Card(Rank.KING,Suit.DIAMONDS);
+        Card c25=new Card(Rank.ACE,Suit.DIAMONDS);
+        Card c26=new Card(Rank.ACE,Suit.HEARTS);
+
+        h2.add(c21);
+        h2.add(c22);
+        h2.add(c23);
+        h2.add(c24);
+        h2.add(c25);
+        h2.add(c26);
+
+        Hand analyse1= HandTypeRankingUtil.getBestHand(h.cards);
+        System.out.println(analyse1.getHandType());
+        System.out.println(analyse1.getCards());
+
+        Hand analyse2= HandTypeRankingUtil.getBestHand(h2.cards);
+        System.out.println(analyse2.getHandType());
+        System.out.println(analyse2.getCards());
+
+        System.out.println(analyse1.compareTo(analyse2));
 
 
 

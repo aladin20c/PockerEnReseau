@@ -7,7 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Hand {
+public class Hand implements Comparable<Hand> {
     protected List<Card> cards;
     private PokerHandType handType;
 
@@ -102,32 +102,26 @@ public class Hand {
         int size= cards.size();
         return cards.get(0).getSuit().equals(cards.get(size-1).getSuit());//If the first and last cards have the same suit
     }
-/*
-    public boolean isStraight(){
-        sortByRank();
-        if(cards.get(0).getRank().getRank()== Rank.ACE.getRank()){
-                boolean weekStr=(cards.get(1).getRank()==Rank.DEUCE.getRank())
-                    &&(cards.get(2).getRank()==Rank.THREE.getRank())
-                    &&(cards.get(3).getRank()==Rank.FOUR.getRank())
-                    &&(cards.get(4).getRank()==Rank.FIVE.getRank());
-            boolean strongStr=(cards.get(1).getRank()==Rank.TEN.getRank())
-                    &&(cards.get(2).getRank()==Rank.JACK.getRank())
-                    &&(cards.get(3).getRank()==Rank.QUEEN.getRank())
-                    &&(cards.get(4).getRank()==Rank.KING.getRank());
-            return (weekStr || strongStr) ;
-        }else{
-            int size= cards.size();
-            int rank=cards.get(0).getRank();
-            return cards.get(size-1).getRank()==(rank+5)-1;
+
+    //TODO verify with all possibilities (check for flush hand (done))
+    @Override
+    public int compareTo(Hand hand) {
+        if(handType.getPower()>hand.getHandType().getPower()){
+            return 1;
         }
+        if(handType.getPower()<hand.getHandType().getPower()){
+            return -1;
+        }
+        for(int i=0;i< cards.size();i++){
+            Card card=cards.get(i);
+            Card otherHandsCard=hand.getCards().get(i);
+            if(card.getRank().getRank()>otherHandsCard.getRank().getRank()){
+                return 1;
+            }else if(card.getRank().getRank()<otherHandsCard.getRank().getRank()){
+                return -1;
+            }
+        }
+        return 0;
     }
 
-    public boolean isRoyalFlush(){
-        int size= cards.size();
-        sortByRank();
-        return (isFlush() && isStraight()
-                && (cards.get(0).getRank()==Rank.ACE.getRank()
-                && cards.get(size-1).getRank()==Rank.KING.getRank() ));
-    }
-*/
 }
