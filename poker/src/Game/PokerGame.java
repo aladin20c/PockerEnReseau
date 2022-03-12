@@ -1,82 +1,206 @@
 package Game;
 import java.util.ArrayList;
 
-public class PokerGame{
-    private ArrayList<Player> players;
-    private Player currentPlayer;
-    private Hand table;
-    private Deck deck;
-    private int pot;
-    //private pokerHandEvaluator evaluator;
-    //private dealer dealer;
-
-    public PokerGame(){
-        players=new ArrayList<Player>();
-        currentPlayer=null;
-        table=new Hand();
-        deck=new Deck();
-        pot=0;
-        //evaluator=new PokerHandEvaluator();
-        //dealer=new Dealer();
+public abstract class PokerGame {
+    protected ArrayList<Player> players;
+    protected int dealer;
+    protected Player winner;
+    protected Deck deck;
+    protected int bidAmount=0;
+    protected int pot=0;
+    protected int totalCheck=0;
+    protected int foldedPlayers=0;
+    protected boolean isOneTurnCompleted=false;
+    protected boolean isGameFinished=false;
+    protected Scanner sc;
+ 
+    public PokerGame(ArrayList<Player> players){
+        deck = new Deck();
+        this.players=players;
+        dealer=0;
+        initPlayer();
+        sc = new Scanner(System.in);
     }
-    public Player getCurrentPlayer(){
-        return currentPlayer;
+ 
+    /**
+     * To get the deck
+     * @return
+    */
+    public Deck getDeck(){
+        return deck;
     }
-    public void setCurrentPlayer(Player player){
-        currentPlayer=player;
-    }
-    public void addPlayer(Player player){
-        players.add(player);
-        setCurrentPlayer(players.get(0));
-    }
-    public Player nextPlayer(){
-        int position=players.indexOf(currentPlayer);
-        if(position<(players.size()-1)){
-            setCurrentPlayer( players.get(position+1));
-        }else{
-            setCurrentPlayer( players.get(0));
-        }
-        return currentPlayer;
-    }
-    public ArrayList<Player> getPlayers(){
-        return players;
-    }
-    public int getPot(){
-        return pot;
-    }
-    public void setPot(int p){
-        pot=p;
-    }
-    public void addToPot(int bet){
-        pot+=bet;
-    }
-    public Hand getTable(){
-        return table;
-    }
-    public void clearTable(){
-        table.clear();
-    }
-    public void clearHands(){
-        for(Player p:players){
-            p.getHand().clear();
-        }
-    }
-    public ArrayList<Hand> getPlayerHands(){
-        ArrayList<Hand> playerHands=new ArrayList<Hand>();
-        for(Player p:players){
-            playerHands.add(p.getHand());
-        }
-        return playerHands;
-    }
-    public Hand combineHandAndTable(Player player){
-        Hand handAndTable=new Hand();
-        for(Card c:table.getCards()){
-            table.give(c,handAndTable);
-        }
-        for(Card c:player.getHand().getCards()){
-            player.getHand().give(c,handAndTable);
-        }
-        return handAndTable;
-    }
-
+    
+    /**
+     * To get the index of the next player
+     * @return
+     */
+     public int nextPlayer(int i){
+         int n=(i+1)%players.size();
+         if(!players.get(n).isFold()){
+             return n;
+         }
+         else{
+             return nextPlayer(n);
+         }
+     }
+ 
+     /**
+     * To get the bidAmount
+     * @return
+     */
+     public int getBidAmount(){
+         return bidAmount;
+     }
+ 
+     /**
+      * To set bidAmount
+      * @param bidAmount
+      */
+     public void setBidAmount(int bidAmount) {
+         this.bidAmount = bidAmount;
+     }
+ 
+     /**
+      * To get pot
+      * @return
+      */
+     public int getPot() {
+         return pot;
+     }
+ 
+     public void initPlayer(){
+         for(Player p : players){
+             p.setRound(this);
+         }
+     }
+ 
+     /**
+      * distribute nbCard to all players (no folded players)
+      * @param nbCard
+      */
+     public void distributeCard(int nbCard){
+         int nbPlayers = players.size()-foldedPlayers;
+         Hand[] hands = new Hand[nbPlayers];
+         int index = dealer;
+         for(int i=0 ; i<nbPlayers ; i++){
+             index=nextPlayer(index);
+             hands[i]=players.get(index).getHand();
+         }
+         deck.dealPlayers(hands, nbCard);
+     }
+ 
+     public void makeBid(String betType, int raiseAmount, int callAmount){
+         switch(betType){
+             case "CALL":
+                 call(callAmount);
+                 break;
+             case "RAISE":
+                 raise(raiseAmount,callAmount);
+                 break;
+             default :
+                 //Lancer une exception
+                 System.out.println("Cette action n'existe pas");
+         }
+     }
+ 
+     public void makeBid(String betType) {
+         switch(betType){
+             case "CHECK":
+                 check();
+                break;
+             case "FOLD":
+                 fold();
+                break;
+             default :
+              //Lancer une exception
+              System.out.println("Cette action n'existe pas");
+         }
+     }
+ 
+     public void fold(){
+         foldedPlayers++;
+     }
+ 
+     public void check(){
+         totalCheck++;
+ 
+     }
+ 
+     public void call(int callAmount){
+         pot  += callAmount;
+         check();
+ 
+     }
+ 
+     public void raise(int raiseAmount,int callAmount){
+         bidAmount += raiseAmount;
+         pot = pot + raiseAmount+callAmount;
+         totalCheck = 1;
+ 
+     }
+ 
+     public void resetBidTurn() {
+          
+     }
+     
+     public void biddingRound(int firstPlayer , boolean firstRound){
+         int index = firstPlayer;
+         Player player = players.get(index);
+         resetBidPerRoundOfPlayers();
+         if(!firstRound){
+             bidAmount=0;
+         }
+         totalCheck=0;
+         while(foldedPlayers<players.size()-1 && totalCheck<(players.size()-foldedPlayers) ){
+             System.out.println("Le joueur "+player.getName()+" doit choisir :");
+             actionOfBiddingRound();
+             String rep = sc.next();
+             switch(rep){
+                 case "0" : 
+                     player.call();
+                     break;
+                 case "1":
+                     player.fold();
+                     if(index==dealer){
+                         dealer = nextPlayer(dealer);
+                     }
+                     break;
+                 case "2" :
+                     player.check();
+                     break;
+                 case "3":
+                     System.out.println("Entrez une somme pour faire un raise");
+                     int raiseAmount = sc.nextInt();
+                     player.raise(raiseAmount);
+                     break;
+                 default:
+                     System.out.println("Vous devez choisir une de ces options");
+                     actionOfBiddingRound();
+             }
+             System.out.println("pot : "+pot);
+             player.afficher();
+             System.out.println("totalChek : "+totalCheck);
+             index = nextPlayer(index);
+             player = players.get(index);
+ 
+         }
+     }
+     public void actionOfBiddingRound(){
+         System.out.println("0- CALL");
+         System.out.println("1- FOLD");
+         System.out.println("2- CHECK");
+         System.out.println("3- RAISE");
+         System.out.println("Entrez votre choix : ");
+     }
+     public void resetBidPerRoundOfPlayers(){
+         for(Player p:players){
+             p.setBidPerRound(0);
+         }
+     }
+ 
+     
+     
+     public abstract boolean isGameTurnFinished();
+     public abstract void playGame();
+     public abstract boolean checkEndOfTurn();
 }
