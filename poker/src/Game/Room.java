@@ -34,4 +34,5 @@ public abstract class Room {
 
 
     public void incrementHighestBid(int raise) {this.highestBid += raise;}
+    public void setId(int id) {this.id = id;}
 }
