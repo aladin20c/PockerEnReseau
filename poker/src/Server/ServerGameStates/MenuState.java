@@ -8,7 +8,7 @@ import Server.Server;
 public class MenuState extends GameState{
 
     private String clientUsername;
-    private boolean hasRoomsList;
+    private boolean hasRoomsList;//the player doesnt have the list of rooms to connect to one of them only when he asks GETLIST
 
     public MenuState(ClientHandler clientHandler, String clientUsername) {
         super(clientHandler, 1);
@@ -58,7 +58,7 @@ public class MenuState extends GameState{
 
             int id=Integer.parseInt(messageFromClient.substring(9));
             SRoom room=Server.getRoom(id);
-            if(room==null|| !room.canAddNewPlayer()){
+            if(!hasRoomsList ||room==null|| !room.canAddNewPlayer()){
                 writeToClient("131 room unavailable");
                 return;
             }
@@ -66,23 +66,26 @@ public class MenuState extends GameState{
             writeToClient("131 GAME " + room.getId() + " JOINED");
             broadCastMessage("141 " + clientUsername + " JOINED",room.getClientHandlers());
 
-
-
             writeToClient("155 LIST PLAYER "+room.numberOfPlayers());
-            int i = 0;
-            for (; i < room.numberOfPlayers() / 5; i++) {
-                writeToClient("155 MESS " + (i + 1) + " PLAYER "
-                        + room.getClientHandlers().get(i * 5) + " "
-                        + room.getClientHandlers().get(i * 5 + 1) + " "
-                        + room.getClientHandlers().get(i * 5 + 2) + " "
-                        + room.getClientHandlers().get(i * 5 + 3) + " "
-                        + room.getClientHandlers().get(i * 5 + 4));}
-            if (i * 5 < room.numberOfPlayers()) {
-                writeToClient("155 MESS " + (i + 1) + " PLAYER "
-                        + room.getClientHandlers().get(i * 5) + " "
-                        + ((i * 5 + 1 < room.numberOfPlayers()) ? room.getClientHandlers().get(i + 1) + " " : "")
-                        + ((i * 5 + 2 < room.numberOfPlayers()) ? room.getClientHandlers().get(i + 2) + " " : "")
-                        + ((i * 5 + 3 < room.numberOfPlayers()) ? room.getClientHandlers().get(i + 3) : ""));}
+            int index = 0;
+
+            for (; index < room.numberOfPlayers() / 5; index++) {
+
+                writeToClient("155 MESS " + (index + 1) + " PLAYER "
+                        + room.getClientHandlers().get(index * 5).getClientUsername() + " "
+                        + room.getClientHandlers().get(index * 5 + 1).getClientUsername() + " "
+                        + room.getClientHandlers().get(index * 5 + 2).getClientUsername() + " "
+                        + room.getClientHandlers().get(index * 5 + 3).getClientUsername() + " "
+                        + room.getClientHandlers().get(index * 5 + 4).getClientUsername());
+            }
+
+            if (index * 5 < room.numberOfPlayers()) {
+                writeToClient("155 MESS " + (index + 1) + " PLAYER "
+                        + room.getClientHandlers().get(index * 5).getClientUsername() + " "
+                        + ((index * 5 + 1 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 1).getClientUsername() + " " : "")
+                        + ((index * 5 + 2 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 2).getClientUsername() + " " : "")
+                        + ((index * 5 + 3 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 3).getClientUsername() : ""));
+            }
 
             room.addClient(this.clientHandler);
             this.clientHandler.setGameState(new WaitingState(clientHandler,clientUsername,room));

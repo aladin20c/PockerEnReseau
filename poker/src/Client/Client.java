@@ -60,8 +60,8 @@ public class Client {
         while (socket.isConnected()){
             //get what the user is typing and sent it over
             String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
-            analyseMessageToSend(messageToSend);
             messageToSend=messageToSend.trim();
+            analyseMessageToSend(messageToSend);
             writeToServer(messageToSend);
         }
     }
