@@ -78,6 +78,8 @@ public class Card {
         }
     }
 
+
+
     //Public methods
 
     /**
@@ -113,7 +115,7 @@ public class Card {
     }
     /**
      * To return a card and change its position
-    */
+     */
     public void flipCard(){
         isFaceUp=!isFaceUp;
     }

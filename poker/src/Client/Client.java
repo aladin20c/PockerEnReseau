@@ -98,9 +98,7 @@ public class Client {
 
     /*analysing messages before sending it to the server */
     public void analyseMessageToSend(String messageToSend){
-        if(joinedARoom() && currentRoom.startRequested() && !messageToSend.matches(Request.START_RESPONSE)){
-            System.out.println("u must respond to the start request first !!!!!");
-        } else if(messageToSend.matches(Request.CREATE_ROOM)){
+        if(messageToSend.matches(Request.CREATE_ROOM)){
             String[] words=messageToSend.substring(11).split("\\s*[a-zA-Z]+\\s+");
 
             int type=Integer.parseInt(words[0]);
@@ -144,7 +142,7 @@ public class Client {
             int gameId = Integer.parseInt(comingMessage.substring(17));
             if (futureRoom==null) throw new RuntimeException("player is not attempting to create a room");
             currentRoom = futureRoom;
-            currentRoom.setId(gameId);
+
             joinRoom(currentRoom);
             currentRoom.addPlayer(this.username);
 
@@ -189,17 +187,15 @@ public class Client {
 
         } else if (comingMessage.matches(Request.START_IS_REQUESTED)) {
 
-            currentRoom.setStartRequested(true);
+
 
         } else if (comingMessage.matches(Request.GAME_STARTED)) {
 
-            currentRoom.setStartRequested(false);
-            currentRoom.setGameStarted(true);
+
 
         } else if (comingMessage.matches(Request.GAME_ABORDED)) {
 
-            currentRoom.setStartRequested(false);
-            currentRoom.setGameStarted(false);
+
 
 
         } else if (comingMessage.matches(Request.PLAYER_FOLD)) {

@@ -1,56 +1,37 @@
 package Game;
 
 public abstract class Room {
-    private static int COUNT=1;
 
-    private boolean startRequested;
-    private boolean gameStarted;
-
-    private int type;
     private int id;
+    private int type;
     private int maxPlayers;
     private int minBid;
     private int initStack;
 
-    private int tableMoney;
     private int highestBid;
-    
+    private int tableMoney;
 
-    public Room(int id,int type, int minPlayers, int minBid, int initStack) {
-        this.type = type;
-        this.maxPlayers = minPlayers;
-        this.minBid = minBid;
-        this.initStack = initStack;
-        this.startRequested=false;
-        this.gameStarted=false;
+
+    public Room(int id, int type, int maxPlayers, int minBid, int initStack) {
         this.id = id;
-    }
-    public Room(int type, int minPlayers, int minBid, int initStack) {
         this.type = type;
-        this.maxPlayers = minPlayers;
+        this.maxPlayers = maxPlayers;
         this.minBid = minBid;
         this.initStack = initStack;
-        this.startRequested=false;
-        this.gameStarted=false;
-        this.id=COUNT++;
+        this.highestBid=0;
+        this.tableMoney=0;
     }
 
-    public int getType() {return type;}
+
+
     public int getId() {return id;}
+    public int getType() {return type;}
     public int getMaxPlayers() {return maxPlayers;}
     public int getMinBid() {return minBid;}
     public int getInitStack() {return initStack;}
-    public void setId(int id) {this.id = id;}
     public int getHighestBid() {return highestBid;}
+    public int getTableMoney() {return tableMoney;}
+
+
     public void incrementHighestBid(int raise) {this.highestBid += raise;}
-
-    public boolean gameStarted() {return gameStarted;}
-    public boolean startRequested(){return startRequested;}
-    public void setStartRequested(boolean startRequested) {this.startRequested = startRequested;}
-    public void setGameStarted(boolean gameStarted) {this.gameStarted = gameStarted;}
-
-    public abstract boolean hasRoomLeft();
-    public abstract boolean hasEnoughPlayersToStart();
-    public abstract int numberOfPlayers();
-    public abstract boolean isAdmin(String userName);
 }

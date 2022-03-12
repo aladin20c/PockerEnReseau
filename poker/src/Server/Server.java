@@ -10,17 +10,18 @@ import java.util.ArrayList;
 public class Server {
 
 
-    public static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
-    protected static ArrayList<SRoom> rooms=new ArrayList<>();
+    private static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
+    private static ArrayList<SRoom> rooms=new ArrayList<>();
     private static Server server;
     private ServerSocket serverSocket;
 
 
-
-
-
     private Server(ServerSocket serverSocket) {
         this.serverSocket = serverSocket;
+    }
+    public static Server get(ServerSocket serverSocket){
+        if(server==null) server= new Server(serverSocket);
+        return server;
     }
 
     public void startServer(){
@@ -56,19 +57,6 @@ public class Server {
         }
     }
 
-    public static boolean containsName(String name){
-        for(ClientHandler ch:clientHandlers){
-            if(ch.getClientUsername().equals(name)) return true;
-        }
-        return false;
-    }
-
-
-    public static Server get(ServerSocket serverSocket){
-        if(server==null) server= new Server(serverSocket);
-        return server;
-    }
-
     public static void main(String[] args) {
         try{
             ServerSocket serverSocket=new ServerSocket(Request.PORT);
@@ -78,4 +66,37 @@ public class Server {
             e.printStackTrace();
         }
     }
+
+
+    public static boolean containsName(String name){
+        for(ClientHandler ch:clientHandlers){
+            if(ch.getClientUsername().equals(name)) return true;
+        }
+        return false;
+    }
+    public static void addClient(ClientHandler ch){
+        clientHandlers.add(ch);
+    }
+    public static void removeClient(ClientHandler ch){
+        clientHandlers.remove(ch);
+    }
+    public static void addRoom(SRoom room){
+        rooms.add(room);
+    }
+    public static void removeClient(SRoom room){
+        rooms.remove(room);
+    }
+    public static int numberOfRooms(){
+        return rooms.size();
+    }
+    public static ArrayList<SRoom> getRooms() {
+        return rooms;
+    }
+    public static SRoom getRoom(int id) {
+        for(SRoom room : rooms){
+            if(room.getId()==id) return room;
+        }
+        return null;
+    }
 }
+
