@@ -5,63 +5,49 @@ import Game.Room;
 import java.util.ArrayList;
 
 public class SRoom extends Room {
+    private static int COUNT=1;
+
     protected ArrayList<ClientHandler> clientHandlers;
-    protected Boolean[] startRequestResponses;
+    private ClientHandler currentPlayer;
 
     public SRoom(int type, int minPlayers, int minBid, int initStack) {
-        super(type, minPlayers,minBid, initStack);
+        super(COUNT++,type, minPlayers,minBid, initStack);
         this.clientHandlers=new ArrayList<>();
     }
 
-    public boolean hasRoomLeft(){
+
+
+    public void addClient(ClientHandler clientHandler){
+        clientHandlers.add(clientHandler);
+    }
+    public void removeClient(ClientHandler clientHandler){
+        clientHandlers.remove(clientHandler);
+    }
+    public boolean canAddNewPlayer(){
+        if(!clientHandlers.isEmpty()){
+            return clientHandlers.size()<this.getMaxPlayers() && clientHandlers.get(0).getGameState().canAddNewPlayer();
+        }
         return clientHandlers.size()<this.getMaxPlayers();
     }
-    public int numberOfPlayers(){return clientHandlers.size();}
-    public boolean isAdmin(String userName){
+    public ArrayList<ClientHandler> getClientHandlers() {
+        return clientHandlers;
+    }
+    public boolean isAdmin(ClientHandler clientHandler){
         if(clientHandlers.isEmpty()) return false;
-        return clientHandlers.get(0).getClientUsername().equals(userName);
+        return clientHandlers.get(0)==clientHandler;
     }
-
-
-
-    public void requestStart(){
-        setStartRequested(true);
-        startRequestResponses=new Boolean[clientHandlers.size()];
-        startRequestResponses[0]=true;
-    }
-    public void abortStartRequested(){
-        setStartRequested(false);
-        startRequestResponses=null;
-    }
-    public void respond(ClientHandler c,boolean response){
-        int index=this.clientHandlers.indexOf(c);
-        if(startRequestResponses[index]==null)startRequestResponses[index]=response;
-    }
-    public boolean allPlayersResponded(){
-        for(Boolean b : startRequestResponses){
-            if(b==null) return false;
-        }
-        return true;
-    }
-    public boolean startApproved(){
-        for(Boolean b : startRequestResponses){
-            if(!b) return false;
-        }
-        return true;
-    }
-    public ArrayList<String> getPlayersWhoSaidNo(){
-        ArrayList<String> res=new ArrayList<>();
-        for(int i=0;i<clientHandlers.size();i++){
-            if(!startRequestResponses[i]){
-                res.add(clientHandlers.get(i).getClientUsername());
-            }
-        }
-        return res;
-    }
-
     public boolean hasEnoughPlayersToStart(){
         return (getType()==0 && clientHandlers.size()>=3) || (getType()==1 && clientHandlers.size()>=2);
     }
+
+    public int numberOfPlayers(){return clientHandlers.size();}
+
+    public void requestStart(boolean start){
+        for(ClientHandler ch : clientHandlers){
+            ch.getGameState().requestStart(start);
+        }
+    }
+
 
 
 }
