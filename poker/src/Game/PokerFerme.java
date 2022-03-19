@@ -1,5 +1,6 @@
 package Game;
 
+import java.util.ArrayList;
 public class PokerFerme extends PokerGame{
     public PokerFerme(ArrayList<Player> players, int bidAmount){
         super(players);
@@ -19,7 +20,7 @@ public class PokerFerme extends PokerGame{
                     break;
                 case "1" :
                     players.get(index).fold();
-                    if(index==dealer){
+                    if(index==dealer){ 
                         dealer = nextPlayer(dealer);
                     }
                     break;
@@ -28,7 +29,6 @@ public class PokerFerme extends PokerGame{
                     actionOfStart();
             }
             System.out.println("pot : "+pot);
-            players.get(index).afficher();
         }
     }
             
@@ -43,7 +43,6 @@ public class PokerFerme extends PokerGame{
         int index = dealer;
         for(int i=0 ; i<nbPlayers ; i++){
             index=nextPlayer(index);
-            System.out.println("Vous voulez changer combien de cartes (entre 0 et 3)");
             int nbCards = sc.nextInt();
             if(nbCards!=0){
                 for(int j=0 ; j<nbCards ; j++){
@@ -75,12 +74,9 @@ public class PokerFerme extends PokerGame{
         firstRound();
         deck.shuffle();
         distributeCard(5);
-        CardsOfPlayers();
         biddingRound(nextPlayer(dealer),false);
         discard();
-        CardsOfPlayers();
         redistributeCard();
-        CardsOfPlayers();
         biddingRound(nextPlayer(dealer),false);
     }
     public boolean checkEndOfTurn(){

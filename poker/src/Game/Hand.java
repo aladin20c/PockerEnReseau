@@ -123,5 +123,25 @@ public class Hand implements Comparable<Hand> {
         }
         return 0;
     }
-
+    public int nbCards(){
+        return cards.size();
+    }
+    public Card getCard(int pos){
+        return cards.get(pos);
+    }
+    /**
+     * remove a card and return the same card
+     * @param s
+     * @return
+     */
+    public Card removeCard(String s){
+        Card c = Card.createCard(s);
+        for(Card card : cards){
+            if(card.equals(c)){
+                cards.remove(card);
+                return c;
+            }
+        }
+        return null;
+    }
 }

@@ -193,12 +193,6 @@ public class Card {
         return false;
       }
 
-    public boolean equals(Object o) {
-        if(!(o instanceof Card)) return false;
-        Card c = (Card)o;
-        if (this==o || (this.rank==c.rank && this.suit==c.suit)) return true;
-        return false;
-    }
     public boolean encodedTo(String s) {
         if(s.length()!=2) return false;
         return this.getSuit().getShortName().equals(String.valueOf(s.charAt(0))) &&

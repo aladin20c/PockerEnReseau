@@ -1,6 +1,6 @@
 package Game;
 import java.util.ArrayList;
-
+import java.util.Scanner;
 public abstract class PokerGame {
     protected ArrayList<Player> players;
     protected int dealer;
@@ -177,9 +177,6 @@ public abstract class PokerGame {
                      System.out.println("Vous devez choisir une de ces options");
                      actionOfBiddingRound();
              }
-             System.out.println("pot : "+pot);
-             player.afficher();
-             System.out.println("totalChek : "+totalCheck);
              index = nextPlayer(index);
              player = players.get(index);
  
