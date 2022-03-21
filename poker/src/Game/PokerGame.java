@@ -194,10 +194,28 @@ public abstract class PokerGame {
              p.setBidPerRound(0);
          }
      }
- 
-     
-     
-     public abstract boolean isGameTurnFinished();
+
+    public Player getWinner() {
+        return winner;
+    }
+    public void defineWinner(){
+         for(Player p:players){
+            if(p.getHand().compareTo(this.winner.getHand())==1){
+                winner=p;
+            }
+         }
+    }
+
+    public static Player winner(ArrayList<Player> players){
+         Player winner=players.get(0);
+         for(int i=1;i<players.size();i++){
+             if(players.get(i).getHand().compareTo(winner.getHand())==1){
+                 winner=players.get(i);
+             }
+         }
+         return winner;
+    }
+    public abstract boolean isGameTurnFinished();
      public abstract void playGame();
      public abstract boolean checkEndOfTurn();
 }
