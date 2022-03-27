@@ -2,42 +2,26 @@ package Game;
 
 import java.util.ArrayList;
 public class PokerFerme extends PokerGame{
+
     public PokerFerme(ArrayList<Player> players, int bidAmount){
         super(players);
         super.bidAmount=bidAmount;
     }
-    
-    public void firstRound(){
-        int nbPlayers = players.size()-foldedPlayers;
-        int index = dealer;
-        for(int i=0 ; i<nbPlayers ; i++){
-            index=nextPlayer(index);
-            actionOfStart(); //chaque joueur doit choisir soit de faire un CALL (pour continuer à jouer) ou un FOLD (pour se coucher)
-            String rep=sc.next();
-            switch(rep){
-                case "0" :
-                    players.get(index).call();
-                    break;
-                case "1" :
-                    players.get(index).fold();
-                    if(index==dealer){ 
-                        dealer = nextPlayer(dealer);
-                    }
-                    break;
-                default :
-                    System.out.println("Vous devez choisir une de ces options");
-                    actionOfStart();
-            }
-            System.out.println("pot : "+pot);
+    public void rotate(){
+        if(isTurnFinished()){
+            bidTurn++;
+            bidAmount=0;
+            resetBidPerRoundOfPlayers();
+            currentPlayer=nextPlayer(dealer);
+        }
+        else{
+            currentPlayer=nextPlayer(currentPlayer);
         }
     }
-            
-    public void actionOfStart(){
-        System.out.println("0- CALL");
-        System.out.println("1- FOLD");
-        System.out.println("Entrez votre choix : ");
+    public boolean isGameTurnFinished(){
+        return bidTurn==2;
     }
-    
+
     public void discard(){
         int nbPlayers = players.size()-foldedPlayers;
         int index = dealer;
@@ -68,23 +52,7 @@ public class PokerFerme extends PokerGame{
         }
 
     }
-
-    public void playGame(){
-        deck.populate();
-        firstRound();
-        deck.shuffle();
-        distributeCard(5);
-        biddingRound(nextPlayer(dealer),false);
-        discard();
-        redistributeCard();
-        biddingRound(nextPlayer(dealer),false);
-    }
-    public boolean checkEndOfTurn(){
-        return false;
-    }
-    public boolean isGameTurnFinished(){
-        return false;
-    }
+    
 
 
 }
