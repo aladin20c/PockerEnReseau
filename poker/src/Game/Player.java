@@ -6,8 +6,6 @@ public class Player {
     private Hand userHand;
     private boolean isFold;
     private int bidPerRound=0;
-    private PokerGame round;
-    private boolean played;
 
     public Player(String name, int stack){
         this.name=name;
@@ -62,14 +60,14 @@ public class Player {
     public boolean canFold(){
         return (this==round.getCurrentPlayer());
     }
-    public void fold(){
+    public void fold(PokerGame round){
         isFold=true;
         if(this==round.getDealer()){
             round.incFolderPlayers();
         }
         round.rotate();
     }
-    public void call(){
+    public void call(PokerGame round){
         int callAmount = round.getBidAmount()-bidPerRound;
         bidPerRound += callAmount;
         stack -= callAmount;
@@ -77,7 +75,7 @@ public class Player {
         round.incTotalCheck();
         round.rotate();
     }
-    public void raise(int raiseAmount){
+    public void raise(PokerGame round,int raiseAmount){
         int callAmount = round.getBidAmount()-bidPerRound;
         bidPerRound = bidPerRound + callAmount+raiseAmount;
         stack = stack- callAmount-raiseAmount;
@@ -86,7 +84,7 @@ public class Player {
         round.setTotalCheck(1);
         round.rotate();
     }
-    public void check(){
+    public void check(PokerGame round){
         round.incTotalCheck();
         round.rotate();
     }
@@ -98,7 +96,12 @@ public class Player {
     public Hand getHand(){
         return userHand;
     }
-    
+    public int getBidPerRound() {
+        return bidPerRound;
+    }
+    public int geStack() {
+        return stack;
+    }
     public void setBidPerRound(int bidAmount) {
         this.bidPerRound = bidAmount;
     }

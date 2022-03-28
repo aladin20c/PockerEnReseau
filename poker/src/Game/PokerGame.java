@@ -190,7 +190,7 @@ public abstract class PokerGame {
          }
          return winner;
     }
-    public abstract boolean isRoundFinished();
+   
 
     public boolean canChange(Player player,ArrayList<Card> cards){
         return (cards.size()>=1
@@ -211,7 +211,7 @@ public abstract class PokerGame {
         return newCards;
     }
 
-    public abstract boolean can_reset_game();
+    
     public boolean reset_game(){
         if(can_reset_game()){
             currentPlayer=1;
@@ -230,5 +230,10 @@ public abstract class PokerGame {
 
 
     }
-
+    public abstract boolean can_reset_game();
+    public abstract boolean isRoundFinished();
+    public abstract boolean canCall(Player player);
+    public abstract boolean canCheck(Player player);
+    public abstract boolean canFold(Player player);
+    public abstract boolean canRaise(Player player,int raiseAmount );
 }

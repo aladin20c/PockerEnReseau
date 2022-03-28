@@ -18,13 +18,8 @@ public class PokerFerme extends PokerGame{
             currentPlayer=nextPlayer(currentPlayer);
         }
     }
-////////////////////////////////////////////////TODO
     @Override
     public boolean isRoundFinished() {
-        return false;
-    }
-////////////////////////////
-    public boolean isGameTurnFinished(){
         return bidTurn==2;
     }
 
