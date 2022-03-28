@@ -5,7 +5,7 @@ public abstract class PokerGame {
     protected ArrayList<Player> players;
     protected int currentPlayer;
     protected int dealer;
-    protected Player winner=NULL;
+    protected Player winner=null;
     protected Deck deck;
     protected int bidAmount=0;
     protected int pot=0;
@@ -96,7 +96,7 @@ public abstract class PokerGame {
          }
     }
     public Player nextDealer(){
-        return joueurs.get(nextPlayer(dealer));
+        return players.get(nextPlayer(dealer));
    }
     /**
       * increment tne number of foldedPlayers
@@ -191,4 +191,23 @@ public abstract class PokerGame {
          return winner;
     }
     public abstract boolean isRoundFinished();
+
+    public boolean canChange(Player player,ArrayList<Card> cards){
+        return (cards.size()>=1
+                && cards.size()<=5
+                && player.getHand().getCards().containsAll(cards)
+                && isOneTurnCompleted
+                && players.get(currentPlayer).getName()==player.getName());
+
+    }
+    public ArrayList<Card> change(Player player,ArrayList<Card> cards){
+        //if(canChange(player,cards))
+        deck.getCards().addAll(cards);
+        ArrayList<Card> newCards=new ArrayList<>();
+        for(int i=0 ;i<cards.size();i++){
+            newCards.add(deck.getNextCard());
+        }
+        player.getHand().getCards().addAll(newCards);
+        return newCards;
+    }
 }

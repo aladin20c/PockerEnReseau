@@ -81,7 +81,7 @@ public class Player {
         int callAmount = round.getBidAmount()-bidPerRound;
         bidPerRound = bidPerRound + callAmount+raiseAmount;
         stack = stack- callAmount-raiseAmount;
-        round.setBidAmount(round.getBidAmount+raiseAmount);
+        round.setBidAmount(round.getBidAmount()+raiseAmount);
         round.setPot(raiseAmount+callAmount);
         round.setTotalCheck(1);
         round.rotate();
