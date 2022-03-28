@@ -210,4 +210,25 @@ public abstract class PokerGame {
         player.getHand().getCards().addAll(newCards);
         return newCards;
     }
+
+    public abstract boolean can_reset_game();
+    public boolean reset_game(){
+        if(can_reset_game()){
+            currentPlayer=1;
+            dealer=0;
+            winner=null;
+            deck=new Deck();
+            pot=0;
+            totalCheck=0;
+            foldedPlayers=0;
+            isOneTurnCompleted=false;
+            isGameFinished=false;
+            bidTurn=0;
+            return true;
+        }
+        return false;
+
+
+    }
+
 }

@@ -18,6 +18,12 @@ public class PokerFerme extends PokerGame{
             currentPlayer=nextPlayer(currentPlayer);
         }
     }
+////////////////////////////////////////////////TODO
+    @Override
+    public boolean isRoundFinished() {
+        return false;
+    }
+////////////////////////////
     public boolean isGameTurnFinished(){
         return bidTurn==2;
     }
@@ -52,7 +58,9 @@ public class PokerFerme extends PokerGame{
         }
 
     }
-    
 
+    public boolean can_reset_game(){
+        return players.size()>=3 && players.size()<=8;
+    }
 
 }
