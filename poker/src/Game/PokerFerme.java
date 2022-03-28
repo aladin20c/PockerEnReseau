@@ -18,11 +18,6 @@ public class PokerFerme extends PokerGame{
             currentPlayer=nextPlayer(currentPlayer);
         }
     }
-    @Override
-    public boolean isRoundFinished() {
-        return bidTurn==2;
-    }
-
     public void discard(){
         int nbPlayers = players.size()-foldedPlayers;
         int index = dealer;
@@ -53,9 +48,45 @@ public class PokerFerme extends PokerGame{
         }
 
     }
-
+    @Override
+    public boolean isRoundFinished() {
+        return bidTurn==4; //la condition à revoir
+    }
+    @Override
     public boolean can_reset_game(){
         return players.size()>=3 && players.size()<=8;
+    }
+    @Override
+    public boolean canCall(Player player){
+        if(player==getCurrentPlayer()){
+            if(bidTurn!=2){
+                return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
+            }
+        }
+        return false;
+    }
+    @Override
+    public boolean canFold(Player player){
+        return player==getCurrentPlayer() && bidTurn!=2;
+    }
+    @Override
+    public boolean canCheck(Player player){
+        if(bidTur!=0 && bidTur!=2){
+            if(player==getCurrentPlayer()){
+                return (player.getBidPerRound == bidAmount);
+            }
+        }
+        return false;
+    }
+    @Override
+    public boolean canRaise(Player player,int raiseAmount){
+        if(player==getCurrentPlayer()){
+            if(bidTurn!=2){
+                int callAmount = bidAmount-player.getBidPerRound();
+                return ((player.getBidPerRound()<bidAmount)&&((bidAmount- callAmount-raiseAmount)<=player.getStack()));
+            }
+        }
+        return false;
     }
 
 }

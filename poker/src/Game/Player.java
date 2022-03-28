@@ -21,45 +21,6 @@ public class Player {
     public void receiveCard(Card c){
         userHand.add(c);
     }
-    /**
-     * check if this player can do a CALL
-     * @return
-     */
-    public boolean canCall(){
-        if(this==round.getCurrentPlayer()){
-            return (round.getBidAmount()-bidPerRound)<=stack;
-        }
-        return false;
-    }
-    /**
-     * check if this player can do a CHECK
-     * @return
-     */
-    public boolean canCheck(){
-        if(this==round.getCurrentPlayer()){
-            return (bidPerRound == round.getBidAmount());
-        }
-        return false;
-    }
-    /**
-     * check if this player can do a RAISE
-     * @param raiseAmount
-     * @return
-     */
-    public boolean canRaise(int raiseAmount){
-        if(this==round.getCurrentPlayer()){
-            int callAmount = round.getBidAmount()-bidPerRound;
-            return (round.getBidAmount()- callAmount-raiseAmount)<=stack;
-        }
-        return false;
-    }
-    /**
-     * check if this player can do a FOLD
-     * @return
-     */
-    public boolean canFold(){
-        return (this==round.getCurrentPlayer());
-    }
     public void fold(PokerGame round){
         isFold=true;
         if(this==round.getDealer()){

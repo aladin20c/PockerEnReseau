@@ -32,7 +32,7 @@ public class TexasHoldem extends PokerGame{
     }
     @Override
     public boolean isRoundFinished() {
-        return bidTurn==3;
+        return bidTurn==4;//à revoir la condition
     }
     @Override
     public boolean can_reset_game(){
@@ -41,7 +41,7 @@ public class TexasHoldem extends PokerGame{
     @Override
     public boolean canCall(Player player){
         if(player==getCurrentPlayer()){
-            if(bidTurn==0 && smallBlind && bigBlind){
+            if((bidTurn==0 && smallBlind && bigBlind) || bidTurn!=0){
                 return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
             }
         }
@@ -53,7 +53,7 @@ public class TexasHoldem extends PokerGame{
     }
     @Override
     public boolean canCheck(Player player){
-        if(bidTurn==1){
+        if(bidTurn!=0){
             if(player==getCurrentPlayer()){
                 return (player.getBidPerRound == bidAmount);
             }
