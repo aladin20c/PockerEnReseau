@@ -6,11 +6,15 @@ public class Player {
     private Hand userHand;
     private boolean isFold;
     private int bidPerRound=0;
+    private boolean isQuit;
+    private boolean played;
+    //achaque fois je teste si le joueur n a pas folder et n as pas quiter
 
     public Player(String name, int stack){
         this.name=name;
         userHand = new Hand();
         isFold=false;
+        isQuit=false;
         this.stack=stack;
         played=false;
     }
@@ -23,9 +27,7 @@ public class Player {
     }
     public void fold(PokerGame round){
         isFold=true;
-        if(this==round.getDealer()){
-            round.incFolderPlayers();
-        }
+        round.incFolderPlayers();
         round.rotate();
     }
     public void call(PokerGame round){
@@ -33,20 +35,17 @@ public class Player {
         bidPerRound += callAmount;
         stack -= callAmount;
         round.setPot(callAmount);
-        round.incTotalCheck();
         round.rotate();
     }
     public void raise(PokerGame round,int raiseAmount){
-        int callAmount = round.getBidAmount()-bidPerRound;
-        bidPerRound = bidPerRound + callAmount+raiseAmount;
-        stack = stack- callAmount-raiseAmount;
-        round.setBidAmount(round.getBidAmount()+raiseAmount);
-        round.setPot(raiseAmount+callAmount);
-        round.setTotalCheck(1);
+        int callAmount = raiseAmount-bidPerRound;
+        bidPerRound += callAmount;
+        stack -= callAmount;
+        round.setBidAmount(raiseAmount);
+        round.setPot(callAmount);
         round.rotate();
     }
     public void check(PokerGame round){
-        round.incTotalCheck();
         round.rotate();
     }
     public void addChipsToUser(int chips){
@@ -56,6 +55,9 @@ public class Player {
 
     public Hand getHand(){
         return userHand;
+    }
+    public void resetHand(){
+        userHand.clear(); 
     }
     public int getBidPerRound() {
         return bidPerRound;
@@ -92,6 +94,16 @@ public class Player {
     public void setRound(PokerGame round){
         this.round=round;
     }
-    
-    
+    public void setIsQuit(boolean isQuit) {
+        this.isQuit= isQuit;
+    }
+    public boolean isQuit() {
+        return isQuit;
+    }
+    public void setPlayed(boolean played) {
+        this.played= played;
+    }
+    public boolean played() {
+        return played;
+    }
 }

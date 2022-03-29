@@ -1,29 +1,29 @@
 package Game;
 import java.util.ArrayList;
-import java.util.Scanner;
 public abstract class PokerGame {
     protected ArrayList<Player> players;
     protected int currentPlayer;
-    protected int dealer;
+    protected final int dealer;
     protected Player winner=null;
     protected Deck deck;
-    protected int bidAmount=0;
+    protected int minBid;
+    protected int bidAmount=0;//le bid maximum
     protected int pot=0;
-    protected int totalCheck=0;
     protected int foldedPlayers=0;
-    protected boolean isOneTurnCompleted=false;
-    protected boolean isGameFinished=false;
     protected int bidTurn=0;
-    protected Scanner sc;
  
-    public PokerGame(ArrayList<Player> players){
+    public PokerGame(int minBid){
+        this.minBid=minBid;
         deck = new Deck();
-        this.players=players;
+        players=new ArrayList<Player>();
         dealer=0;
-        initPlayer();
-        sc = new Scanner(System.in);
     }
- 
+    public void addPlayer(Player player){
+        players.add(player);
+    }
+    public Player firstPlayer(){
+        return players.get(nextPlayer(dealer));
+    }
     /**
      * To get the deck
      * @return
@@ -70,19 +70,6 @@ public abstract class PokerGame {
         this.bidAmount = bidAmount;
     }
     /**
-     * set totalCheck
-     * @param n
-     */
-    public void setTotalCheck(int n){
-        totalCheck=n;
-    }
-    /**
-     * change the dealer
-     */
-    public void setNextDealer(){
-        dealer=nextPlayer(dealer);
-    }
-    /**
      * To get the index of the next player
      * @return
      */
@@ -105,39 +92,18 @@ public abstract class PokerGame {
         foldedPlayers++;
     }
     /**
-     * increment totalCheck
-    */
-    public void incTotalCheck(){
-        totalCheck++;
-    }
-    /**
      * add p to pot
      * @param p
     */
     public void setPot(int p){
         pot+=p;
-    }    
-    /**
-     * Initialize the attribut PokerGame of each player
-     */
-    public void initPlayer(){
-         for(Player p : players){
-             p.setRound(this);
-         }
-    }
-    /**
-     * reset bidPerRound of each player
-     */
-    public void resetBidPerRoundOfPlayers(){
-        for(Player p:players){
-            p.setBidPerRound(0);
-        }
     }
     /**
       * distribute nbCard to all players (no folded players)
       * @param nbCard
     */
      public void distributeCard(int nbCard){
+         if(nbCard==2) deck.burn();
          int nbPlayers = players.size()-foldedPlayers;
          Hand[] hands = new Hand[nbPlayers];
          int index = dealer;
@@ -148,37 +114,37 @@ public abstract class PokerGame {
          deck.dealPlayers(hands, nbCard);
     }
     public boolean isTurnFinished(){
-        if(totalCheck==(players.size()-foldedPlayers)){
-            return true;
-        }
         if(players.size()-foldedPlayers==1){
             for(Player p : players){
                 if(!p.isFold()){
                     winner=p;
+                    p.addChipsToUser(pot);
                     return true;
                 }
             }
         }
-        return false;
+        //je parcours tous les joueurs et je teste si les joueurs ont joué et ont misé la meme somme
+        for(Player p : players){
+            if(!p.isFold()){
+                if(!p.played || p.getBidPerRound!=bidAmount){
+                    return false;
+                }
+            }
+        }
+        return true;
     }
     public void rotate(){
         if(isTurnFinished()){
             bidTurn++;
-            bidAmount=0;
-            resetBidPerRoundOfPlayers();
             currentPlayer=nextPlayer(dealer);
+            for(Player p : players){
+                p.setPlayed(false);
+            }
         }
         else{
+            currentPlayer().setPlayed(true);
             currentPlayer=nextPlayer(currentPlayer);
         }
-    }
-
-    public void defineWinner(){
-         for(Player p:players){
-            if(p.getHand().compareTo(this.winner.getHand())==1){
-                winner=p;
-            }
-         }
     }
 
     public static Player winner(ArrayList<Player> players){
@@ -193,44 +159,38 @@ public abstract class PokerGame {
    
 
     public boolean canChange(Player player,ArrayList<Card> cards){
-        return (cards.size()>=1
-                && cards.size()<=5
-                && player.getHand().getCards().containsAll(cards)
-                && isOneTurnCompleted
-                && players.get(currentPlayer).getName()==player.getName());
+        return false;
 
     }
     public ArrayList<Card> change(Player player,ArrayList<Card> cards){
-        //if(canChange(player,cards))
-        deck.getCards().addAll(cards);
-        ArrayList<Card> newCards=new ArrayList<>();
-        for(int i=0 ;i<cards.size();i++){
-            newCards.add(deck.getNextCard());
-        }
-        player.getHand().getCards().addAll(newCards);
-        return newCards;
+        return null;
     }
 
     
-    public boolean reset_game(){
-        if(can_reset_game()){
-            currentPlayer=1;
-            dealer=0;
-            winner=null;
-            deck=new Deck();
-            pot=0;
-            totalCheck=0;
-            foldedPlayers=0;
-            isOneTurnCompleted=false;
-            isGameFinished=false;
-            bidTurn=0;
-            return true;
+    public void resetGame(){
+        players.add(players.get(dealer));
+        players.remove(dealer);
+        for(Player p:players){
+            if(p.isQuit()){
+                players.remove(p);
+            }
+            else{
+                p.setIsFold(false);
+                p.setPlayed(false);
+                p.setBidPerRound(0);
+                p.resetHand();
+                //on doit initialiser aussi le stack de chaque joueur donc on doit garder la trace
+            }
         }
-        return false;
-
-
+        bidTurn=0;
+        pot=0;
+        bidAmount=0;
+        foldedPlayers=0;
+        currentPlayer=nextPlayer(dealer);
+        deck=new Deck();
+        winner=null;
     }
-    public abstract boolean can_reset_game();
+    public abstract boolean canResetGame();
     public abstract boolean isRoundFinished();
     public abstract boolean canCall(Player player);
     public abstract boolean canCheck(Player player);
