@@ -6,47 +6,47 @@ public class Player {
     private Hand userHand;
     private boolean isFold;
     private int bidPerRound=0;
-    private PokerGame round;
+    private boolean isQuit;
+    private boolean played;
+    //achaque fois je teste si le joueur n a pas folder et n as pas quiter
 
     public Player(String name, int stack){
         this.name=name;
         userHand = new Hand();
         isFold=false;
+        isQuit=false;
         this.stack=stack;
+        played=false;
     }
+    /**
+     * add card c to the hand of Player
+     * @param c
+     */
     public void receiveCard(Card c){
         userHand.add(c);
     }
-    public boolean canCall(){
-        return ( round.getBidAmount()-bidPerRound)<=stack;
-    }
-    //Cette methode je dois la supprimer pttr
-    public boolean canCheck(){
-        return bidPerRound== round.getBidAmount();
-    }
-    public void fold(){
-        round.makeBid("FOLD");
+    public void fold(PokerGame round){
         isFold=true;
+        round.incFolderPlayers();
+        round.rotate();
     }
-    public void call(){
-        if(canCall()){
-            int callAmount = round.getBidAmount()-bidPerRound;
-            bidPerRound += callAmount;
-            stack -= callAmount;
-            round.makeBid("CALL",0,  callAmount);
-        }
-
-    }
-    public void raise(int raiseAmount){
+    public void call(PokerGame round){
         int callAmount = round.getBidAmount()-bidPerRound;
-        bidPerRound = bidPerRound + callAmount+raiseAmount;
-        stack = stack- callAmount-raiseAmount;
-        round.makeBid("RAISE", raiseAmount, callAmount);
+        bidPerRound += callAmount;
+        stack -= callAmount;
+        round.setPot(callAmount);
+        round.rotate();
     }
-    public void check(){
-        if(this.canCheck()){
-            round.makeBid("CHECK");
-        }
+    public void raise(PokerGame round,int raiseAmount){
+        int callAmount = raiseAmount-bidPerRound;
+        bidPerRound += callAmount;
+        stack -= callAmount;
+        round.setBidAmount(raiseAmount);
+        round.setPot(callAmount);
+        round.rotate();
+    }
+    public void check(PokerGame round){
+        round.rotate();
     }
     public void addChipsToUser(int chips){
         stack+=chips;
@@ -56,7 +56,15 @@ public class Player {
     public Hand getHand(){
         return userHand;
     }
-    
+    public void resetHand(){
+        userHand.clear(); 
+    }
+    public int getBidPerRound() {
+        return bidPerRound;
+    }
+    public int geStack() {
+        return stack;
+    }
     public void setBidPerRound(int bidAmount) {
         this.bidPerRound = bidAmount;
     }
@@ -86,6 +94,16 @@ public class Player {
     public void setRound(PokerGame round){
         this.round=round;
     }
-    
-    
+    public void setIsQuit(boolean isQuit) {
+        this.isQuit= isQuit;
+    }
+    public boolean isQuit() {
+        return isQuit;
+    }
+    public void setPlayed(boolean played) {
+        this.played= played;
+    }
+    public boolean played() {
+        return played;
+    }
 }

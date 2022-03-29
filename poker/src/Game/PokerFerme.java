@@ -2,89 +2,78 @@ package Game;
 
 import java.util.ArrayList;
 public class PokerFerme extends PokerGame{
-    public PokerFerme(ArrayList<Player> players, int bidAmount){
-        super(players);
-        super.bidAmount=bidAmount;
-    }
-    
-    public void firstRound(){
-        int nbPlayers = players.size()-foldedPlayers;
-        int index = dealer;
-        for(int i=0 ; i<nbPlayers ; i++){
-            index=nextPlayer(index);
-            actionOfStart(); //chaque joueur doit choisir soit de faire un CALL (pour continuer à jouer) ou un FOLD (pour se coucher)
-            String rep=sc.next();
-            switch(rep){
-                case "0" :
-                    players.get(index).call();
-                    break;
-                case "1" :
-                    players.get(index).fold();
-                    if(index==dealer){ 
-                        dealer = nextPlayer(dealer);
-                    }
-                    break;
-                default :
-                    System.out.println("Vous devez choisir une de ces options");
-                    actionOfStart();
-            }
-            System.out.println("pot : "+pot);
-        }
-    }
-            
-    public void actionOfStart(){
-        System.out.println("0- CALL");
-        System.out.println("1- FOLD");
-        System.out.println("Entrez votre choix : ");
-    }
-    
-    public void discard(){
-        int nbPlayers = players.size()-foldedPlayers;
-        int index = dealer;
-        for(int i=0 ; i<nbPlayers ; i++){
-            index=nextPlayer(index);
-            int nbCards = sc.nextInt();
-            if(nbCards!=0){
-                for(int j=0 ; j<nbCards ; j++){
-                    System.out.println("Entrez la carte : ");
-                    String s = sc.next();
-                    Card c = players.get(index).getHand().removeCard(s);
-                    deck.add(c);
-                }
-            }
-        }
-    }   
-    public void redistributeCard(){
-        deck.shuffle();
-        int nbPlayers = players.size()-foldedPlayers;
-        int index = dealer;
-        for(int i=0 ; i<nbPlayers ; i++){
-            index=nextPlayer(index);
-            int n=5-players.get(index).getHand().nbCards();
-            for(int j=0 ; j<n ; j++){
-                Card c = deck.getNextCard();
-                players.get(index).getHand().add(c);
-            }
-        }
 
+    public PokerFerme( int minBid){
+        super(minBid);
+    } 
+    
+    @Override
+    public boolean isRoundFinished() {
+        return bidTurn==4;
     }
-
-    public void playGame(){
-        deck.populate();
-        firstRound();
-        deck.shuffle();
-        distributeCard(5);
-        biddingRound(nextPlayer(dealer),false);
-        discard();
-        redistributeCard();
-        biddingRound(nextPlayer(dealer),false);
+    @Override
+    public boolean can_reset_game(){
+        int nbPlayers=0;
+        for(Player p:players){
+            if(!p.isQuit()){
+                nbPlayers++;
+            }
+        }
+        return nbPlayers>=3 && nbPlayers()<=8;
     }
-    public boolean checkEndOfTurn(){
+    @Override
+    public boolean canCall(Player player){
+        if(player==getCurrentPlayer()){
+            if(bidTurn!=2){
+                return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
+            }
+        }
         return false;
     }
-    public boolean isGameTurnFinished(){
+    @Override
+    public boolean canFold(Player player){
+        return player==getCurrentPlayer() && bidTurn!=2;
+    }
+    @Override
+    public boolean canCheck(Player player){
+        if(bidTur!=0 && bidTur!=2){
+            if(player==getCurrentPlayer()){
+                return (player.getBidPerRound == bidAmount);
+            }
+        }
         return false;
     }
+    @Override
+    public boolean canRaise(Player player,int raiseAmount){
+        if(player==getCurrentPlayer()){
+            if(bidTurn==0 && raiseAmout==minBid){
+                return true;
+            }
+            if(bidTurn!=2){
+                int callAmount = bidAmount-player.getBidPerRound();
+                return ((raiseAmount>bidAmount)&&((callAmount)<=player.getStack()));
+            }
+        }
+        return false;
+    }
+    @Override
+    public boolean canChange(Player player,ArrayList<Card> cards){
+        return (cards.size()>=1
+                && cards.size()<5
+                && player.getHand().getCards().containsAll(cards)
+                && bidTurn==2
+                && players.get(currentPlayer)==player);
 
+    }
+    @Override
+    public ArrayList<Card> change(Player player,ArrayList<Card> cards){
+        deck.getCards().addAll(cards);
+        ArrayList<Card> newCards=new ArrayList<>();
+        for(int i=0 ;i<cards.size();i++){
+            newCards.add(deck.getNextCard());
+        }
+        player.getHand().getCards().addAll(newCards);
+        return newCards;
+    }
 
 }
