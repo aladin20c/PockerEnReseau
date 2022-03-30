@@ -24,20 +24,20 @@ public class MenuState extends GameState{
 
             String[] words=messageFromClient.substring(11).split("\\s*[a-zA-Z]+\\s+");
             int type=Integer.parseInt(words[0]);
-            int numberOfPlayers=Integer.parseInt(words[1]);
+            int numberOfClients=Integer.parseInt(words[1]);
             int minBet=Integer.parseInt(words[2]);
             int initialStack=Integer.parseInt(words[3]);
 
             if(type!=0 && type!=1) {
                 writeToClient(Request.INCORRECT_VALUE);
-            } else if( (type==0 && (numberOfPlayers<3 || numberOfPlayers>8)) || (type==1 && (numberOfPlayers<2 || numberOfPlayers>10))) {
+            } else if( (type==0 && (numberOfClients<3 || numberOfClients>8)) || (type==1 && (numberOfClients<2 || numberOfClients>10))) {
                 writeToClient(Request.INCORRECT_PLAYERS);
             } else if(minBet<=0) {
                 writeToClient(Request.INCORRECT_BET);
             } else if(initialStack<= minBet*20) {
                 writeToClient(Request.INCORRECT_STACK);
             } else{
-                SRoom room=new SRoom(type,numberOfPlayers,minBet,initialStack);
+                SRoom room=new SRoom(type,numberOfClients,minBet,initialStack);
                 room.addClient(this.clientHandler);
                 Server.addRoom(room);
                 writeToClient("110 GAME CREATED "+room.getId());
@@ -47,10 +47,9 @@ public class MenuState extends GameState{
         }else if(messageFromClient.matches(Request.GET_ROOMS)){
 
             writeToClient("120 NUMBER "+Server.numberOfRooms());
-            int counter=1;
+            int index=1;
             for(SRoom room : Server.getRooms()){
-                writeToClient("121 MESS "+counter+" ID "+room.getId()+" "+room.getType()+" "+room.getMaxPlayers()+" "+room.getMinBid()+" "+room.getInitStack()+" "+room.numberOfPlayers());
-                counter++;
+                writeToClient(room.informationToString(index++));
             }
             this.hasRoomsList=true;
 
@@ -58,7 +57,7 @@ public class MenuState extends GameState{
 
             int id=Integer.parseInt(messageFromClient.substring(9));
             SRoom room=Server.getRoom(id);
-            if(!hasRoomsList ||room==null|| !room.canAddNewPlayer()){
+            if(!hasRoomsList ||room==null|| !room.canAddNewClient()){
                 writeToClient("131 room unavailable");
                 return;
             }
@@ -66,10 +65,10 @@ public class MenuState extends GameState{
             writeToClient("131 GAME " + room.getId() + " JOINED");
             broadCastMessage("141 " + clientUsername + " JOINED",room.getClientHandlers());
 
-            writeToClient("155 LIST PLAYER "+room.numberOfPlayers());
+            writeToClient("155 LIST PLAYER "+room.numberOfClients());
             int index = 0;
 
-            for (; index < room.numberOfPlayers() / 5; index++) {
+            for (; index < room.numberOfClients() / 5; index++) {
 
                 writeToClient("155 MESS " + (index + 1) + " PLAYER "
                         + room.getClientHandlers().get(index * 5).getClientUsername() + " "
@@ -79,12 +78,12 @@ public class MenuState extends GameState{
                         + room.getClientHandlers().get(index * 5 + 4).getClientUsername());
             }
 
-            if (index * 5 < room.numberOfPlayers()) {
+            if (index * 5 < room.numberOfClients()) {
                 writeToClient("155 MESS " + (index + 1) + " PLAYER "
                         + room.getClientHandlers().get(index * 5).getClientUsername() + " "
-                        + ((index * 5 + 1 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 1).getClientUsername() + " " : "")
-                        + ((index * 5 + 2 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 2).getClientUsername() + " " : "")
-                        + ((index * 5 + 3 < room.numberOfPlayers()) ? room.getClientHandlers().get(index + 3).getClientUsername() : ""));
+                        + ((index * 5 + 1 < room.numberOfClients()) ? room.getClientHandlers().get(index + 1).getClientUsername() + " " : "")
+                        + ((index * 5 + 2 < room.numberOfClients()) ? room.getClientHandlers().get(index + 2).getClientUsername() + " " : "")
+                        + ((index * 5 + 3 < room.numberOfClients()) ? room.getClientHandlers().get(index + 3).getClientUsername() : ""));
             }
 
             room.addClient(this.clientHandler);

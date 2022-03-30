@@ -92,7 +92,7 @@ public class ClientHandler implements Runnable{
     public void removeClientHandler(){
         Server.removeClient(this);
         System.out.println("Server: "+clientUsername+" has left !");
-        gameState.playerQuit();
+        gameState.clientQuit();
     }
 
     @Override

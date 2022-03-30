@@ -27,7 +27,7 @@ public class WaitingState extends GameState {
 
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessageToEveryone(messageFromClient,currentRoom.getClientHandlers());
+            broadCastMessageToEveryone(clientUsername+":"+messageFromClient,currentRoom.getClientHandlers());
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
@@ -44,7 +44,7 @@ public class WaitingState extends GameState {
             } else {
                 currentRoom.requestStart(true);
                 this.startRequestResponse=1;
-                broadCastMessageToEveryone("152 START REQUESTED",currentRoom.getClientHandlers());
+                broadCastMessage("152 START REQUESTED",currentRoom.getClientHandlers());
             }
 
         } else if (messageFromClient.matches(Request.START_RESPONSE)) {
@@ -62,7 +62,7 @@ public class WaitingState extends GameState {
 
         } else if (messageFromClient.matches(Request.QUIT)) {
 
-            playerQuit();
+            clientQuit();
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
@@ -90,8 +90,13 @@ public class WaitingState extends GameState {
         if(playersWhoRefused.isEmpty()){
             broadCastMessageToEveryone("153 GAME STARTED",currentRoom.getClientHandlers());
             for(ClientHandler ch : currentRoom.getClientHandlers()){
-                ch.setGameState(new PlayingState(ch,ch.getClientUsername(),currentRoom));
+                if(this.currentRoom.getType()==1) {
+                    ch.setGameState(new PlayingTexasHoldemState(ch,ch.getClientUsername(),currentRoom));
+                }else{
+                    ch.setGameState(new Playing5CardPokerState(ch,ch.getClientUsername(),currentRoom));
+                }
             }
+            return;
         }else{
             int size = playersWhoRefused.size();
             broadCastMessageToEveryone("154 START ABORDED " + size,currentRoom.getClientHandlers());
@@ -118,13 +123,12 @@ public class WaitingState extends GameState {
     }
 
     @Override
-    public void playerQuit() {
+    public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
         broadCastMessage("211 " + clientUsername + " QUIT",currentRoom.getClientHandlers());
         currentRoom.removeClient(clientHandler);
         if(startRequested){
-            //TODO maybe change this in the future
-            broadCastMessageToEveryone("153 GAME ABORDED " + 0,currentRoom.getClientHandlers());
+            broadCastMessageToEveryone("153 GAME ABORDED " + 0,currentRoom.getClientHandlers());//todo maybe change this in the future
             requestStart(false);
         }
     }

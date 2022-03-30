@@ -77,4 +77,6 @@ public class Request {
     public static String PLAYER_QUIT="211 .+ QUIT";
     public static String QUIT_RECIEVED="201 RECIEVED";
 
+    public static String ERROR="999 ERROR";
+
 }

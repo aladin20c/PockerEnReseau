@@ -1,5 +1,6 @@
 package Server.ServerGameStates;
 
+import Game.Utils.Request;
 import Server.ClientHandler;
 
 import java.util.List;
@@ -16,7 +17,7 @@ public abstract class GameState {
 
 
     public void sendError(){
-        clientHandler.writeToClient("999 ERROR");
+        clientHandler.writeToClient(Request.ERROR);
     }
     public void writeToClient(String message){
         clientHandler.writeToClient(message);
@@ -30,10 +31,9 @@ public abstract class GameState {
 
 
 
+
     public abstract void analyseRequest(String messageFromClient);
-    public void playerQuit(){}
-
-
+    public void clientQuit(){}
     public boolean canAddNewPlayer(){
         return false;
     }

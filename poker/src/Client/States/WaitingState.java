@@ -1,23 +1,24 @@
 package Client.States;
 
-import Client.CRoom;
 import Client.Player;
 import Client.Client;
+import Game.Room;
 import Game.Utils.Request;
 
 
 public class WaitingState extends GameState{
 
     private String username;
-    private CRoom currentRoom;
+    private Room currentRoom;
     private boolean startRequested;
 
 
-    public WaitingState(Client client, String username, CRoom currentRoom) {
+    public WaitingState(Client client, String username, Room currentRoom) {
         super(client, 2);
         this.username = username;
         this.currentRoom = currentRoom;
         this.startRequested=false;
+        System.out.println("[Client][gameState][WaitingState] waiting for game start....");
     }
 
 
@@ -39,11 +40,14 @@ public class WaitingState extends GameState{
 
             String message=comingMessage.substring(comingMessage.indexOf("PLAYER"));
             String[] data=message.split("\\s+");
-            Player tmp=currentRoom.remove();
+
+            Player tmp=currentRoom.players.remove(currentRoom.players.size()-1);
+
             for(int i=1;i< data.length;i++){
                 currentRoom.addPlayer(data[i]);
             }
-            currentRoom.add(tmp);
+            currentRoom.players.add(tmp);
+
 
         }else if (comingMessage.matches(Request.PLAYER_JOINED)) {
 
@@ -57,7 +61,11 @@ public class WaitingState extends GameState{
 
         } else if (comingMessage.matches(Request.GAME_STARTED)) {
 
-            this.client.setGameState(new PlayingState(client,username,currentRoom));
+            if(this.currentRoom.getType()==1) {
+                this.client.setGameState(new PlayingTexasHoldemState(client, username, currentRoom));
+            }else{
+                this.client.setGameState(new Playing5CardPokerState(client, username, currentRoom));
+            }
 
         } else if (comingMessage.matches(Request.GAME_ABORDED)) {
 

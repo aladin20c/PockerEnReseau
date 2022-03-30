@@ -22,6 +22,8 @@ public class IdentificationState extends GameState{
                 // checking if the name already exists
             }else if(Server.containsName(name)){
                 writeToClient(Request.USED_NAME);
+            }else if(name.matches("\\d.*") || name.contains(" ")){
+                writeToClient("955 wrong format");
             }else{
                 clientHandler.setClientUsername(name);
                 Server.addClient(clientHandler);

@@ -6,12 +6,13 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.HashSet;
 
 public class Server {
 
 
-    private static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
-    private static ArrayList<SRoom> rooms=new ArrayList<>();
+    private static HashSet<ClientHandler> clientHandlers=new HashSet<>();
+    private static HashSet<SRoom> rooms=new HashSet<>();
     private static Server server;
     private ServerSocket serverSocket;
 
@@ -83,13 +84,13 @@ public class Server {
     public static void addRoom(SRoom room){
         rooms.add(room);
     }
-    public static void removeClient(SRoom room){
+    public static void removeRoom(SRoom room){
         rooms.remove(room);
     }
     public static int numberOfRooms(){
         return rooms.size();
     }
-    public static ArrayList<SRoom> getRooms() {
+    public static HashSet<SRoom> getRooms() {
         return rooms;
     }
     public static SRoom getRoom(int id) {

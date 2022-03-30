@@ -1,14 +1,16 @@
 package Server;
 
+import Client.Player;
+import Game.Card;
 import Game.Room;
 
 import java.util.ArrayList;
 
 public class SRoom extends Room {
-    private static int COUNT=1;
 
+    private static int COUNT=1;
     protected ArrayList<ClientHandler> clientHandlers;
-    private ClientHandler currentPlayer;
+
 
     public SRoom(int type, int minPlayers, int minBid, int initStack) {
         super(COUNT++,type, minPlayers,minBid, initStack);
@@ -16,32 +18,20 @@ public class SRoom extends Room {
     }
 
 
-
     public void addClient(ClientHandler clientHandler){
+        this.addPlayer(clientHandler.getClientUsername());
         clientHandlers.add(clientHandler);
     }
     public void removeClient(ClientHandler clientHandler){
+        this.removePlayer(clientHandler.getClientUsername());
         clientHandlers.remove(clientHandler);
     }
-    public boolean canAddNewPlayer(){
-        if(!clientHandlers.isEmpty()){
-            return clientHandlers.size()<this.getMaxPlayers() && clientHandlers.get(0).getGameState().canAddNewPlayer();
-        }
-        return clientHandlers.size()<this.getMaxPlayers();
-    }
-    public ArrayList<ClientHandler> getClientHandlers() {
-        return clientHandlers;
-    }
-    public boolean isAdmin(ClientHandler clientHandler){
-        if(clientHandlers.isEmpty()) return false;
-        return clientHandlers.get(0)==clientHandler;
+    public boolean canAddNewClient(){
+        return clientHandlers.size()<this.getMaxPlayers() && clientHandlers.get(0).getGameState().canAddNewPlayer();
     }
     public boolean hasEnoughPlayersToStart(){
         return (getType()==0 && clientHandlers.size()>=3) || (getType()==1 && clientHandlers.size()>=2);
     }
-
-    public int numberOfPlayers(){return clientHandlers.size();}
-
     public void requestStart(boolean start){
         for(ClientHandler ch : clientHandlers){
             ch.getGameState().requestStart(start);
@@ -50,5 +40,14 @@ public class SRoom extends Room {
 
 
 
-}
 
+    public boolean isAdmin(ClientHandler clientHandler){
+        return clientHandlers.get(0)==clientHandler;
+    }
+    public ArrayList<ClientHandler> getClientHandlers() {
+        return clientHandlers;
+    }
+    public int numberOfClients(){return clientHandlers.size();}
+
+
+}

@@ -1,30 +1,33 @@
 package Client.States;
 
-import Client.CRoom;
-import Client.Player;
 import Client.Client;
+import Client.Player;
 import Game.Card;
+import Game.Hand;
+import Game.Room;
 import Game.Utils.Request;
 
-import java.util.ArrayList;
 
-public class PlayingState extends GameState{
+public class Playing5CardPokerState extends GameState{
 
     private String username;
-    private CRoom currentRoom;
+    private Room currentRoom;
 
     private String futureAction;
     private String futureChange;
 
-    ArrayList<Card> cards;
+    private Hand hand;//same as in player class corresponding to client
 
 
-    public PlayingState(Client client, String username, CRoom currentRoom) {
+    public Playing5CardPokerState(Client client, String username, Room currentRoom) {
         super(client, 3);
+        System.out.println("[Client][gameState][Playing5CardPokerState] playing 5 card poker....");
         this.username = username;
         this.currentRoom = currentRoom;
         this.futureAction="";
         this.futureChange="";
+        this.hand=this.currentRoom.getPlayer(username).getHand();
+        this.startGame();
     }
 
 
@@ -50,26 +53,24 @@ public class PlayingState extends GameState{
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentRoom.getPlayer(username);
-            if(player==null) throw new RuntimeException("player "+username+" is not found");
-            player.setHasFolded(true);
+            player.fold();
+            rotateTurn(player);
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 6);
             Player player = currentRoom.getPlayer(username);
-            if(player==null) throw new RuntimeException("player "+username+" is not found");
+            player.check();
+            rotateTurn(player);
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.PLAYER_CALL)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentRoom.getPlayer(username);
-            if(player==null) throw new RuntimeException("player "+username+" is not found");
-
-            player.changeStack(-(currentRoom.getHighestBid()-player.getBids()));
-            player.setBids(currentRoom.getHighestBid());
-
+            player.call(currentRoom);
+            rotateTurn(player);
             writeToServer(Request.ACTION_RECIEVED);
 
         }
@@ -78,10 +79,8 @@ public class PlayingState extends GameState{
             int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")));
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
             Player player = currentRoom.getPlayer(username);
-            if(player==null) throw new RuntimeException("player "+username+" is not found");
-            player.changeStack(-(currentRoom.getHighestBid()+raise-player.getBids()));
-            currentRoom.incrementHighestBid(raise);
-            player.setBids(currentRoom.getHighestBid());
+            player.raise(currentRoom,raise);
+            rotateTurn(player);
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
@@ -93,7 +92,7 @@ public class PlayingState extends GameState{
         }else if(comingMessage.matches(Request.CARDS_DISTRIBUTION)){
 
             String[] data=comingMessage.substring(10).split("\\s+");
-            for(int i=1;i<data.length;i++)this.cards.add(new Card(data[i]));
+            for(int i=1;i<data.length;i++)this.hand.add(new Card(data[i]));
             writeToServer(Request.CARDS_RECIEVED);
 
         }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
@@ -101,31 +100,36 @@ public class PlayingState extends GameState{
             if(futureChange.isEmpty()) throw new RuntimeException("there is no change sent");
             String[] data=futureChange.split("\\s+");
             for(int i=1;i<data.length;i++){
-                for(int j=0;j< cards.size();j++){
-                    if(cards.get(j).encodedTo(data[i])) {
-                        cards.remove(j);
+                for(int j=0;j< hand.getCards().size();j++){
+                    if(hand.getCards().get(j).encodedTo(data[i])) {
+                        hand.getCards().remove(j);
                         break;
                     }
                 }
             }
             this.futureChange="";
+            rotateTurn(currentRoom.getPlayer(username));
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {
 
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" CHANGE"));
             Player player = currentRoom.getPlayer(username);
-            if(player==null) throw new RuntimeException("player is not found");
             int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE")+7));
+            rotateTurn(player);
             writeToServer(Request.CHANGE_RECIEVED);
 
         } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
-            quit();//TODO
+            quit();
 
         } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
 
-            String name = comingMessage.substring(4, comingMessage.length()-5);
-            currentRoom.removePlayer(name);//TODO
+            String username = comingMessage.substring(4, comingMessage.length()-5);
+            Player player = currentRoom.getPlayer(username);
+            player.setInactive();
+            if(currentRoom.isCurrentPlayer(username)){
+                rotateTurn(player);
+            }
             writeToServer(Request.QUIT_RECIEVED);
 
         }
@@ -133,6 +137,37 @@ public class PlayingState extends GameState{
 
     @Override
     public void quit() {
-
+        this.client.setGameState(new MenuState(client,username));
     }
+
+
+    public void startGame(){
+        currentRoom.startGame();
+    }
+    public void resetGame(){
+        currentRoom.resetGame();
+    }
+
+    public void rotateTurn(Player player){
+        if(currentRoom.currentPlayer!=player)throw new RuntimeException("there s no coordinance between serever and client");
+        player.setPlayedInThisTurn(true);
+        currentRoom.setCurrentPlayer(currentRoom.nextPlayer());
+
+        for (Player p : currentRoom.players){
+            if(!p.hasFolded && (!p.playedInThisTurn || p.bids!=currentRoom.highestBid)) return;
+        }
+        //passing to next round
+        currentRoom.round+=1;
+        currentRoom.setAllPlayersDidntPlay();
+        currentRoom.setCurrentPlayer(currentRoom.playerleftToDealer());
+        switch (currentRoom.round){
+            case 0:break;//ante
+            case 1:break;// distributing cards
+            case 2:break;//first betting round
+            case 3:break;// changing cards
+            case 4:break;// secound betting
+            case 5:break;// End revealing cards
+        }
+    }
+
 }
