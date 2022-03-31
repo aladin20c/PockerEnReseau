@@ -12,11 +12,10 @@ public abstract class PokerGame {
     protected int initStack;
 
 
-
+    protected static final int dealer=0;
     protected ArrayList<Player> players;
     protected ArrayList<Player> winners=new ArrayList<>();
     protected int currentPlayer;
-    protected final int dealer=0;
     protected Deck deck;
     protected int bidAmount=0;//le bid maximum
     protected int pot=0;
@@ -55,13 +54,17 @@ public abstract class PokerGame {
      * To get the index of the next player
      * @return
      */
-    public int nextPlayer(int i){
+    public int nextPlayer(int i){//fixme gives error when there'S no players
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;
         }else{
             return nextPlayer(n);
         }
+    }
+
+    public int nextPlayer(){
+        return nextPlayer(currentPlayer);
     }
 
 
@@ -197,6 +200,54 @@ public abstract class PokerGame {
         this.bidAmount = bidAmount;
     }
 
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public ArrayList<Player> getPlayers() {
+        return players;
+    }
+
+    public int getType() {
+        return type;
+    }
+    public Player getPlayer(String username){
+        for(Player player : players){
+            if(player.name.equals(username)) return player;
+        }
+        throw new RuntimeException("player "+username+" is not found");
+    }
+
+    public Hand getTable(){return null;}
+
+    public int getMaxPlayers() {
+        return maxPlayers;
+    }
+
+    public int getMinBid() {
+        return minBid;
+    }
+
+    public int getInitStack() {
+        return initStack;
+    }
+
+    public void setCurrentPlayer(int currentPlayer) {
+        this.currentPlayer = currentPlayer;
+    }
+
+    public int getBidTurn() {
+        return bidTurn;
+    }
+
+    public boolean isCurrentPlayer( String name){
+        return players.get(currentPlayer).getName().equals(name);
+    }
+
     /**--------------------------------- methods to override ---------------------------------*/
 
     public boolean canChange(Player player,Card[] cards){
@@ -209,6 +260,7 @@ public abstract class PokerGame {
     public abstract boolean isRoundFinished();
     public abstract boolean isTurnFinished();
     public abstract boolean canResetGame();
+    public abstract boolean canStartGame();
     public abstract boolean canCall(Player player);
     public abstract boolean canCheck(Player player);
     public abstract boolean canFold(Player player);

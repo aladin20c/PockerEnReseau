@@ -1,18 +1,19 @@
 package Server.ServerGameStates;
 
+import Game.PokerFerme;
+import Game.PokerGame;
+import Game.TexasHoldem;
 import Game.Utils.Request;
 import Server.ClientHandler;
-import Server.SRoom;
+import Server.Room;
 import Server.Server;
 
 public class MenuState extends GameState{
 
-    private String clientUsername;
     private boolean hasRoomsList;//the player doesnt have the list of rooms to connect to one of them only when he asks GETLIST
 
-    public MenuState(ClientHandler clientHandler, String clientUsername) {
-        super(clientHandler, 1);
-        this.clientUsername=clientUsername;
+    public MenuState(ClientHandler clientHandler) {
+        super(clientHandler);
         this.hasRoomsList=false;
     }
 
@@ -36,19 +37,21 @@ public class MenuState extends GameState{
                 writeToClient(Request.INCORRECT_BET);
             } else if(initialStack<= minBet*20) {
                 writeToClient(Request.INCORRECT_STACK);
-            } else{
-                SRoom room=new SRoom(type,numberOfClients,minBet,initialStack);
-                room.addClient(this.clientHandler);
+            }else{
+                PokerGame game= (type==1)? new TexasHoldem(type,numberOfClients,minBet,initialStack):new PokerFerme(type,numberOfClients,minBet,initialStack);
+                this.room=new Room();
+                room.setGame(game);
+                room.addClient(clientHandler);
                 Server.addRoom(room);
-                writeToClient("110 GAME CREATED "+room.getId());
-                clientHandler.setGameState(new WaitingState(clientHandler,clientUsername,room));
+                writeToClient("110 GAME CREATED "+game.getId());
+                clientHandler.setGameState(new WaitingState(clientHandler,room));
             }
 
         }else if(messageFromClient.matches(Request.GET_ROOMS)){
 
             writeToClient("120 NUMBER "+Server.numberOfRooms());
             int index=1;
-            for(SRoom room : Server.getRooms()){
+            for(Room room : Server.getRooms()){
                 writeToClient(room.informationToString(index++));
             }
             this.hasRoomsList=true;
@@ -56,14 +59,15 @@ public class MenuState extends GameState{
         }else if(messageFromClient.matches(Request.JOIN_ROOM)){
 
             int id=Integer.parseInt(messageFromClient.substring(9));
-            SRoom room=Server.getRoom(id);
+            Room room=Server.getRoom(id);
             if(!hasRoomsList ||room==null|| !room.canAddNewClient()){
                 writeToClient("131 room unavailable");
                 return;
             }
 
-            writeToClient("131 GAME " + room.getId() + " JOINED");
-            broadCastMessage("141 " + clientUsername + " JOINED",room.getClientHandlers());
+            writeToClient("131 GAME " + room.getGame().getId() + " JOINED");
+            this.room=room;
+            broadCastMessage("141 " + clientHandler.getClientUsername() + " JOINED");
 
             writeToClient("155 LIST PLAYER "+room.numberOfClients());
             int index = 0;
@@ -85,12 +89,10 @@ public class MenuState extends GameState{
                         + ((index * 5 + 2 < room.numberOfClients()) ? room.getClientHandlers().get(index + 2).getClientUsername() + " " : "")
                         + ((index * 5 + 3 < room.numberOfClients()) ? room.getClientHandlers().get(index + 3).getClientUsername() : ""));
             }
-
             room.addClient(this.clientHandler);
-            this.clientHandler.setGameState(new WaitingState(clientHandler,clientUsername,room));
-
+            this.clientHandler.setGameState(new WaitingState(clientHandler,room));
         }else {
-            sendError();
+            clientHandler.writeToClient(Request.ERROR);
         }
     }
 

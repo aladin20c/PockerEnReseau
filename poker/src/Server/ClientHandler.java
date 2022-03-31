@@ -44,6 +44,7 @@ public class ClientHandler implements Runnable{
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
+
     public void writeToClient(String message){
         try{
             this.bufferedWriter.write(message);
@@ -53,6 +54,7 @@ public class ClientHandler implements Runnable{
             closeEverything(socket,bufferedReader,bufferedWriter);
         }
     }
+
     public void broadCastMessage(String messageToSend, List<ClientHandler> clientHandlers){
         for (ClientHandler clientHandler : clientHandlers) {
             try {
@@ -78,6 +80,7 @@ public class ClientHandler implements Runnable{
             }
         }
     }
+
     public void closeEverything(Socket socket,BufferedReader bufferedReader,BufferedWriter bufferedWriter){
         removeClientHandler();
         try{
@@ -89,6 +92,7 @@ public class ClientHandler implements Runnable{
             e.printStackTrace();
         }
     }
+
     public void removeClientHandler(){
         Server.removeClient(this);
         System.out.println("Server: "+clientUsername+" has left !");

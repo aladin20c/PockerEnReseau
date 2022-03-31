@@ -1,47 +1,44 @@
 package Client.States;
 
 import Client.Client;
-import Client.Player;
+import Game.Card;
 import Game.Hand;
-import Game.Room;
+import Game.Player;
+import Game.PokerGame;
 import Game.Utils.Request;
 
 
 public class PlayingTexasHoldemState extends GameState {
 
+    private int turn;
     private String username;
-    private Room currentRoom;
+    private PokerGame currentGame;
     private String futureAction;
 
-    private Hand burntCards;
-    private Hand hand;//same as in player class corresponding to client
-    private Hand table;
 
 
-    public PlayingTexasHoldemState(Client client, String username, Room currentRoom) {
+    public PlayingTexasHoldemState(Client client, String username, PokerGame currentGame) {
         super(client, 3);
         System.out.println("[Client][gameState][PlayingTexasHoldemState] playing Texas Holdem poker....");
         this.username = username;
-        this.currentRoom = currentRoom;
+        this.currentGame = currentGame;
         this.futureAction = "";
-        this.hand=this.currentRoom.getPlayer(username).getHand();
-        this.table=currentRoom.getTable();
-        this.burntCards=new Hand();
-        this.startGame();
+        this.turn=-1;
+        startGame();
     }
 
 
     @Override
     public void analyseMessageToSend(String messageToSend) {
         if (messageToSend.matches(Request.FOLD)) {
-            futureAction = "510 " + username + " FOLD";
+            futureAction ="FOLD";
         } else if (messageToSend.matches(Request.CHECK)) {
-            futureAction = "511 " + username + " CHECK";
+            futureAction = "CHECK";
         } else if (messageToSend.matches(Request.CALL)) {
-            futureAction = "512 " + username + " CALL";
+            futureAction = "CALL";
         } else if (messageToSend.matches(Request.RAISE)) {
             int raise = Integer.parseInt(messageToSend.substring(10));
-            futureAction = "513 " + username + " RAISE " + raise;
+            futureAction = "RAISE " + raise;
         }
     }
 
@@ -50,54 +47,66 @@ public class PlayingTexasHoldemState extends GameState {
         if (comingMessage.matches(Request.PLAYER_FOLD)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
-            Player player = currentRoom.getPlayer(username);
-            player.fold();
-            rotateTurn(player);
+            Player player = currentGame.getPlayer(username);
+            player.fold(currentGame);
+            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 6);
-            Player player = currentRoom.getPlayer(username);
-            player.check();
-            rotateTurn(player);
+            Player player = currentGame.getPlayer(username);
+            player.check(currentGame);
+            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.PLAYER_CALL)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
-            Player player = currentRoom.getPlayer(username);
-            player.call(currentRoom);
-            rotateTurn(player);
+            Player player = currentGame.getPlayer(username);
+            player.call(currentGame);
+            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
 
         }
         else if (comingMessage.matches(Request.PLAYER_RAISE)) {
 
-            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")+6));
+            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")));
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
-            Player player = currentRoom.getPlayer(username);
-            player.raise(currentRoom,raise);
-            rotateTurn(player);
+            Player player = currentGame.getPlayer(username);
+            player.raise(currentGame,raise);
+            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
 
         } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
 
             if (futureAction.equals("")) throw new RuntimeException("there is no action sent");
-            analyseComingMessage(futureAction);
+            Player player=currentGame.getPlayer(username);
+
+            if(futureAction.equals("FOLD")){
+                player.fold(currentGame);
+            }else if(futureAction.equals("CHECK")){
+                player.check(currentGame);
+            }else if(futureAction.equals("CALL")){
+                player.call(currentGame);
+            }else if(futureAction.startsWith("RAISE")){
+                player.raise(currentGame,Integer.parseInt(futureAction.substring(6)));
+            }
             futureAction = "";
+            rotateTurn();
+
 
         } else if (comingMessage.matches(Request.CARDS_DISTRIBUTION)) {
 
-            /*String[] data = comingMessage.substring(10).split("\\s+");
-            if(this.burntCards.isEmpty()){
-                for (int i = 1; i < data.length; i++) this.burntCards.add(new Card(data[i]));
-            }else if(this.hand.isEmpty() || this.hand.size()<2){
-                for (int i = 1; i < data.length; i++) this.hand.add(new Card(data[i]));
+            String[] data = comingMessage.substring(10).split("\\s+");
+            Hand hand=currentGame.getPlayer(username).getHand();
+
+            if(hand.getCards().isEmpty() || hand.getCards().size()<2){
+                for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
             } else {
-                for (int i = 1; i < data.length; i++) this.table.add(new Card(data[i]));
+                for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
             }
-            writeToServer(Request.CARDS_RECIEVED);*/
+            writeToServer(Request.CARDS_RECIEVED);
 
         } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
@@ -105,12 +114,9 @@ public class PlayingTexasHoldemState extends GameState {
 
         } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
 
-            String username = comingMessage.substring(4, comingMessage.length()-5);
-            Player player = currentRoom.getPlayer(username);
-            player.setInactive();
-            if(currentRoom.isCurrentPlayer(username)){
-                rotateTurn(player);
-            }
+            String name = comingMessage.substring(4, comingMessage.length()-5);
+            Player player=currentGame.getPlayer(name);
+            player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
 
         }
@@ -122,30 +128,38 @@ public class PlayingTexasHoldemState extends GameState {
     }
 
     public void startGame(){
-        currentRoom.startGame();
-    }
-    public void resetGame(){
-        currentRoom.resetGame();
+        currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
     }
 
-    public void rotateTurn(Player player){
-        if(currentRoom.currentPlayer!=player)throw new RuntimeException("there s no coordinance between serever and client");
-        player.setPlayedInThisTurn(true);
-        currentRoom.setCurrentPlayer(currentRoom.nextPlayer());
 
-        for (Player p : currentRoom.players){
-            if(!p.hasFolded && (!p.playedInThisTurn || p.bids!=currentRoom.highestBid)) return;
+    public void rotateTurn(){
+        if(currentGame.isRoundFinished()){
+            System.out.println("client : endgame");return;
         }
-        //passing to next round
-        currentRoom.round+=1;
-        currentRoom.setAllPlayersDidntPlay();
-        currentRoom.setCurrentPlayer(currentRoom.playerleftToDealer());
-        switch (currentRoom.round){
-            case 0:break;//cards distributed -> already done
-            case 1:break;//first betting round
-            case 2:break;//second betting round
-            case 3:break;//third betting round
-            case 4:break;//End revealing cards
+
+        if(turn!=currentGame.getBidTurn()){
+            turn=currentGame.getBidTurn();
+            switch (turn) {
+                case 0:
+                    System.out.println("client : small & bigBlind round");
+                    break;
+                case 1:
+                    System.out.println("client : first betting round");
+                    break;
+                case 2:
+                    System.out.println("client : second betting round");
+                    break;
+                case 3:
+                    System.out.println("client : third betting round");
+                    break;
+                default: System.out.println("client : endgame");
+            }
+        }
+
+        if(currentGame.isCurrentPlayer(username)) {
+            System.out.println("client : It is ur turn");
+        }else{
+            System.out.println("client : It is "+currentGame.getCurrentPlayer().getName()+"'s turn");
         }
     }
 }

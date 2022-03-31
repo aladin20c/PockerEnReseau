@@ -59,6 +59,14 @@ public class Player {
         round.rotate();
     }
 
+    public void quit(PokerGame round){
+        this.isFold=true;
+        this.isQuit=true;
+        round.incFolderPlayers();
+        if(round.getCurrentPlayer()==this){
+            round.setCurrentPlayer(round.nextPlayer());
+        }
+    }
 
     public void reset(){
         userHand.clear();
@@ -93,13 +101,15 @@ public class Player {
         this.userHand = userHand;
     }
 
-    public Hand getUserHand() {
-        return userHand;
-    }
+
     public int getStack() {
         return stack;
     }
 
+    public Card[] getCards(){
+        Card[] cards = userHand.getCards().toArray(new Card[0]);
+        return cards;
+    }
 
     public boolean hasFolded() {
         return isFold;

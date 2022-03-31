@@ -53,6 +53,10 @@ public class TexasHoldem extends PokerGame{
         return  nbPlayers>=2 &&  nbPlayers<=10;
     }
 
+    public boolean canStartGame(){
+        return  players.size()>=2 &&  players.size()<=10;
+    }
+
 
     @Override
     public boolean canCall(Player player){
@@ -79,7 +83,7 @@ public class TexasHoldem extends PokerGame{
 
 
     @Override
-    public boolean canRaise(Player player,int raiseAmount){
+    public boolean canRaise(Player player,int raiseAmount){////fixme gives error when first player pay small blind and quits
         if(player==getCurrentPlayer()){
             if(bidTurn==0){
                 if(currentPlayer==nextPlayer(dealer)){
@@ -114,4 +118,7 @@ public class TexasHoldem extends PokerGame{
         handOfTable.addAll(cards);
         return cards;
     }
+
+    @Override
+    public Hand getTable(){return handOfTable;}
 }

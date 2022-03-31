@@ -1,43 +1,40 @@
 package Server.ServerGameStates;
 
-import Game.Utils.Request;
-import Server.ClientHandler;
 
-import java.util.List;
+import Server.ClientHandler;
+import Server.Room;
+
 
 public abstract class GameState {
 
     protected ClientHandler clientHandler;
-    protected int order;
+    protected Room room;
 
-    public GameState(ClientHandler clientHandler, int order) {
+    public GameState(ClientHandler clientHandler,Room room) {
         this.clientHandler = clientHandler;
-        this.order = order;
+        this.room=room;
+    }
+    public GameState(ClientHandler clientHandler) {
+        this.clientHandler = clientHandler;
+        this.room=null;
     }
 
-
-    public void sendError(){
-        clientHandler.writeToClient(Request.ERROR);
-    }
     public void writeToClient(String message){
         clientHandler.writeToClient(message);
     }
-    public void broadCastMessage(String message, List<ClientHandler> clientHandlers){
-        clientHandler.broadCastMessage(message,clientHandlers);
-    }
-    public void broadCastMessageToEveryone(String message, List<ClientHandler> clientHandlers){
-        clientHandler.broadCastMessageToEveryone(message,clientHandlers);
+
+    public void broadCastMessage(String message){
+        clientHandler.broadCastMessage(message,room.getClientHandlers());
     }
 
-
-
+    public void broadCastMessageToEveryone(String message){
+        clientHandler.broadCastMessageToEveryone(message,room.getClientHandlers());
+    }
 
     public abstract void analyseRequest(String messageFromClient);
+
     public void clientQuit(){}
-    public boolean canAddNewPlayer(){
-        return false;
-    }
-    public void requestStart(boolean start){}
+
     public int getResponse(){
         return 0;
     }

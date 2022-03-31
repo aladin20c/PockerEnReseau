@@ -105,13 +105,8 @@ public class Card {
      * @return
      */
     public String toString(){
-        String str="";
-        if(isFaceUp) {
-            str+=rank.printRank()+" of "+suit.printSuit();
-        }else{
-            str="Face down (nothing to see here)";
-        }
-        return str;
+        int rank=(this.rank.getRank()-1)%13+1;
+        return rank+suit.getShortName();
     }
     /**
      * To return a card and change its position

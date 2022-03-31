@@ -1,24 +1,22 @@
 package Server.ServerGameStates;
 
-import Client.Player;
+import Game.Card;
+import Game.Player;
 import Game.Utils.Request;
 import Server.ClientHandler;
-import Server.SRoom;
+import Server.Room;
 import Server.Server;
 
 public class PlayingTexasHoldemState extends GameState{
 
-    private String clientUsername;
-    private SRoom currentRoom;
+    private int turn;
     private Player player;
 
 
-    public PlayingTexasHoldemState(ClientHandler clientHandler, String clientUsername, SRoom currentRoom) {
-        super(clientHandler, 3);
-        this.clientUsername=clientUsername;
-        this.currentRoom=currentRoom;
-        this.player=currentRoom.getPlayer(clientUsername);
-        this.player.getHand();
+    public PlayingTexasHoldemState(ClientHandler clientHandler , Room room) {
+        super(clientHandler, room);
+        this.player=room.getGame().getPlayer(clientHandler.getClientUsername());
+        this.turn=-1;
         startGame();
     }
 
@@ -27,59 +25,52 @@ public class PlayingTexasHoldemState extends GameState{
     public void analyseRequest(String messageFromClient) {
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessageToEveryone(clientUsername+":"+messageFromClient,currentRoom.getClientHandlers());
+            broadCastMessageToEveryone(clientHandler.getClientUsername()+":"+messageFromClient);
 
         }else if(messageFromClient.matches(Request.FOLD)){
 
-            if(!currentRoom.isCurrentPlayer(player)){
-                writeToClient("907 Invalid Command : this is not ur turn");
-            } else if(!player.canFold()){
+            if(!room.getGame().canFold(player)){
                 writeToClient("907 Invalid Command");
             }else {
-                player.fold();
-                broadCastMessage("510 " + clientUsername + " FOLD",currentRoom.getClientHandlers());
+                player.fold(room.getGame());
+                broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
         }else if(messageFromClient.matches(Request.CHECK)){
 
-            if(!currentRoom.isCurrentPlayer(player)){
-                writeToClient("907 Invalid Command : this is not ur turn");
-            } else if(!player.canCheck(currentRoom)){
+            if(!room.getGame().canCheck(player)){
                 writeToClient("907 Invalid Command");
             }else{
-                player.check();
+                player.check(room.getGame());
                 writeToClient("400 ACCEPTED");
-                broadCastMessage("511 "+ clientUsername +" CHECK",currentRoom.getClientHandlers());
+                broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
                 rotateTurn();
             }
 
         }else if(messageFromClient.matches(Request.CALL)){
 
-            if(!currentRoom.isCurrentPlayer(player)){
-                writeToClient("907 Invalid Command : this is not ur turn");
-            } else if(!player.canCall(currentRoom)){
+            if(!room.getGame().canCall(player)){
                 writeToClient("907 Invalid Command");
             }else{
-                player.call(currentRoom);
+                player.call(room.getGame());
                 writeToClient("400 ACCEPTED");
-                broadCastMessage("512 "+ clientUsername +" CALL",currentRoom.getClientHandlers());
+                broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
                 rotateTurn();
             }
 
         }else if(messageFromClient.matches(Request.RAISE)) {
 
             int raise = Integer.parseInt(messageFromClient.substring(10));
-            if(!currentRoom.isCurrentPlayer(player)){
-                writeToClient("907 Invalid Command : this is not ur turn");
-            } else if(!player.canRaise(currentRoom,raise)){
+            if(!room.getGame().canRaise(player,raise)){
                 writeToClient("907 Invalid Command");
+            }else {
+                player.raise(room.getGame(), raise);
+                writeToClient("400 ACCEPTED");
+                broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
+                rotateTurn();
             }
-            player.raise(currentRoom,raise);
-            writeToClient("400 ACCEPTED");
-            broadCastMessage("513 " + clientUsername + " RAISE " + raise,currentRoom.getClientHandlers());
-            rotateTurn();
 
         }else if(messageFromClient.matches(Request.ACTION_RECIEVED)){
 
@@ -98,69 +89,72 @@ public class PlayingTexasHoldemState extends GameState{
             //nothing to do here(probably)
 
         }else{
-            sendError();
+            clientHandler.writeToClient(Request.ERROR);
         }
     }
 
-
-
-    public void startGame(){
-        currentRoom.startGame();
-        writeToClient("Srever:distributing cards");
-        if(player.dealer){
-            //burm first card
-            //distribut e cards
-            //distribute table cards
-        }
-        currentRoom.round+=1;
-        writeToClient("Srever:first betting Round");
-
-    }
-
-
-
-    public void resetGame(){
-        currentRoom.resetGame();
-    }
-
-
-    public void rotateTurn(){
-        currentRoom.currentPlayer.setPlayedInThisTurn(true);
-        currentRoom.setCurrentPlayer(currentRoom.nextPlayer());
-
-        for (Player player : currentRoom.players){
-            if(!player.hasFolded && (!player.playedInThisTurn || player.bids!=currentRoom.highestBid)) return;
-        }
-
-        //passing to next round
-        currentRoom.round+=1;
-        currentRoom.setAllPlayersDidntPlay();
-        currentRoom. setCurrentPlayer(currentRoom.playerleftToDealer());
-
-        switch (currentRoom.round){
-            /*case 0:break;//this is the first betting round (already done in start game)
-            case 1:writeToClient("Srever:first betting Round");break;*/
-            case 2:broadCastMessageToEveryone("Srever:second betting Round",currentRoom.getClientHandlers());break;
-            case 3:broadCastMessageToEveryone("Srever:third betting Round",currentRoom.getClientHandlers());break;
-            case 4:broadCastMessageToEveryone("Srever:final Round",currentRoom.getClientHandlers());break;
-        }
-    }
-
-    
 
 
     @Override
     public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
-        broadCastMessage("211 " + clientUsername + " QUIT",currentRoom.getClientHandlers());
-        player.setInactive();
-        if(currentRoom.isCurrentPlayer(clientUsername)){
-            rotateTurn();
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        player.quit(room.getGame());
+        room.removeClient(clientHandler);
+        if(room.numberOfClients()==0){
+            Server.removeRoom(room);
         }
-        currentRoom.removeClient(clientHandler);
-        if(currentRoom.numberOfClients()==0){
-            Server.removeRoom(currentRoom);
-        }
+        clientHandler.setGameState(new MenuState(clientHandler));
         //TODO further actions
     }
+
+
+    public void startGame(){
+        if(room.isAdmin(clientHandler)){
+            room.getGame().setCurrentPlayer(room.getGame().nextPlayer(0));
+            turn=room.getGame().getBidTurn();
+            broadCastMessageToEveryone("server : small blind and big blind");
+        }
+    }
+
+    public void rotateTurn(){
+        if(room.getGame().isRoundFinished()){
+            //todo endgame
+        }else if(room.getGame().getBidTurn()!=turn){
+            turn=room.getGame().getBidTurn();
+            switch (turn){
+                case 1:broadCastMessageToEveryone("server : first betting round");
+                    room.getGame().burn();
+                    room.getGame().distributeCards(2);
+                    notifyCardDistribution();
+                    revealCards(3);break;
+                case 2:broadCastMessageToEveryone("server : second betting round");
+                    room.getGame().burn();
+                    revealCards(1);;break;
+                case 3:broadCastMessageToEveryone("server : third betting round");
+                    room.getGame().burn();
+                    revealCards(1);;break;
+            }
+        }
+    }
+
+
+    public void notifyCardDistribution(){
+        for(Player player : room.getGame().getPlayers()){
+            Card[] cards= player.getCards();
+            String cardDistribution="610 CARDS ";
+            cardDistribution+=cards.length;
+            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            room.getClientHandler(player.getName()).writeToClient(cardDistribution);
+        }
+    }
+
+    public void revealCards(int n){
+        Card[] cards= room.getGame().revealCards(n);
+        String cardDistribution="610 CARDS "+n;
+        for(Card card : cards) cardDistribution+=(" "+card.toString());
+        broadCastMessageToEveryone(cardDistribution);
+    }
+
 }
+

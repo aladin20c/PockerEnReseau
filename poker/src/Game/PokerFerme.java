@@ -43,7 +43,9 @@ public class PokerFerme extends PokerGame{
             }
         }
         return  nbPlayers>=3 &&  nbPlayers<=8;
-
+    }
+    public boolean canStartGame(){
+        return  players.size()>=3 &&  players.size()<=8;
     }
 
 

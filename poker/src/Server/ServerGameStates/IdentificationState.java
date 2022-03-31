@@ -3,11 +3,12 @@ package Server.ServerGameStates;
 import Game.Utils.Request;
 import Server.ClientHandler;
 import Server.Server;
+import Server.Room;
 
 public class IdentificationState extends GameState{
 
     public IdentificationState(ClientHandler clientHandler) {
-        super(clientHandler,0);
+        super(clientHandler);
     }
 
 
@@ -29,10 +30,10 @@ public class IdentificationState extends GameState{
                 Server.addClient(clientHandler);
                 writeToClient("101 WELCOME "+name);
                 System.out.println(name+" has successfully connected");
-                clientHandler.setGameState(new MenuState(clientHandler,name));
+                clientHandler.setGameState(new MenuState(clientHandler));
             }
         }else {
-            sendError();
+            clientHandler.writeToClient(Request.ERROR);
         }
     }
 }

@@ -29,7 +29,6 @@ public class Request {
 
 
     //waiting
-    public static String EXISTING_PLAYER="800 .+";
     public static String PLAYERS_LIST="155 LIST PLAYER \\d";
     public static String PLAYERS_INFOS="155 MESS \\d+ PLAYER((\\s+.+){1,5})";
 
