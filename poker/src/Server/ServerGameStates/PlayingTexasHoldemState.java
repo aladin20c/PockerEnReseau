@@ -9,14 +9,13 @@ import Server.Server;
 
 public class PlayingTexasHoldemState extends GameState{
 
-    private int turn;
+
     private Player player;
 
 
     public PlayingTexasHoldemState(ClientHandler clientHandler , Room room) {
         super(clientHandler, room);
         this.player=room.getGame().getPlayer(clientHandler.getClientUsername());
-        this.turn=-1;
         startGame();
     }
 
@@ -25,7 +24,7 @@ public class PlayingTexasHoldemState extends GameState{
     public void analyseRequest(String messageFromClient) {
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessageToEveryone(clientHandler.getClientUsername()+":"+messageFromClient);
+            broadCastMessage(clientHandler.getClientUsername()+":"+messageFromClient);
 
         }else if(messageFromClient.matches(Request.FOLD)){
 
@@ -112,30 +111,41 @@ public class PlayingTexasHoldemState extends GameState{
     public void startGame(){
         if(room.isAdmin(clientHandler)){
             room.getGame().setCurrentPlayer(room.getGame().nextPlayer(0));
-            turn=room.getGame().getBidTurn();
-            broadCastMessageToEveryone("server : small blind and big blind");
+            rotateTurn();
         }
     }
 
     public void rotateTurn(){
         if(room.getGame().isRoundFinished()){
-            //todo endgame
-        }else if(room.getGame().getBidTurn()!=turn){
-            turn=room.getGame().getBidTurn();
-            switch (turn){
-                case 1:broadCastMessageToEveryone("server : first betting round");
+            broadCastMessageToEveryone("server : EndGame");
+            //todo
+        }else if(!room.turnIsUpToDate()){
+            room.updateTurn();
+            switch (room.getTurn()){
+                case 0:
+                    broadCastMessageToEveryone("server : small blind and big blind");
+                    break;
+                case 1:
+                    broadCastMessageToEveryone("server : first betting round");
+
                     room.getGame().burn();
                     room.getGame().distributeCards(2);
                     notifyCardDistribution();
-                    revealCards(3);break;
-                case 2:broadCastMessageToEveryone("server : second betting round");
+                    revealCards(3);
+                    break;
+
+                case 2:
+                    broadCastMessageToEveryone("server : second betting round");
                     room.getGame().burn();
-                    revealCards(1);;break;
-                case 3:broadCastMessageToEveryone("server : third betting round");
+                    revealCards(1);
+                    break;
+                case 3:
+                    broadCastMessageToEveryone("server : third betting round");
                     room.getGame().burn();
-                    revealCards(1);;break;
+                    revealCards(1);break;
             }
         }
+        broadCastMessage("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
     }
 
 

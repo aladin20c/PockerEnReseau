@@ -71,7 +71,7 @@ public class PlayingTexasHoldemState extends GameState {
         }
         else if (comingMessage.matches(Request.PLAYER_RAISE)) {
 
-            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")));
+            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")+6));
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
             Player player = currentGame.getPlayer(username);
             player.raise(currentGame,raise);
@@ -129,6 +129,7 @@ public class PlayingTexasHoldemState extends GameState {
 
     public void startGame(){
         currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
+        rotateTurn();
     }
 
 

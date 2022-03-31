@@ -23,7 +23,7 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public boolean isRoundFinished() {
-        return bidTurn>4 || players.size()-foldedPlayers>1;
+        return bidTurn>4 || players.size()-foldedPlayers<=1;
     }
 
     @Override
@@ -73,41 +73,27 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public boolean canCheck(Player player){
-        if(bidTurn!=0){
-            if(player==getCurrentPlayer()){
-                return (player.getBidPerRound() == bidAmount);
-            }
+        if(player==getCurrentPlayer() && bidTurn!=0){
+            return (player.getBidPerRound() == bidAmount);
         }
         return false;
     }
 
 
-    @Override
-    public boolean canRaise(Player player,int raiseAmount){////fixme gives error when first player pay small blind and quits
+    public boolean canRaise(Player player,int raiseAmount){
         if(player==getCurrentPlayer()){
             if(bidTurn==0){
-                if(currentPlayer==nextPlayer(dealer)){
-                    if(raiseAmount==bidAmount/2 && raiseAmount <=player.getStack()){
-                        smallBlind=true;
-                        return true;
-                    }
-                }
-                if(currentPlayer==nextPlayer(nextPlayer(dealer))){
-                    if(raiseAmount==bidAmount && raiseAmount <=player.getStack()){
-                        bigBlind=true;
-                        return true;
-                    }
-                }
-            }
-            else{
+                System.out.println("pot :"+pot);
+                System.out.println("raiseamount :"+raiseAmount);
+                System.out.println("minbid :"+minBid);
+                return (pot==0 && raiseAmount==minBid/2) || (pot==minBid/2 && raiseAmount==minBid) ;
+            } else{
                 int callAmount = bidAmount-player.getBidPerRound();
                 return ((raiseAmount>bidAmount)&&((callAmount)<=player.getStack()));
             }
         }
         return false;
     }
-
-
 
     @Override
     public Card[] revealCards(int nbcards) {

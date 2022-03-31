@@ -12,14 +12,14 @@ public class Request {
     public static String USED_NAME="902 This name is already used";
 
     //menu
-    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 5 STACK 10000
+    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 6 STACK 10000
     public static String INCORRECT_VALUE="903 Incorrect value";
     public static String INCORRECT_PLAYERS="904 Incorrect number of players";
     public static String INCORRECT_BET="903 Incorrect minimal bet";
     public static String INCORRECT_STACK="903 Incorrect stack";
     public static String GAME_CREATED="110 GAME CREATED -?\\d+";
 
-    public static String GET_ROOMS="120 GETLIST";
+    public static String GET_ROOMS="120 GETLIST";//fixme always update getlist
     public static String LIST_LENGTH="120 NUMBER -?\\d+";
     public static String ROOM_INFOS="121 MESS\\s+-?\\d+\\s+ID\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+";
 

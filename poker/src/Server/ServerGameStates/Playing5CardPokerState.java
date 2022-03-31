@@ -9,14 +9,12 @@ import Server.Room;
 
 public class Playing5CardPokerState extends GameState{
 
-    private int turn;
     private Player player;
 
 
     public Playing5CardPokerState(ClientHandler clientHandler , Room room) {
         super(clientHandler, room);
         this.player=room.getGame().getPlayer(clientHandler.getClientUsername());
-        this.turn=-1;
         startGame();
     }
 
@@ -140,17 +138,19 @@ public class Playing5CardPokerState extends GameState{
     public void startGame(){
         if(room.isAdmin(clientHandler)){
             room.getGame().setCurrentPlayer(room.getGame().nextPlayer(0));
-            turn=room.getGame().getBidTurn();
-            broadCastMessageToEveryone("server : Ante");
+            rotateTurn();
         }
     }
 
     public void rotateTurn(){
         if(room.getGame().isRoundFinished()){
-            //todo endgame
-        }else if(room.getGame().getBidTurn()!=turn){
-            turn=room.getGame().getBidTurn();
-            switch (turn){
+            broadCastMessageToEveryone("server : EndGame");
+            //todo
+        }else if(!room.turnIsUpToDate()){
+            room.updateTurn();
+            switch (room.getTurn()){
+                case 0: broadCastMessageToEveryone("server : Ante");
+                    break;
                 case 1:broadCastMessageToEveryone("server : second betting round");
                     room.getGame().distributeCards(5);
                     notifyCardDistribution();break;
@@ -158,6 +158,7 @@ public class Playing5CardPokerState extends GameState{
                 case 3:broadCastMessageToEveryone("server : third betting round");break;
             }
         }
+        broadCastMessage("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
     }
 
 

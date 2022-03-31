@@ -4,6 +4,7 @@ import Game.PokerGame;
 import Game.Utils.Request;
 import Server.ClientHandler;
 import Server.Room;
+import Server.Server;
 
 
 import java.util.ArrayList;
@@ -27,7 +28,7 @@ public class WaitingState extends GameState {
 
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessageToEveryone(clientHandler.getClientUsername()+":"+messageFromClient);
+            broadCastMessage(clientHandler.getClientUsername()+":"+messageFromClient);
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
@@ -127,10 +128,14 @@ public class WaitingState extends GameState {
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         room.removeClient(clientHandler);
         room.getGame().removePlayer(clientHandler.getClientUsername());
-        if(startRequested){
+
+        if(room.numberOfClients()==0) {
+            Server.removeRoom(room);
+        }else if(startRequested){
             broadCastMessageToEveryone("153 GAME ABORDED " + 0);
             room.requestStart(false);
         }
+        clientHandler.setGameState(new MenuState(clientHandler));
     }
 
 

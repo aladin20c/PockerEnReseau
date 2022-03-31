@@ -149,6 +149,7 @@ public class Playing5CardPokerState extends GameState{
 
     public void startGame(){
         currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
+        rotateTurn();
     }
 
 

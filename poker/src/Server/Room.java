@@ -10,10 +10,11 @@ public class Room  {
 
     protected PokerGame game;
     protected ArrayList<ClientHandler> clientHandlers;
-
+    private int turn;
 
     public Room() {
         this.clientHandlers=new ArrayList<>();
+        this.turn=-1;
     }
 
 
@@ -62,4 +63,14 @@ public class Room  {
     public int numberOfClients(){return clientHandlers.size();}
     public PokerGame getGame() {return game;}
     public void setGame(PokerGame game) {this.game = game;}
+
+    public int getTurn() {return turn;}
+    public void setTurn(int turn) {this.turn = turn;}
+
+    public boolean turnIsUpToDate(){
+        return turn==game.getBidTurn();
+    }
+    public void updateTurn(){
+        this.turn=game.getBidTurn();
+    }
 }

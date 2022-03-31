@@ -19,7 +19,7 @@ public class PokerFerme extends PokerGame{
 
     @Override
     public boolean isRoundFinished() {
-        return bidTurn>3 || players.size()-foldedPlayers>2;
+        return bidTurn>3 || players.size()-foldedPlayers<=2;
     }
 
     @Override

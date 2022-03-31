@@ -147,12 +147,8 @@ public abstract class PokerGame {
      * add p to pot
      * @param p
      */
-    public void incrementPot(int p){
-        pot+=p;
-    }
-
     public void setPot(int p){
-        pot=0;
+        pot+=p;
     }
     /**
      * To get the deck
@@ -215,6 +211,7 @@ public abstract class PokerGame {
     public int getType() {
         return type;
     }
+
     public Player getPlayer(String username){
         for(Player player : players){
             if(player.name.equals(username)) return player;
@@ -240,9 +237,7 @@ public abstract class PokerGame {
         this.currentPlayer = currentPlayer;
     }
 
-    public int getBidTurn() {
-        return bidTurn;
-    }
+    public int getBidTurn() {return bidTurn;}
 
     public boolean isCurrentPlayer( String name){
         return players.get(currentPlayer).getName().equals(name);
