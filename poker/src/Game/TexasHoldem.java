@@ -6,10 +6,6 @@ public class TexasHoldem extends PokerGame{
 
 
     private Hand handOfTable;
-    private boolean smallBlind = false; //cet attribut sera à vrai lorsque le joueur aprés le dealer mise la smallBilnd
-    private boolean bigBlind = false; ////cet attribut sera à vrai lorsque le 2éme joueur aprés le dealer mise la bigBilnd
-
-
 
     public TexasHoldem(int id, int type, int maxPlayers, int minBid, int initStack) {
         super(id, type, maxPlayers, minBid, initStack);
@@ -23,24 +19,9 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public boolean isRoundFinished() {
-        return bidTurn>4 || players.size()-foldedPlayers<=1;
+        return bidTurn>3 || players.size()-foldedPlayers<=1;
     }
 
-    @Override
-    public boolean isTurnFinished(){
-        if(bidTurn==0 ){
-            return pot==minBid+minBid/2;
-        }else {
-            for (Player p : players) {
-                if (!p.hasFolded()) {
-                    if (!p.played || p.bidPerRound != bidAmount) {
-                        return false;
-                    }
-                }
-            }
-            return true;
-        }
-    }
 
     @Override
     public boolean canResetGame(){
@@ -60,7 +41,7 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public boolean canCall(Player player){
-        if(player==getCurrentPlayer() && bidTurn!=0){
+        if(player==getCurrentPlayer() ){
             return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
         }
         return false;
@@ -73,7 +54,7 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public boolean canCheck(Player player){
-        if(player==getCurrentPlayer() && bidTurn!=0){
+        if(player==getCurrentPlayer()){
             return (player.getBidPerRound() == bidAmount);
         }
         return false;
@@ -82,15 +63,8 @@ public class TexasHoldem extends PokerGame{
 
     public boolean canRaise(Player player,int raiseAmount){
         if(player==getCurrentPlayer()){
-            if(bidTurn==0){
-                System.out.println("pot :"+pot);
-                System.out.println("raiseamount :"+raiseAmount);
-                System.out.println("minbid :"+minBid);
-                return (pot==0 && raiseAmount==minBid/2) || (pot==minBid/2 && raiseAmount==minBid) ;
-            } else{
-                int callAmount = bidAmount-player.getBidPerRound();
-                return ((raiseAmount>bidAmount)&&((callAmount)<=player.getStack()));
-            }
+            int callAmount = bidAmount-player.getBidPerRound();
+            return ((raiseAmount>bidAmount)&&((callAmount)<=player.getStack()));
         }
         return false;
     }
@@ -107,4 +81,8 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public Hand getTable(){return handOfTable;}
+    public void FixSmallBigBlind(){
+        players.get(nextPlayer(dealer)).raise(this,minBid/2);
+        players.get(nextPlayer(nextPlayer(dealer))).raise(this,minBid);
+    }
 }

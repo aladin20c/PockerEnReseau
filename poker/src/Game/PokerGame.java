@@ -138,7 +138,16 @@ public abstract class PokerGame {
     public void burn(){
          this.deck.getNextCard();
     }
-
+    public boolean isTurnFinished(){
+        for (Player p : players) {
+            if (!p.hasFolded()) {
+                if (!p.played || p.bidPerRound != bidAmount) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
 
 
     /**--------------------------------- Getters & Setters ---------------------------------*/
@@ -253,7 +262,6 @@ public abstract class PokerGame {
     }
     public Card[] revealCards(int mbcards){return null;}
     public abstract boolean isRoundFinished();
-    public abstract boolean isTurnFinished();
     public abstract boolean canResetGame();
     public abstract boolean canStartGame();
     public abstract boolean canCall(Player player);

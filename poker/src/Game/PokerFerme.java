@@ -22,17 +22,7 @@ public class PokerFerme extends PokerGame{
         return bidTurn>3 || players.size()-foldedPlayers<=2;
     }
 
-    @Override
-    public boolean isTurnFinished(){
-        for(Player p : players){
-            if(!p.hasFolded()){
-                if(!p.played || p.bidPerRound!=bidAmount){
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
+
 
     @Override
     public boolean canResetGame(){
