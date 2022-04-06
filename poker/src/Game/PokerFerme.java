@@ -1,52 +1,73 @@
 package Game;
 
-import java.util.ArrayList;
+
 public class PokerFerme extends PokerGame{
 
-    public PokerFerme( int minBid){
-        super(minBid);
-    } 
-    
+    public static int ANTE=0;
+    public static int CHANGING_TURN=2;
+
+
+
+    public PokerFerme(int id, int type, int maxPlayers, int minBid, int initStack) {
+        super(id, type, maxPlayers, minBid, initStack);
+    }
+
+    public PokerFerme(int type, int maxPlayers, int minBid, int initStack) {
+        super(type, maxPlayers, minBid, initStack);
+    }
+
+
     @Override
     public boolean isRoundFinished() {
-        return bidTurn==4;
+        return bidTurn>3 || players.size()-foldedPlayers<=2;
     }
+
+
+
     @Override
-    public boolean can_reset_game(){
+    public boolean canResetGame(){
         int nbPlayers=0;
         for(Player p:players){
-            if(!p.isQuit()){
+            if(!p.hasQuitted()){
                 nbPlayers++;
             }
         }
-        return nbPlayers>=3 && nbPlayers()<=8;
+        return  nbPlayers>=3 &&  nbPlayers<=8;
     }
+    public boolean canStartGame(){
+        return  players.size()>=3 &&  players.size()<=8;
+    }
+
+
     @Override
     public boolean canCall(Player player){
         if(player==getCurrentPlayer()){
-            if(bidTurn!=2){
+            if(bidTurn!=CHANGING_TURN){
                 return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
             }
         }
         return false;
     }
+
     @Override
     public boolean canFold(Player player){
-        return player==getCurrentPlayer() && bidTurn!=2;
+        return player==getCurrentPlayer();
     }
+
     @Override
     public boolean canCheck(Player player){
-        if(bidTur!=0 && bidTur!=2){
+        if(bidTurn!=CHANGING_TURN){
             if(player==getCurrentPlayer()){
-                return (player.getBidPerRound == bidAmount);
+                return (player.getBidPerRound() == bidAmount);
             }
         }
         return false;
     }
+
     @Override
     public boolean canRaise(Player player,int raiseAmount){
         if(player==getCurrentPlayer()){
-            if(bidTurn==0 && raiseAmout==minBid){
+            if(bidTurn==0 && raiseAmount==minBid){
                 return true;
             }
             if(bidTurn!=2){
@@ -56,23 +77,27 @@ public class PokerFerme extends PokerGame{
         }
         return false;
     }
-    @Override
-    public boolean canChange(Player player,ArrayList<Card> cards){
-        return (cards.size()>=1
-                && cards.size()<5
-                && player.getHand().getCards().containsAll(cards)
-                && bidTurn==2
-                && players.get(currentPlayer)==player);
 
-    }
+
     @Override
-    public ArrayList<Card> change(Player player,ArrayList<Card> cards){
-        deck.getCards().addAll(cards);
-        ArrayList<Card> newCards=new ArrayList<>();
-        for(int i=0 ;i<cards.size();i++){
-            newCards.add(deck.getNextCard());
+    public boolean canChange(Player player,Card[] cards){
+        return (cards.length>0
+                && cards.length<5
+                && player.getHand().containsAll(cards)
+                && bidTurn==CHANGING_TURN
+                && players.get(currentPlayer)==player);
+    }
+
+    @Override
+    public Card[] change(Player player,Card[] cards){
+        player.setPlayed(true);
+        player.getHand().removeAll(cards);
+        deck.addAll(cards);
+        Card[] newCards=new Card[cards.length];
+        for(int i=0 ;i<cards.length;i++){
+            newCards[i]=deck.getNextCard();
         }
-        player.getHand().getCards().addAll(newCards);
+        player.getHand().addAll(newCards);
         return newCards;
     }
 

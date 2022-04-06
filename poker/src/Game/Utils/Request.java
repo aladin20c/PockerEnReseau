@@ -12,7 +12,7 @@ public class Request {
     public static String USED_NAME="902 This name is already used";
 
     //menu
-    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 5 STACK 10000
+    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 6 STACK 10000
     public static String INCORRECT_VALUE="903 Incorrect value";
     public static String INCORRECT_PLAYERS="904 Incorrect number of players";
     public static String INCORRECT_BET="903 Incorrect minimal bet";
@@ -29,7 +29,6 @@ public class Request {
 
 
     //waiting
-    public static String EXISTING_PLAYER="800 .+";
     public static String PLAYERS_LIST="155 LIST PLAYER \\d";
     public static String PLAYERS_INFOS="155 MESS \\d+ PLAYER((\\s+.+){1,5})";
 
@@ -76,5 +75,7 @@ public class Request {
 
     public static String PLAYER_QUIT="211 .+ QUIT";
     public static String QUIT_RECIEVED="201 RECIEVED";
+
+    public static String ERROR="999 ERROR";
 
 }

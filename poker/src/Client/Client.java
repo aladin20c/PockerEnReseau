@@ -1,16 +1,13 @@
 package Client;
 
-
-
-
 import Client.States.GameState;
 import Client.States.IdentificationState;
 import Game.Utils.Request;
 
-
 import java.io.*;
 import java.net.Socket;
 import java.util.Scanner;
+
 
 public class Client {
 
@@ -18,8 +15,6 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private GameState gameState;
-
-
 
 
     public Client(Socket socket) {

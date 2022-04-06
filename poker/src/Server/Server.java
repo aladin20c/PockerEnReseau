@@ -11,7 +11,7 @@ public class Server {
 
 
     private static ArrayList<ClientHandler> clientHandlers=new ArrayList<>();
-    private static ArrayList<SRoom> rooms=new ArrayList<>();
+    private static ArrayList<Room> rooms=new ArrayList<>();
     private static Server server;
     private ServerSocket serverSocket;
 
@@ -80,21 +80,21 @@ public class Server {
     public static void removeClient(ClientHandler ch){
         clientHandlers.remove(ch);
     }
-    public static void addRoom(SRoom room){
+    public static void addRoom(Room room){
         rooms.add(room);
     }
-    public static void removeClient(SRoom room){
+    public static void removeRoom(Room room){
         rooms.remove(room);
     }
     public static int numberOfRooms(){
         return rooms.size();
     }
-    public static ArrayList<SRoom> getRooms() {
+    public static ArrayList<Room> getRooms() {
         return rooms;
     }
-    public static SRoom getRoom(int id) {
-        for(SRoom room : rooms){
-            if(room.getId()==id) return room;
+    public static Room getRoom(int id) {
+        for(Room room : rooms){
+            if(room.game.getId()==id) return room;
         }
         return null;
     }

@@ -1,33 +1,34 @@
 package Server.ServerGameStates;
 
+import Game.PokerGame;
 import Game.Utils.Request;
 import Server.ClientHandler;
-import Server.SRoom;
+import Server.Room;
+import Server.Server;
+
 
 import java.util.ArrayList;
 
 public class WaitingState extends GameState {
 
-    private String clientUsername;
-    private SRoom currentRoom;
+
     private boolean startRequested;
     private int startRequestResponse;
 
 
-    public WaitingState(ClientHandler clientHandler, String clientUsername, SRoom currentRoom) {
-        super(clientHandler, 2);
-        this.clientUsername=clientUsername;
-        this.currentRoom = currentRoom;
+    public WaitingState(ClientHandler clientHandler, Room room) {
+        super(clientHandler, room);
         this.startRequested=false;
         this.startRequestResponse = -1;
     }
+
 
     @Override
     public void analyseRequest(String messageFromClient) {
 
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessageToEveryone(messageFromClient,currentRoom.getClientHandlers());
+            broadCastMessage(clientHandler.getClientUsername()+":"+messageFromClient);
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
@@ -37,14 +38,14 @@ public class WaitingState extends GameState {
 
             if (startRequested) {
                 writeToClient("155 start already requested");
-            } else if (!currentRoom.isAdmin(clientHandler)) {
+            } else if (!room.isAdmin(clientHandler)) {
                 writeToClient("157 u are not the admin");
-            } else if (!currentRoom.hasEnoughPlayersToStart()) {
+            } else if (!room.getGame().canStartGame()) {
                 writeToClient("158 not enough players");
             } else {
-                currentRoom.requestStart(true);
+                room.requestStart(true);
                 this.startRequestResponse=1;
-                broadCastMessageToEveryone("152 START REQUESTED",currentRoom.getClientHandlers());
+                broadCastMessage("152 START REQUESTED");
             }
 
         } else if (messageFromClient.matches(Request.START_RESPONSE)) {
@@ -59,17 +60,16 @@ public class WaitingState extends GameState {
                 checkPlayersResponses();
             }
 
-
         } else if (messageFromClient.matches(Request.QUIT)) {
 
-            playerQuit();
+            clientQuit();
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
             //nothing to do here(probably)
 
         }else{
-            sendError();
+            clientHandler.writeToClient(Request.ERROR);
         }
     }
 
@@ -79,7 +79,7 @@ public class WaitingState extends GameState {
     private void checkPlayersResponses(){
 
         ArrayList<String> playersWhoRefused=new ArrayList<>();
-        for(ClientHandler ch : currentRoom.getClientHandlers()){
+        for(ClientHandler ch : room.getClientHandlers()){
             switch (ch.getGameState().getResponse()){
                 case -1: return;
                 case 0: playersWhoRefused.add(ch.getClientUsername());break;
@@ -88,13 +88,18 @@ public class WaitingState extends GameState {
         }
 
         if(playersWhoRefused.isEmpty()){
-            broadCastMessageToEveryone("153 GAME STARTED",currentRoom.getClientHandlers());
-            for(ClientHandler ch : currentRoom.getClientHandlers()){
-                ch.setGameState(new PlayingState(ch,ch.getClientUsername(),currentRoom));
+            broadCastMessageToEveryone("153 GAME STARTED");
+            for(ClientHandler ch : room.getClientHandlers()){
+                if(room.getGame().getType()==1) {
+                    ch.setGameState(new PlayingTexasHoldemState(ch,room));
+                }else{
+                    ch.setGameState(new Playing5CardPokerState(ch,room));
+                }
             }
+            return;
         }else{
             int size = playersWhoRefused.size();
-            broadCastMessageToEveryone("154 START ABORDED " + size,currentRoom.getClientHandlers());
+            broadCastMessageToEveryone("154 START ABORDED " + size);
             int i = 0;
             for (; i < playersWhoRefused.size() / 5; i++) {
                 broadCastMessageToEveryone("154 MESS " + (i + 1) + " PLAYER "
@@ -103,7 +108,7 @@ public class WaitingState extends GameState {
                                 + playersWhoRefused.get(i * 5 + 2) + " "
                                 + playersWhoRefused.get(i * 5 + 3) + " "
                                 + playersWhoRefused.get(i * 5 + 4)
-                        ,currentRoom.getClientHandlers());
+                        );
             }
             if (i * 5 < size) {
                 broadCastMessageToEveryone("154 MESS " + (i + 1) + " PLAYER "
@@ -111,39 +116,38 @@ public class WaitingState extends GameState {
                                 + ((i * 5 + 1 < size) ? playersWhoRefused.get(i + 1) + " " : "")
                                 + ((i * 5 + 2 < size) ? playersWhoRefused.get(i + 2) + " " : "")
                                 + ((i * 5 + 3 < size) ? playersWhoRefused.get(i + 3) : "")
-                        ,currentRoom.getClientHandlers());
+                        );
             }
-            currentRoom.requestStart(false);
+            room.requestStart(false);
         }
     }
 
     @Override
-    public void playerQuit() {
+    public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
-        broadCastMessage("211 " + clientUsername + " QUIT",currentRoom.getClientHandlers());
-        currentRoom.removeClient(clientHandler);
-        if(startRequested){
-            //TODO maybe change this in the future
-            broadCastMessageToEveryone("153 GAME ABORDED " + 0,currentRoom.getClientHandlers());
-            requestStart(false);
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        room.removeClient(clientHandler);
+        room.getGame().removePlayer(clientHandler.getClientUsername());
+
+        if(room.numberOfClients()==0) {
+            Server.removeRoom(room);
+        }else if(startRequested){
+            broadCastMessageToEveryone("153 GAME ABORDED " + 0);
+            room.requestStart(false);
         }
+        clientHandler.setGameState(new MenuState(clientHandler));
     }
 
 
-
-
-
-    @Override
-    public boolean canAddNewPlayer() {
-        return !startRequested;
-    }
-    @Override
-    public void requestStart(boolean start) {
-        this.startRequestResponse=-1;
-        this.startRequested=start;
-    }
     @Override
     public int getResponse() {
         return startRequestResponse;
+    }
+    public boolean startRequested() {return startRequested;}
+    public void setStartRequested(boolean startRequested) {
+        this.startRequested = startRequested;
+    }
+    public void setResponse(int startRequestResponse) {
+        this.startRequestResponse = startRequestResponse;
     }
 }

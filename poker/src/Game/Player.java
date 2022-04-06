@@ -1,42 +1,55 @@
 package Game;
 
+
 public class Player {
-    private String name;
-    private int stack;
-    private Hand userHand;
-    private boolean isFold;
-    private int bidPerRound=0;
-    private boolean isQuit;
-    private boolean played;
-    //achaque fois je teste si le joueur n a pas folder et n as pas quiter
+
+    protected String name;
+    protected int stack;
+    protected Hand userHand;
+    protected boolean isFold;
+    protected boolean isQuit;
+    protected boolean played;
+    protected int bidPerRound=0;
+
 
     public Player(String name, int stack){
         this.name=name;
+        this.stack=stack;
         userHand = new Hand();
         isFold=false;
         isQuit=false;
-        this.stack=stack;
         played=false;
     }
-    /**
-     * add card c to the hand of Player
-     * @param c
-     */
+
     public void receiveCard(Card c){
         userHand.add(c);
     }
+    public void addChipsToUser(int chips){
+        stack+=chips;
+    }
+
+
     public void fold(PokerGame round){
         isFold=true;
+        played=true;
         round.incFolderPlayers();
         round.rotate();
     }
+
+    public void check(PokerGame round){
+        played=true;
+        round.rotate();
+    }
+
     public void call(PokerGame round){
+        played=true;
         int callAmount = round.getBidAmount()-bidPerRound;
         bidPerRound += callAmount;
         stack -= callAmount;
         round.setPot(callAmount);
         round.rotate();
     }
+
     public void raise(PokerGame round,int raiseAmount){
         int callAmount = raiseAmount-bidPerRound;
         bidPerRound += callAmount;
@@ -45,20 +58,35 @@ public class Player {
         round.setPot(callAmount);
         round.rotate();
     }
-    public void check(PokerGame round){
-        round.rotate();
+
+    public void quit(PokerGame round){
+        this.isFold=true;
+        this.isQuit=true;
+        round.incFolderPlayers();
+        if(round.getCurrentPlayer()==this){
+            round.setCurrentPlayer(round.nextPlayer());
+        }
     }
-    public void addChipsToUser(int chips){
-        stack+=chips;
+
+    public void reset(){
+        userHand.clear();
+        isFold=false;
+        played=false;
+        bidPerRound=0;
     }
 
 
+
+
+    /**--------------------------------- Getters & Setters ---------------------------------*/
+
+    public String getName() {
+        return name;
+    }
     public Hand getHand(){
         return userHand;
     }
-    public void resetHand(){
-        userHand.clear(); 
-    }
+
     public int getBidPerRound() {
         return bidPerRound;
     }
@@ -69,41 +97,38 @@ public class Player {
         this.bidPerRound = bidAmount;
     }
 
-    public void setFold(boolean fold) {
-        isFold = fold;
-    }
-
     public void setUserHand(Hand userHand) {
         this.userHand = userHand;
     }
 
-    public boolean isFold() {
-        return isFold;
-    }
-    public Hand getUserHand() {
-        return userHand;
-    }
 
     public int getStack() {
         return stack;
     }
 
-    public String getName() {
-        return name;
+    public Card[] getCards(){
+        Card[] cards = userHand.getCards().toArray(new Card[0]);
+        return cards;
     }
-    public void setRound(PokerGame round){
-        this.round=round;
+
+    public boolean hasFolded() {
+        return isFold;
     }
-    public void setIsQuit(boolean isQuit) {
+    public void setFold(boolean fold) {
+        isFold = fold;
+    }
+    public boolean hasQuitted() {
+        return isQuit;
+    }
+    public void setQuit(boolean isQuit) {
         this.isQuit= isQuit;
     }
-    public boolean isQuit() {
-        return isQuit;
+    public boolean hasPlayed() {
+        return played;
     }
     public void setPlayed(boolean played) {
         this.played= played;
     }
-    public boolean played() {
-        return played;
-    }
+
 }
+

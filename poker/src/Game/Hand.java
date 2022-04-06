@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class Hand implements Comparable<Hand> {
+
     protected List<Card> cards;
     private PokerHandType handType;
 
@@ -21,12 +22,33 @@ public class Hand implements Comparable<Hand> {
         this.cards=cards;
         this.handType=handType;
     }
+
     public List<Card> getCards(){
         return cards;
     }
+
     public PokerHandType getHandType(){
         return handType;
     }
+
+    public boolean containsAll(Card[] cards){
+        for (Card card : cards){
+            if(! this.cards.contains(card)) return false;
+        }
+        return true;
+    }
+
+    public void addAll(Card[] cards){
+        for (Card card : cards){
+            this.cards.add(card);
+        }
+    }
+    public void removeAll(Card[] cards){
+        for (Card card : cards){
+            this.cards.remove(card);
+        }
+    }
+
     /**
      * To clear the list
      */
@@ -144,4 +166,5 @@ public class Hand implements Comparable<Hand> {
         }
         return null;
     }
+
 }
