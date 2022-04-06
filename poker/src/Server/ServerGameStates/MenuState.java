@@ -8,13 +8,16 @@ import Server.ClientHandler;
 import Server.Room;
 import Server.Server;
 
+import java.util.HashSet;
+
 public class MenuState extends GameState{
 
-    private boolean hasRoomsList;//the player doesnt have the list of rooms to connect to one of them only when he asks GETLIST
+    //the player doesnt have the list of rooms to connect to one of them only when he asks GETLIST
+    private HashSet<Integer> clientRoomIds;
 
     public MenuState(ClientHandler clientHandler) {
         super(clientHandler);
-        this.hasRoomsList=false;
+        this.clientRoomIds=new HashSet<>();
     }
 
 
@@ -50,17 +53,19 @@ public class MenuState extends GameState{
         }else if(messageFromClient.matches(Request.GET_ROOMS)){
 
             writeToClient("120 NUMBER "+Server.numberOfRooms());
+            this.clientRoomIds.clear();
             int index=1;
             for(Room room : Server.getRooms()){
                 writeToClient(room.informationToString(index++));
+                this.clientRoomIds.add(room.getGame().getId());
             }
-            this.hasRoomsList=true;
+
 
         }else if(messageFromClient.matches(Request.JOIN_ROOM)){
 
             int id=Integer.parseInt(messageFromClient.substring(9));
             Room room=Server.getRoom(id);
-            if(!hasRoomsList ||room==null|| !room.canAddNewClient()){
+            if(!clientRoomIds.contains(id) ||room==null|| !room.canAddNewClient()){
                 writeToClient("131 room unavailable");
                 return;
             }

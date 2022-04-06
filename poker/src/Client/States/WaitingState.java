@@ -14,7 +14,7 @@ public class WaitingState extends GameState{
 
 
     public WaitingState(Client client, String username, PokerGame currentGame) {
-        super(client, 2);
+        super(client);
         this.username = username;
         this.currentGame = currentGame;
         this.startRequested=false;

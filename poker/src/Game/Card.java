@@ -6,8 +6,8 @@ import Game.definitions.Suit;
 public class Card {
 
     //Private fields
-    private Suit suit;
-    private Rank rank;
+    private final Suit suit;
+    private final Rank rank;
     private boolean isFaceUp;
 
     //Constructor
@@ -42,7 +42,7 @@ public class Card {
                 this.rank = Rank.DEUCE;
                 break;
             case "3":
-                this.rank = Rank.EIGHT;
+                this.rank = Rank.THREE;
                 break;
             case "4":
                 this.rank = Rank.FOUR;
@@ -142,7 +142,7 @@ public class Card {
                 rank = Rank.DEUCE;
                 break;
             case "3":
-                rank = Rank.EIGHT;
+                rank = Rank.THREE;
                 break;
             case "4":
                 rank = Rank.FOUR;
@@ -182,11 +182,10 @@ public class Card {
         return new Card(rank,suit);
     }
     public boolean equals(Object o) {
-        if(o==null || !(o instanceof Card)) return false;
+        if(!(o instanceof Card)) return false;
         Card c = (Card)o;
-        if (this==o || (this.rank==c.rank && this.suit==c.suit)) return true;
-        return false;
-      }
+        return this == o || (this.rank == c.rank && this.suit == c.suit);
+    }
 
     public boolean encodedTo(String s) {
         if(s.length()!=2) return false;

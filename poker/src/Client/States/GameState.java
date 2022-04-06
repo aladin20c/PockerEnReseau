@@ -6,11 +6,9 @@ import Client.Client;
 public abstract class GameState {
 
     protected Client client;
-    protected int order;
 
-    public GameState(Client client, int order) {
+    public GameState(Client client) {
         this.client = client;
-        this.order = order;
     }
 
     public void writeToServer(String messageToSend){

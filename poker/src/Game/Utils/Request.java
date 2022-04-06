@@ -19,7 +19,7 @@ public class Request {
     public static String INCORRECT_STACK="903 Incorrect stack";
     public static String GAME_CREATED="110 GAME CREATED -?\\d+";
 
-    public static String GET_ROOMS="120 GETLIST";//fixme always update getlist
+    public static String GET_ROOMS="120 GETLIST";
     public static String LIST_LENGTH="120 NUMBER -?\\d+";
     public static String ROOM_INFOS="121 MESS\\s+-?\\d+\\s+ID\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+";
 

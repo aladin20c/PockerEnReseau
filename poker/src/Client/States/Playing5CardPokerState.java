@@ -18,7 +18,7 @@ public class Playing5CardPokerState extends GameState{
 
 
     public Playing5CardPokerState(Client client, String username, PokerGame currentGame) {
-        super(client, 3);
+        super(client);
         System.out.println("[Client][gameState][Playing5CardPokerState] playing 5 card poker....");
         this.username = username;
         this.currentGame = currentGame;

@@ -13,7 +13,7 @@ public class MenuState extends GameState{
     private PokerGame[] gamesList;
 
     public MenuState(Client client, String username) {
-        super(client, 1);
+        super(client);
         this.username = username;
         System.out.println("[Client][gameState][menuState] connected....");
     }
