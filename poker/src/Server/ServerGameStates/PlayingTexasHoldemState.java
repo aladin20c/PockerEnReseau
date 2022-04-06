@@ -2,6 +2,7 @@ package Server.ServerGameStates;
 
 import Game.Card;
 import Game.Player;
+import Game.TexasHoldem;
 import Game.Utils.Request;
 import Server.ClientHandler;
 import Server.Room;
@@ -123,29 +124,33 @@ public class PlayingTexasHoldemState extends GameState{
             room.updateTurn();
             switch (room.getTurn()){
                 case 0:
-                    broadCastMessageToEveryone("server : small blind and big blind");
-                    break;
-                case 1:
-                    broadCastMessageToEveryone("server : first betting round");
-
+                    broadCastMessageToEveryone("server : preflop");
+                    ((TexasHoldem)room.getGame()).fixSmallBigBlind();
+                    broadCastMessageToEveryone("server : small blind and bigblind paid");
                     room.getGame().burn();
                     room.getGame().distributeCards(2);
                     notifyCardDistribution();
+                    break;
+                case 1:
+                    broadCastMessageToEveryone("server : flop");
+                    room.getGame().burn();
                     revealCards(3);
                     break;
 
                 case 2:
-                    broadCastMessageToEveryone("server : second betting round");
+                    broadCastMessageToEveryone("server : turn");
                     room.getGame().burn();
                     revealCards(1);
                     break;
                 case 3:
-                    broadCastMessageToEveryone("server : third betting round");
+                    broadCastMessageToEveryone("server : river");
                     room.getGame().burn();
-                    revealCards(1);break;
+                    revealCards(1);
+                    break;
+                default: broadCastMessageToEveryone("server : endgame");
             }
         }
-        broadCastMessage("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
+        broadCastMessageToEveryone("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
     }
 
 

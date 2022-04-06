@@ -149,16 +149,24 @@ public class Playing5CardPokerState extends GameState{
         }else if(!room.turnIsUpToDate()){
             room.updateTurn();
             switch (room.getTurn()){
-                case 0: broadCastMessageToEveryone("server : Ante");
+                case 0:
+                    broadCastMessageToEveryone("server : Ante");
                     break;
-                case 1:broadCastMessageToEveryone("server : second betting round");
+                case 1:
+                    broadCastMessageToEveryone("server : second betting round");
                     room.getGame().distributeCards(5);
-                    notifyCardDistribution();break;
-                case 2:broadCastMessageToEveryone("server : changing round");break;
-                case 3:broadCastMessageToEveryone("server : third betting round");break;
+                    notifyCardDistribution();
+                    break;
+                case 2:
+                    broadCastMessageToEveryone("server : changing round");
+                    break;
+                case 3:
+                    broadCastMessageToEveryone("server : third betting round");
+                    break;
+                default: broadCastMessageToEveryone("server : endgame");
             }
         }
-        broadCastMessage("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
+        broadCastMessageToEveryone("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
     }
 
 

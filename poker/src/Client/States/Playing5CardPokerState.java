@@ -52,24 +52,24 @@ public class Playing5CardPokerState extends GameState{
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentGame.getPlayer(username);
             player.fold(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 6);
             Player player = currentGame.getPlayer(username);
             player.check(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.PLAYER_CALL)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentGame.getPlayer(username);
             player.call(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         }
         else if (comingMessage.matches(Request.PLAYER_RAISE)) {
@@ -78,8 +78,8 @@ public class Playing5CardPokerState extends GameState{
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
             Player player = currentGame.getPlayer(username);
             player.raise(currentGame,raise);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
 
@@ -123,8 +123,8 @@ public class Playing5CardPokerState extends GameState{
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" CHANGE"));
             Player player = currentGame.getPlayer(username);
             int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE")+7));
-            rotateTurn();
             writeToServer(Request.CHANGE_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
@@ -136,7 +136,7 @@ public class Playing5CardPokerState extends GameState{
             Player player = currentGame.getPlayer(username);
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
-
+            rotateTurn();
         }
     }
 

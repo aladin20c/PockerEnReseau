@@ -1,10 +1,7 @@
 package Client.States;
 
 import Client.Client;
-import Game.Card;
-import Game.Hand;
-import Game.Player;
-import Game.PokerGame;
+import Game.*;
 import Game.Utils.Request;
 
 
@@ -49,24 +46,24 @@ public class PlayingTexasHoldemState extends GameState {
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentGame.getPlayer(username);
             player.fold(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.PLAYER_CHECK)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 6);
             Player player = currentGame.getPlayer(username);
             player.check(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.PLAYER_CALL)) {
 
             String username = comingMessage.substring(4, comingMessage.length() - 5);
             Player player = currentGame.getPlayer(username);
             player.call(currentGame);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         }
         else if (comingMessage.matches(Request.PLAYER_RAISE)) {
@@ -75,8 +72,8 @@ public class PlayingTexasHoldemState extends GameState {
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
             Player player = currentGame.getPlayer(username);
             player.raise(currentGame,raise);
-            rotateTurn();
             writeToServer(Request.ACTION_RECIEVED);
+            rotateTurn();
 
         } else if (comingMessage.matches(Request.ACTION_ACCEPTED)) {
 
@@ -101,7 +98,7 @@ public class PlayingTexasHoldemState extends GameState {
             String[] data = comingMessage.substring(10).split("\\s+");
             Hand hand=currentGame.getPlayer(username).getHand();
 
-            if(hand.getCards().isEmpty() || hand.getCards().size()<2){
+            if(hand.getCards().size()<2){
                 for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
             } else {
                 for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
@@ -118,6 +115,7 @@ public class PlayingTexasHoldemState extends GameState {
             Player player=currentGame.getPlayer(name);
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
+            rotateTurn();
 
         }
     }
@@ -142,16 +140,17 @@ public class PlayingTexasHoldemState extends GameState {
             turn=currentGame.getBidTurn();
             switch (turn) {
                 case 0:
-                    System.out.println("client : small & bigBlind round");
+                    System.out.println("client : preflop : first betting round");
+                    ((TexasHoldem)currentGame).fixSmallBigBlind();
                     break;
                 case 1:
-                    System.out.println("client : first betting round");
+                    System.out.println("client : flop : second betting round");
                     break;
                 case 2:
-                    System.out.println("client : second betting round");
+                    System.out.println("client : turn : third betting round");
                     break;
                 case 3:
-                    System.out.println("client : third betting round");
+                    System.out.println("client : river : fourth betting round");
                     break;
                 default: System.out.println("client : endgame");
             }

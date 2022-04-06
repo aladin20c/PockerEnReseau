@@ -81,7 +81,8 @@ public class TexasHoldem extends PokerGame{
 
     @Override
     public Hand getTable(){return handOfTable;}
-    public void FixSmallBigBlind(){
+
+    public void fixSmallBigBlind(){
         players.get(nextPlayer(dealer)).raise(this,minBid/2);
         players.get(nextPlayer(nextPlayer(dealer))).raise(this,minBid);
     }

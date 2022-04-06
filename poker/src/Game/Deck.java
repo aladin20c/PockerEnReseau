@@ -7,6 +7,11 @@ import java.util.Collections;
 
 public class Deck extends Hand {
 
+    public Deck() {
+        populate();
+        shuffle();
+    }
+
     /**
      * Initialise the deck with all the possible values
      */
@@ -68,6 +73,17 @@ public class Deck extends Hand {
             return cards.remove(0);
         }
         return null;
+    }
+
+
+
+
+    public Card[] getNextCards(int n){
+        Card[] cards=new Card[n];
+        for (int i=0;i<n;i++){
+            cards[i]= this.cards.remove(0);
+        }
+        return cards;
     }
 
 
