@@ -84,6 +84,8 @@ public class TexasHoldem extends PokerGame{
 
     public void fixSmallBigBlind(){
         players.get(nextPlayer(dealer)).raise(this,minBid/2);
+        players.get(nextPlayer(dealer)).setPlayed(false);
         players.get(nextPlayer(nextPlayer(dealer))).raise(this,minBid);
+        players.get(nextPlayer(nextPlayer(dealer))).setPlayed(false);
     }
 }
