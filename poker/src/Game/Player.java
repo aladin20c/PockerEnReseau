@@ -51,7 +51,6 @@ public class Player {
     }
 
     public void raise(PokerGame round,int raiseAmount){
-        played=true;
         int callAmount = raiseAmount-bidPerRound;
         bidPerRound += callAmount;
         stack -= callAmount;
