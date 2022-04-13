@@ -166,7 +166,14 @@ public class Playing5CardPokerState extends GameState{
                 default: broadCastMessageToEveryone("server : endgame");
             }
         }
-        broadCastMessageToEveryone("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
+        String currentPlayerName=room.getGame().getCurrentPlayer().getName();
+        for (ClientHandler ch:room.getClientHandlers()){
+            if (ch.getClientUsername().equals(currentPlayerName)){
+                ch.writeToClient("Server : It is ur turn");
+            }else {
+                ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
+            }
+        }
     }
 
 

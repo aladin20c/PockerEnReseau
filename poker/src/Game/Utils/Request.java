@@ -68,7 +68,6 @@ public class Request {
 
 
 
-
     //general
     public static String QUIT="210 QUIT";
     public static String QUIT_ACCEPTED="200 ACCEPTED";

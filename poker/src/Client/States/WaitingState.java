@@ -18,7 +18,6 @@ public class WaitingState extends GameState{
         this.username = username;
         this.currentGame = currentGame;
         this.startRequested=false;
-        System.out.println("[Client][gameState][WaitingState] waiting for game start....");
     }
 
 

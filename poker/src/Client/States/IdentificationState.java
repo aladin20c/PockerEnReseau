@@ -8,7 +8,6 @@ public class IdentificationState extends GameState{
 
     public IdentificationState(Client client) {
         super(client);
-        System.out.println("[gameState][IdentificationState] connecting....");
     }
 
 

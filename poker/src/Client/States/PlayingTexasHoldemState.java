@@ -16,7 +16,6 @@ public class PlayingTexasHoldemState extends GameState {
 
     public PlayingTexasHoldemState(Client client, String username, PokerGame currentGame) {
         super(client);
-        System.out.println("[Client][gameState][PlayingTexasHoldemState] playing Texas Holdem poker....");
         this.username = username;
         this.currentGame = currentGame;
         this.futureAction = "";
@@ -133,10 +132,8 @@ public class PlayingTexasHoldemState extends GameState {
 
     public void rotateTurn(){
         if(currentGame.isRoundFinished()){
-            System.out.println("client : endgame");return;
-        }
-
-        if(turn!=currentGame.getBidTurn()){
+            System.out.println("client : endgame");
+        }else if(turn!=currentGame.getBidTurn()){
             turn=currentGame.getBidTurn();
             switch (turn) {
                 case 0:
@@ -155,7 +152,6 @@ public class PlayingTexasHoldemState extends GameState {
                 default: System.out.println("client : endgame");
             }
         }
-
         if(currentGame.isCurrentPlayer(username)) {
             System.out.println("client : It is ur turn");
         }else{

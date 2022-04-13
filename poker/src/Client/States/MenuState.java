@@ -15,7 +15,6 @@ public class MenuState extends GameState{
     public MenuState(Client client, String username) {
         super(client);
         this.username = username;
-        System.out.println("[Client][gameState][menuState] connected....");
     }
 
 
