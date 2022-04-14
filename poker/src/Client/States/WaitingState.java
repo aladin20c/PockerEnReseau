@@ -3,7 +3,7 @@ package Client.States;
 import Client.Client;
 import Game.Player;
 import Game.PokerGame;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 
 public class WaitingState extends GameState{
@@ -18,7 +18,6 @@ public class WaitingState extends GameState{
         this.username = username;
         this.currentGame = currentGame;
         this.startRequested=false;
-        System.out.println("[Client][gameState][WaitingState] waiting for game start....");
     }
 
 

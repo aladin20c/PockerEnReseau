@@ -1,7 +1,6 @@
 package Server.ServerGameStates;
 
-import Game.PokerGame;
-import Game.Utils.Request;
+import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Room;
 import Server.Server;
@@ -32,7 +31,6 @@ public class WaitingState extends GameState {
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
-            return;
 
         } else if (messageFromClient.matches(Request.START_ROUND)) {
 
@@ -96,7 +94,6 @@ public class WaitingState extends GameState {
                     ch.setGameState(new Playing5CardPokerState(ch,room));
                 }
             }
-            return;
         }else{
             int size = playersWhoRefused.size();
             broadCastMessageToEveryone("154 START ABORDED " + size);

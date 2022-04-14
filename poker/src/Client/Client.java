@@ -2,7 +2,7 @@ package Client;
 
 import Client.States.GameState;
 import Client.States.IdentificationState;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 import java.io.*;
 import java.net.Socket;

@@ -23,7 +23,6 @@ public class PokerFerme extends PokerGame{
     }
 
 
-
     @Override
     public boolean canResetGame(){
         int nbPlayers=0;
@@ -42,7 +41,7 @@ public class PokerFerme extends PokerGame{
     @Override
     public boolean canCall(Player player){
         if(player==getCurrentPlayer()){
-            if(bidTurn!=CHANGING_TURN){
+            if(bidTurn!=CHANGING_TURN && bidTurn<4){
                 return ((player.getBidPerRound()<bidAmount)&&((bidAmount-player.getBidPerRound())<=player.getStack()));
             }
         }
@@ -51,12 +50,12 @@ public class PokerFerme extends PokerGame{
 
     @Override
     public boolean canFold(Player player){
-        return player==getCurrentPlayer();
+        return bidTurn<4 && player==getCurrentPlayer();
     }
 
     @Override
     public boolean canCheck(Player player){
-        if(bidTurn!=CHANGING_TURN){
+        if(bidTurn!=CHANGING_TURN && bidTurn<4){
             if(player==getCurrentPlayer()){
                 return (player.getBidPerRound() == bidAmount);
             }
@@ -70,7 +69,7 @@ public class PokerFerme extends PokerGame{
             if(bidTurn==0 && raiseAmount==minBid){
                 return true;
             }
-            if(bidTurn!=2){
+            if(bidTurn!=2 && bidTurn<4){
                 int callAmount = bidAmount-player.getBidPerRound();
                 return ((raiseAmount>bidAmount)&&((callAmount)<=player.getStack()));
             }

@@ -1,9 +1,9 @@
 package Game.pokerhandranking;
 
 import Game.Card;
-import Game.definitions.Rank;
-import Game.definitions.SortBy;
-import Game.definitions.Suit;
+import Game.utils.Rank;
+import Game.utils.SortBy;
+import Game.utils.Suit;
 
 import java.util.*;
 

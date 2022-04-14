@@ -1,4 +1,4 @@
-package Game.Utils;
+package Game.utils;
 
 public class Request {
 
@@ -65,7 +65,6 @@ public class Request {
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
     public static String PLAYER_CHANGED_CARDS="720 .+ Change \\d+";
     public static String CHANGE_RECIEVED="701 RECIEVED";
-
 
 
 

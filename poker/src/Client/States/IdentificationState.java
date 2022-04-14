@@ -1,14 +1,13 @@
 package Client.States;
 
 import Client.Client;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 public class IdentificationState extends GameState{
 
 
     public IdentificationState(Client client) {
         super(client);
-        System.out.println("[gameState][IdentificationState] connecting....");
     }
 
 

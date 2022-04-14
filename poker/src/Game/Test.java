@@ -1,12 +1,8 @@
 package Game;
 
-import Game.definitions.Rank;
-import Game.definitions.Suit;
+import Game.utils.Rank;
+import Game.utils.Suit;
 import Game.pokerhandranking.HandTypeRankingUtil;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public class Test {
     public static void main (String [] args){

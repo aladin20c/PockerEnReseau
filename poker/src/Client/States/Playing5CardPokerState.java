@@ -5,7 +5,7 @@ import Game.Card;
 import Game.Hand;
 import Game.Player;
 import Game.PokerGame;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 
 public class Playing5CardPokerState extends GameState{
@@ -19,7 +19,6 @@ public class Playing5CardPokerState extends GameState{
 
     public Playing5CardPokerState(Client client, String username, PokerGame currentGame) {
         super(client);
-        System.out.println("[Client][gameState][Playing5CardPokerState] playing 5 card poker....");
         this.username = username;
         this.currentGame = currentGame;
         this.futureAction="";
@@ -155,10 +154,9 @@ public class Playing5CardPokerState extends GameState{
 
     public void rotateTurn(){
         if(currentGame.isRoundFinished()){
-            System.out.println("client : endgame");return;
-        }
+            System.out.println("client : endgame");
 
-        if(turn!=currentGame.getBidTurn()){
+        }else if(turn!=currentGame.getBidTurn()){
             turn=currentGame.getBidTurn();
             switch (turn) {
                 case 0:

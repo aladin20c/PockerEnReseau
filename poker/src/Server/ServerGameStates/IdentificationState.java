@@ -1,9 +1,9 @@
 package Server.ServerGameStates;
 
-import Game.Utils.Request;
+import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Server;
-import Server.Room;
+
 
 public class IdentificationState extends GameState{
 

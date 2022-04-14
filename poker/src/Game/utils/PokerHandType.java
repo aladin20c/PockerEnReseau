@@ -1,4 +1,4 @@
-package Game.definitions;
+package Game.utils;
 
 public enum PokerHandType {
     ROYAL_FLUSH(10,"Royal flush",5),

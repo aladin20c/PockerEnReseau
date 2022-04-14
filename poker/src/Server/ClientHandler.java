@@ -1,14 +1,11 @@
 package Server;
 
-import Game.Card;
-import Game.Utils.Request;
 import Server.ServerGameStates.GameState;
 import Server.ServerGameStates.IdentificationState;
 
 
 import java.io.*;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.List;
 
 

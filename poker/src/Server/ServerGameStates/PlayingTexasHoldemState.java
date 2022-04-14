@@ -3,7 +3,7 @@ package Server.ServerGameStates;
 import Game.Card;
 import Game.Player;
 import Game.TexasHoldem;
-import Game.Utils.Request;
+import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Room;
 import Server.Server;
@@ -150,25 +150,32 @@ public class PlayingTexasHoldemState extends GameState{
                 default: broadCastMessageToEveryone("server : endgame");
             }
         }
-        broadCastMessageToEveryone("Server : It is "+room.getGame().getCurrentPlayer().getName()+"'s turn");
+        String currentPlayerName=room.getGame().getCurrentPlayer().getName();
+        for (ClientHandler ch:room.getClientHandlers()){
+            if (ch.getClientUsername().equals(currentPlayerName)){
+                ch.writeToClient("Server : It is ur turn");
+            }else {
+                ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
+            }
+        }
     }
 
 
     public void notifyCardDistribution(){
         for(Player player : room.getGame().getPlayers()){
             Card[] cards= player.getCards();
-            String cardDistribution="610 CARDS ";
-            cardDistribution+=cards.length;
-            for(Card card : cards) cardDistribution+=(" "+card.toString());
-            room.getClientHandler(player.getName()).writeToClient(cardDistribution);
+            StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
+            cardDistribution.append(cards.length);
+            for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+            room.getClientHandler(player.getName()).writeToClient(cardDistribution.toString());
         }
     }
 
     public void revealCards(int n){
         Card[] cards= room.getGame().revealCards(n);
-        String cardDistribution="610 CARDS "+n;
-        for(Card card : cards) cardDistribution+=(" "+card.toString());
-        broadCastMessageToEveryone(cardDistribution);
+        StringBuilder cardDistribution= new StringBuilder("610 CARDS " + n);
+        for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+        broadCastMessageToEveryone(cardDistribution.toString());
     }
 
 }

@@ -3,7 +3,7 @@ import java.util.ArrayList;
 
 public abstract class PokerGame {
 
-
+    protected static final int dealer=0;
     protected static int COUNT=0;
     protected int id;
     protected int type;
@@ -12,9 +12,8 @@ public abstract class PokerGame {
     protected int initStack;
 
 
-    protected static final int dealer=0;
     protected ArrayList<Player> players;
-    protected ArrayList<Player> winners=new ArrayList<>();
+    protected ArrayList<Player> winners;
     protected int currentPlayer;
     protected Deck deck;
     protected int bidAmount=0;//le bid maximum
@@ -29,8 +28,9 @@ public abstract class PokerGame {
         this.maxPlayers = maxPlayers;
         this.minBid = minBid;
         this.initStack = initStack;
-        deck = new Deck();
-        players=new ArrayList<Player>();
+        this.deck = new Deck();
+        this.players=new ArrayList<Player>();
+        this.winners=new ArrayList<>();
     }
 
     public PokerGame( int type, int maxPlayers, int minBid, int initStack) {
