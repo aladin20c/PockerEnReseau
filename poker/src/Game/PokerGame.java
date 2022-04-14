@@ -55,6 +55,7 @@ public abstract class PokerGame {
      * @return
      */
     public int nextPlayer(int i){//fixme gives error when there'S no players
+        if (players.size()==0) return -1;
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;

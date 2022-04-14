@@ -8,13 +8,11 @@ public class Card {
     //Private fields
     private final Suit suit;
     private final Rank rank;
-    private boolean isFaceUp;
 
     //Constructor
     public Card(Rank rank, Suit suit){
         this.rank=rank;
         this.suit=suit;
-        isFaceUp=true;
     }
 
     public Card (String s){
@@ -108,12 +106,7 @@ public class Card {
         int rank=(this.rank.getRank()-1)%13+1;
         return rank+suit.getShortName();
     }
-    /**
-     * To return a card and change its position
-     */
-    public void flipCard(){
-        isFaceUp=!isFaceUp;
-    }
+
     public static Card createCard(String s){
         Suit suit=null;
         Rank rank=null;

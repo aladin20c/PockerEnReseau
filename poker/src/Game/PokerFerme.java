@@ -55,7 +55,7 @@ public class PokerFerme extends PokerGame{
 
     @Override
     public boolean canCheck(Player player){
-        if(bidTurn!=CHANGING_TURN && bidTurn<4){
+        if(bidTurn!=CHANGING_TURN &&  bidTurn!=ANTE && bidTurn<4){
             if(player==getCurrentPlayer()){
                 return (player.getBidPerRound() == bidAmount);
             }
