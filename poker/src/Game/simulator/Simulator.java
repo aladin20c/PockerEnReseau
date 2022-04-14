@@ -7,7 +7,7 @@ import Game.utils.Suit;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public class Simulator {
+public abstract class Simulator {
 
     /*return hashset containing 52 poker cards*/
     public HashSet<Card> getCardSet(){
@@ -21,7 +21,10 @@ public class Simulator {
     }
 
     /*gives a rank to a hand strenght*/
-    public int Rank(ArrayList<Card> handcards, ArrayList<Card> tablecards) {
+    public int Rank(ArrayList<Card> cards,ArrayList<Card> cards2) {
+        return 1;
+    }
+    public int Rank(ArrayList<Card> cards,ArrayList<Card> cards2,ArrayList<Card> cards3) {
         return 1;
     }
 
