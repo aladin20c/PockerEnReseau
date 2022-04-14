@@ -1,6 +1,6 @@
 package Server.ServerGameStates;
 
-import Game.Utils.Request;
+import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Room;
 import Server.Server;

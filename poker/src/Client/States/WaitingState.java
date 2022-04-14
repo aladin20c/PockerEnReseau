@@ -3,7 +3,7 @@ package Client.States;
 import Client.Client;
 import Game.Player;
 import Game.PokerGame;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 
 public class WaitingState extends GameState{

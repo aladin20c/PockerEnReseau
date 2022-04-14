@@ -4,7 +4,7 @@ import Client.Client;
 import Game.PokerFerme;
 import Game.PokerGame;
 import Game.TexasHoldem;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 public class MenuState extends GameState{
 

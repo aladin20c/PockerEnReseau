@@ -1,7 +1,7 @@
 package Game;
 
-import Game.definitions.PokerHandType;
-import Game.definitions.SortBy;
+import Game.utils.PokerHandType;
+import Game.utils.SortBy;
 
 import java.util.ArrayList;
 import java.util.Collections;

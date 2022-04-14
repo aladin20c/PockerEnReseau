@@ -1,4 +1,4 @@
-package Game.Utils;
+package Game.utils;
 
 public class Request {
 

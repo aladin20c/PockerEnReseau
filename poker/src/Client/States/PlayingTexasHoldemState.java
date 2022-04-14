@@ -2,7 +2,7 @@ package Client.States;
 
 import Client.Client;
 import Game.*;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 
 public class PlayingTexasHoldemState extends GameState {

@@ -5,7 +5,7 @@ import Game.Card;
 import Game.Hand;
 import Game.Player;
 import Game.PokerGame;
-import Game.Utils.Request;
+import Game.utils.Request;
 
 
 public class Playing5CardPokerState extends GameState{

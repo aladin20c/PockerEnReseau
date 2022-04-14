@@ -1,4 +1,4 @@
-package Game.definitions;
+package Game.utils;
 
 public enum Rank {
     DEUCE(2,"Deuce"),

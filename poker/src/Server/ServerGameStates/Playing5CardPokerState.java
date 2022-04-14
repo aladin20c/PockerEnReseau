@@ -2,7 +2,7 @@ package Server.ServerGameStates;
 
 import Game.Card;
 import Game.Player;
-import Game.Utils.Request;
+import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Server;
 import Server.Room;

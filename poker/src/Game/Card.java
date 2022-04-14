@@ -1,7 +1,7 @@
 package Game;
 
-import Game.definitions.Rank;
-import Game.definitions.Suit;
+import Game.utils.Rank;
+import Game.utils.Suit;
 
 public class Card {
 
@@ -178,7 +178,6 @@ public class Card {
             default:
             //Lancer une exception
         }
-
         return new Card(rank,suit);
     }
     public boolean equals(Object o) {

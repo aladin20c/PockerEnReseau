@@ -1,8 +1,9 @@
 package Game;
 
-import Game.definitions.Rank;
-import Game.definitions.Suit;
+import Game.utils.Rank;
+import Game.utils.Suit;
 
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class Deck extends Hand {
@@ -78,12 +79,12 @@ public class Deck extends Hand {
 
 
 
-    public Card[] getNextCards(int n){
-        Card[] cards=new Card[n];
+    public ArrayList<Card> getNextCards(int n){
+        ArrayList<Card> nextcards=new ArrayList<>();
         for (int i=0;i<n;i++){
-            cards[i]= this.cards.remove(0);
+            nextcards.add(this.cards.remove(0));
         }
-        return cards;
+        return nextcards;
     }
 
 

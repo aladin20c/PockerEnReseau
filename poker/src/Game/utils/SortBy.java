@@ -1,4 +1,4 @@
-package Game.definitions;
+package Game.utils;
 
 import Game.Card;
 
