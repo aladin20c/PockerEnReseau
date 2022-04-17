@@ -32,8 +32,14 @@ public class IdentificationState extends GameState{
                 System.out.println(name+" has successfully connected");
                 clientHandler.setGameState(new MenuState(clientHandler));
             }
+        }else if(messageFromClient.matches(Request.GETSTATE)) {
+
+            writeToClient("666 IdentificationState");
+
         }else {
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 }

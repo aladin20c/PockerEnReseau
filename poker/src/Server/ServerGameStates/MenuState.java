@@ -46,7 +46,7 @@ public class MenuState extends GameState{
                 room.setGame(game);
                 room.addClient(clientHandler);
                 Server.addRoom(room);
-                writeToClient("110 GAME CREATED "+game.getId());
+                writeToClient("111 GAME CREATED "+game.getId());
                 clientHandler.setGameState(new WaitingState(clientHandler,room));
             }
 
@@ -66,13 +66,13 @@ public class MenuState extends GameState{
             int id=Integer.parseInt(messageFromClient.substring(9));
             Room room=Server.getRoom(id);
             if(!clientRoomIds.contains(id) ||room==null|| !room.canAddNewClient()){
-                writeToClient("131 room unavailable");
+                writeToClient("132 room unavailable");
                 return;
             }
 
             writeToClient("131 GAME " + room.getGame().getId() + " JOINED");
             this.room=room;
-            broadCastMessage("141 " + clientHandler.getClientUsername() + " JOINED");
+            broadCastMessage("140 " + clientHandler.getClientUsername() + " JOINED");
 
             writeToClient("155 LIST PLAYER "+room.numberOfClients());
             int index = 0;
@@ -96,8 +96,15 @@ public class MenuState extends GameState{
             }
             room.addClient(this.clientHandler);
             this.clientHandler.setGameState(new WaitingState(clientHandler,room));
+
+        }else if(messageFromClient.matches(Request.GETSTATE)) {
+
+            writeToClient("666 MenuState");
+
         }else {
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 

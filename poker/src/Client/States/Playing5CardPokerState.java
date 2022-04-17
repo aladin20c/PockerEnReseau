@@ -136,6 +136,11 @@ public class Playing5CardPokerState extends GameState{
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
             rotateTurn();
+
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 Playing5CardPokerState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required Playing5CardPokerState");
+
         }
     }
 

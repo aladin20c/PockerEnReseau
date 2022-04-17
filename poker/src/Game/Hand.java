@@ -92,15 +92,6 @@ public class Hand implements Comparable<Hand> {
     }
 
     /**
-     * Make all the cards visible
-     */
-    public void flipCards(){
-        for(Card c:cards){
-            c.flipCard();
-        }
-    }
-
-    /**
      * Sort cards according to theirs suit
      */
     public void sortBySuit(){

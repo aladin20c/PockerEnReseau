@@ -15,9 +15,9 @@ public class Request {
     public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 6 STACK 10000
     public static String INCORRECT_VALUE="903 Incorrect value";
     public static String INCORRECT_PLAYERS="904 Incorrect number of players";
-    public static String INCORRECT_BET="903 Incorrect minimal bet";
-    public static String INCORRECT_STACK="903 Incorrect stack";
-    public static String GAME_CREATED="110 GAME CREATED -?\\d+";
+    public static String INCORRECT_BET="905 Incorrect minimal bet";
+    public static String INCORRECT_STACK="906 Incorrect stack";
+    public static String GAME_CREATED="111 GAME CREATED -?\\d+";
 
     public static String GET_ROOMS="120 GETLIST";
     public static String LIST_LENGTH="120 NUMBER -?\\d+";
@@ -32,7 +32,7 @@ public class Request {
     public static String PLAYERS_LIST="155 LIST PLAYER \\d";
     public static String PLAYERS_INFOS="155 MESS \\d+ PLAYER((\\s+.+){1,5})";
 
-    public static String PLAYER_JOINED="141 .+ JOINED";
+    public static String PLAYER_JOINED="140 .+ JOINED";
     public static String ACK_Player="141 .+ ACK";
 
     public static String START_ROUND="150 REQUEST START";
@@ -76,5 +76,17 @@ public class Request {
     public static String QUIT_RECIEVED="201 RECIEVED";
 
     public static String ERROR="999 ERROR";
+    public static String INVALID="907 Invalid Command";
+
+
+
+    //Cheats
+    public static String GETSTATE="777 GET STATE";
+    public static String GETALLCARDS="777 GET ALLCARDS";
+    public static String GETTABLECARDS="777 GET TABLE";
+
+
+    public static String STATE="666 .+State";
+
 
 }

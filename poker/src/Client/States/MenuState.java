@@ -73,6 +73,11 @@ public class MenuState extends GameState{
                 }
             }
             throw new RuntimeException("room not found");
+
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 MenuState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required MenuState");
+
         }
     }
 }

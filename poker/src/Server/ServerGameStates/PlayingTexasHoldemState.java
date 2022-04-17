@@ -8,6 +8,9 @@ import Server.ClientHandler;
 import Server.Room;
 import Server.Server;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class PlayingTexasHoldemState extends GameState{
 
 
@@ -25,12 +28,12 @@ public class PlayingTexasHoldemState extends GameState{
     public void analyseRequest(String messageFromClient) {
         if(!messageFromClient.matches("\\d\\d\\d.+")) {
 
-            broadCastMessage(clientHandler.getClientUsername()+":"+messageFromClient);
+            broadCastMessageToEveryone(clientHandler.getClientUsername()+":"+messageFromClient);
 
         }else if(messageFromClient.matches(Request.FOLD)){
 
             if(!room.getGame().canFold(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else {
                 player.fold(room.getGame());
                 broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
@@ -41,22 +44,22 @@ public class PlayingTexasHoldemState extends GameState{
         }else if(messageFromClient.matches(Request.CHECK)){
 
             if(!room.getGame().canCheck(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else{
                 player.check(room.getGame());
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
         }else if(messageFromClient.matches(Request.CALL)){
 
             if(!room.getGame().canCall(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else{
                 player.call(room.getGame());
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
@@ -64,11 +67,11 @@ public class PlayingTexasHoldemState extends GameState{
 
             int raise = Integer.parseInt(messageFromClient.substring(10));
             if(!room.getGame().canRaise(player,raise)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else {
                 player.raise(room.getGame(), raise);
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
@@ -88,8 +91,22 @@ public class PlayingTexasHoldemState extends GameState{
 
             //nothing to do here(probably)
 
+        }else if(messageFromClient.matches(Request.GETSTATE)) {
+
+            writeToClient("666 PlayingTexasHoldemState");
+
+        }else if(messageFromClient.matches(Request.GETALLCARDS)) {
+
+            leakCards();
+
+        }else if(messageFromClient.matches(Request.GETTABLECARDS)) {
+
+            leakTable();
+
         }else{
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 
@@ -176,6 +193,26 @@ public class PlayingTexasHoldemState extends GameState{
         StringBuilder cardDistribution= new StringBuilder("610 CARDS " + n);
         for(Card card : cards) cardDistribution.append(" ").append(card.toString());
         broadCastMessageToEveryone(cardDistribution.toString());
+    }
+
+    public void leakCards(){
+        int count=0;
+        for(Player player : room.getGame().getPlayers()){
+            Card[] cards= player.getCards();
+            String cardDistribution="666 "+player.getName()+" "+count+" CARDS ";
+            cardDistribution+=cards.length;
+            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            writeToClient(cardDistribution);
+            count+=1;
+        }
+    }
+
+    public void leakTable(){
+            List<Card> cards= room.getGame().getTable().getCards();
+            String cardDistribution="666 Table CARDS ";
+            cardDistribution+=cards.size();
+            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            writeToClient(cardDistribution);
     }
 
 }

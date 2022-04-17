@@ -81,6 +81,10 @@ public class WaitingState extends GameState{
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
 
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 WaitingState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required WaitingState");
+
         }
     }
 

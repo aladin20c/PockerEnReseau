@@ -28,7 +28,7 @@ public class Playing5CardPokerState extends GameState{
         }else if(messageFromClient.matches(Request.FOLD)){
 
             if(!room.getGame().canFold(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else {
                 player.fold(room.getGame());
                 broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
@@ -39,22 +39,22 @@ public class Playing5CardPokerState extends GameState{
         }else if(messageFromClient.matches(Request.CHECK)){
 
             if(!room.getGame().canCheck(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else{
                 player.check(room.getGame());
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
         }else if(messageFromClient.matches(Request.CALL)){
 
             if(!room.getGame().canCall(player)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else{
                 player.call(room.getGame());
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
@@ -62,11 +62,11 @@ public class Playing5CardPokerState extends GameState{
 
             int raise = Integer.parseInt(messageFromClient.substring(10));
             if(!room.getGame().canRaise(player,raise)){
-                writeToClient("907 Invalid Command");
+                writeToClient(Request.INVALID);
             }else {
                 player.raise(room.getGame(), raise);
-                writeToClient("400 ACCEPTED");
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
+                writeToClient("400 ACCEPTED");
                 rotateTurn();
             }
 
@@ -88,7 +88,7 @@ public class Playing5CardPokerState extends GameState{
             }
 
             if(data.length!=numberOfCards+3 || !room.getGame().canChange(player,cards)){
-                writeToClient("999 ERROR");
+                writeToClient(Request.ERROR);
             }else{
                 Card[] newCards=room.getGame().change(player,cards);
                 writeToClient("700 ACCEPTED");
@@ -115,8 +115,18 @@ public class Playing5CardPokerState extends GameState{
 
             //nothing to do here(probably)
 
-        }else{
+        }else if(messageFromClient.matches(Request.GETSTATE)) {
+
+            writeToClient("666 Playing5CardPokerState");
+
+        }else if(messageFromClient.matches(Request.GETALLCARDS)) {
+
+            leakCards();
+
+        } else{
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 
@@ -185,6 +195,18 @@ public class Playing5CardPokerState extends GameState{
             cardDistribution+=cards.length;
             for(Card card : cards) cardDistribution+=(" "+card.toString());
             room.getClientHandler(player.getName()).writeToClient(cardDistribution);
+        }
+    }
+
+    public void leakCards(){
+        int count=0;
+        for(Player player : room.getGame().getPlayers()){
+            Card[] cards= player.getCards();
+            String cardDistribution="666 "+player.getName()+" "+count+" CARDS ";
+            cardDistribution+=cards.length;
+            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            writeToClient(cardDistribution);
+            count+=1;
         }
     }
 }

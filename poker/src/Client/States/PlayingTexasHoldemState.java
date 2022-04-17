@@ -116,6 +116,10 @@ public class PlayingTexasHoldemState extends GameState {
             writeToServer(Request.QUIT_RECIEVED);
             rotateTurn();
 
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 PlayingTexasHoldemState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required PlayingTexasHoldemState");
+
         }
     }
 

@@ -37,9 +37,9 @@ public class WaitingState extends GameState {
             if (startRequested) {
                 writeToClient("155 start already requested");
             } else if (!room.isAdmin(clientHandler)) {
-                writeToClient("157 u are not the admin");
+                writeToClient("156 u are not the admin");
             } else if (!room.getGame().canStartGame()) {
-                writeToClient("158 not enough players");
+                writeToClient("157 not enough players");
             } else {
                 room.requestStart(true);
                 this.startRequestResponse=1;
@@ -51,7 +51,7 @@ public class WaitingState extends GameState {
             if (!startRequested) {
                 writeToClient("158 there's no start request");
             } else if (this.startRequestResponse != -1) {
-                writeToClient("158 u already responded to Start request");
+                writeToClient("159 u already responded to Start request");
             }else{
                 String response = messageFromClient.substring(10);
                 this.startRequestResponse = (response.equals("YES"))? 1:0;
@@ -66,8 +66,14 @@ public class WaitingState extends GameState {
 
             //nothing to do here(probably)
 
+        }else if(messageFromClient.matches(Request.GETSTATE)) {
+
+            writeToClient("666 WaitingState");
+
         }else{
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 
@@ -129,7 +135,7 @@ public class WaitingState extends GameState {
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
-            broadCastMessageToEveryone("153 GAME ABORDED " + 0);
+            broadCastMessageToEveryone("154 START ABORDED " + 0);
             room.requestStart(false);
         }
         clientHandler.setGameState(new MenuState(clientHandler));
