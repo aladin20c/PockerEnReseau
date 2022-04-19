@@ -116,7 +116,7 @@ public class ClientHandler implements Runnable{
     public void addTask(String string){
         RunOutOfTimeTask task=new RunOutOfTimeTask(this,string);
         this.taskset.add(task);
-        this.timer.schedule(task,30_000);
+        this.timer.schedule(task,10_000);
     }
 
     public void cancelTask(String string){

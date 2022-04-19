@@ -70,8 +70,10 @@ public class MenuState extends GameState{
                 return;
             }
 
-            writeToClient("131 GAME " + room.getGame().getId() + " JOINED");
             this.room=room;
+            writeToClient("131 GAME " + room.getGame().getId() + " JOINED");
+            //(╯°□°)╯︵ ┻━┻
+            broadCastTask(Request.ACK_Player);
             broadCastMessage("140 " + clientHandler.getClientUsername() + " JOINED");
 
             writeToClient("155 LIST PLAYER "+room.numberOfClients());

@@ -51,6 +51,22 @@ public abstract class GameState {
         }
     }
 
+    public void broadCastTask(String string){
+        for (ClientHandler clientHandler : room.getClientHandlers()) {
+            if (clientHandler!=this.clientHandler) {
+                    clientHandler.addTask(string);
+            }
+        }
+    }
+
+    public void broadCastCancel(String string){
+        for (ClientHandler clientHandler : room.getClientHandlers()) {
+            if (clientHandler!=this.clientHandler) {
+                clientHandler.cancelTask(string);
+            }
+        }
+    }
+
     public abstract void analyseRequest(String messageFromClient);
 
     public void clientQuit(){}

@@ -31,6 +31,8 @@ public class WaitingState extends GameState {
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         } else if (messageFromClient.matches(Request.START_ROUND)) {
 
@@ -43,6 +45,8 @@ public class WaitingState extends GameState {
             } else {
                 room.requestStart(true);
                 this.startRequestResponse=1;
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.START_RESPONSE);
                 broadCastMessage("152 START REQUESTED");
             }
 
@@ -55,6 +59,8 @@ public class WaitingState extends GameState {
             }else{
                 String response = messageFromClient.substring(10);
                 this.startRequestResponse = (response.equals("YES"))? 1:0;
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);
                 checkPlayersResponses();
             }
 
@@ -64,7 +70,8 @@ public class WaitingState extends GameState {
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
-            //nothing to do here(probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         }else if(messageFromClient.matches(Request.GETSTATE)) {
 
@@ -127,15 +134,19 @@ public class WaitingState extends GameState {
 
     @Override
     public void clientQuit() {
-        writeToClient(Request.QUIT_ACCEPTED);
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         room.removeClient(clientHandler);
         room.getGame().removePlayer(clientHandler.getClientUsername());
+        writeToClient(Request.QUIT_ACCEPTED);
+        //(╯°□°)╯︵ ┻━┻
+        broadCastTask(Request.QUIT_RECIEVED);
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
 
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
             broadCastMessageToEveryone("154 START ABORDED " + 0);
+            //(╯°□°)╯︵ ┻━┻
+            broadCastCancel(Request.START_RESPONSE);
             room.requestStart(false);
         }
         clientHandler.setGameState(new MenuState(clientHandler));
