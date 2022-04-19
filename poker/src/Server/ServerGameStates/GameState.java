@@ -4,6 +4,8 @@ package Server.ServerGameStates;
 import Server.ClientHandler;
 import Server.Room;
 
+import java.io.IOException;
+
 
 public abstract class GameState {
 
@@ -23,12 +25,30 @@ public abstract class GameState {
         clientHandler.writeToClient(message);
     }
 
-    public void broadCastMessage(String message){
-        clientHandler.broadCastMessage(message,room.getClientHandlers());
+    public void broadCastMessage(String messageToSend){
+        for (ClientHandler clientHandler : room.getClientHandlers()) {
+            try {
+                if (clientHandler!=this.clientHandler) {
+                    clientHandler.getBufferedWriter().write(messageToSend);
+                    clientHandler.getBufferedWriter().newLine();
+                    clientHandler.getBufferedWriter().flush();
+                }
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
     }
 
-    public void broadCastMessageToEveryone(String message){
-        clientHandler.broadCastMessageToEveryone(message,room.getClientHandlers());
+    public void broadCastMessageToEveryone(String messageToSend){
+        for (ClientHandler clientHandler : room.getClientHandlers()) {
+            try {
+                clientHandler.getBufferedWriter().write(messageToSend);
+                clientHandler.getBufferedWriter().newLine();
+                clientHandler.getBufferedWriter().flush();
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
     }
 
     public abstract void analyseRequest(String messageFromClient);

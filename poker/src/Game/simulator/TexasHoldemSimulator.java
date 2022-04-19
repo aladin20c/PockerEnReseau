@@ -19,20 +19,12 @@ public class TexasHoldemSimulator extends Simulator{
         tablehand.getCards().forEach(cardSet::remove);
         playerhand.getCards().forEach(cardSet::remove);
 
-        //preparing all players
-        HashMap<String,ArrayList<Card>> players=new HashMap<>();
-        for(Player player: gameplayers){
-            players.put(player.getName(),new ArrayList<>(player.getHand().getCards()));
-        }
-
 
         //preparing simulation variables
         int ahead = 0;
         int tied=0;
         int behind = 0;
-        boolean isahead;
-        boolean istied;
-        boolean isbehind;
+
 
         ArrayList<Card> ourhand = new ArrayList<>(playerhand.getCards());
         ArrayList<Card>[] opphands = new ArrayList[numeberOfPlayers-1];
@@ -44,9 +36,6 @@ public class TexasHoldemSimulator extends Simulator{
         ArrayList<Card> boardhand=new ArrayList<>();
         ArrayList<Card> deck;
 
-        int ourrank;
-        int opprank;
-
         //simulation
         for(int i=0;i<100000;i++){
 
@@ -55,11 +44,6 @@ public class TexasHoldemSimulator extends Simulator{
             boardhand.addAll(tablehand.getCards());
             deck.remove(0);
             distributeCards(deck,opphands,2);
-
-            isahead=false;
-            istied=false;
-            isbehind=false;
-
 
             int n=boardhand.size();
             if(n==0){
@@ -83,7 +67,11 @@ public class TexasHoldemSimulator extends Simulator{
 
 
             //ranking hands
-            ourrank=Rank(ourhand,boardhand);
+            boolean isahead=false;
+            boolean istied=false;
+            boolean isbehind=false;
+            int ourrank=Rank(ourhand,boardhand);
+            int opprank=0;
 
             for (ArrayList<Card> hand : opphands){
                 opprank=Rank(hand,boardhand);
@@ -109,6 +97,10 @@ public class TexasHoldemSimulator extends Simulator{
         System.out.println("tied="+tied);
         System.out.println("behind="+behind);
     }
+
+
+
+
 
 
 
@@ -150,6 +142,10 @@ public class TexasHoldemSimulator extends Simulator{
         //return hand strength
         return (ahead + tied / 2) / (ahead + tied + behind);
     }
+
+
+
+
 
     /*calculating handPotential*/
     public int HandPotential(ArrayList<Card> ourcards, ArrayList<Card> boardcards) {
