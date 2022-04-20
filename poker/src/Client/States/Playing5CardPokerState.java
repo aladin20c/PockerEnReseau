@@ -141,6 +141,13 @@ public class Playing5CardPokerState extends GameState{
 
             if(!comingMessage.equals("666 Playing5CardPokerState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required Playing5CardPokerState");
 
+        }else if(comingMessage.matches(Request.PLAYERS)){
+
+            String[] plyers=comingMessage.split("\\s+");
+            if((plyers.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+plyers[1]+" required "+currentGame.getPlayers().size());
+            for (int i=3;i<plyers.length;i++){
+                currentGame.getPlayer(plyers[i]);
+            }
         }
     }
 

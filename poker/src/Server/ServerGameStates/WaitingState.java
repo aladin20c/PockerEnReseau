@@ -1,5 +1,6 @@
 package Server.ServerGameStates;
 
+import Game.Player;
 import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Room;
@@ -77,6 +78,22 @@ public class WaitingState extends GameState {
 
             writeToClient("666 WaitingState");
 
+        }else if(messageFromClient.matches(Request.GETPLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(Player player : room.getGame().getPlayers()){
+                playerList.append(" ").append(player.getName());
+            }
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_ACTIVE_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(ClientHandler ch : room.getClientHandlers()){
+                playerList.append(" ").append(ch.getClientUsername());
+            }
+            writeToClient(playerList.toString());
+
         }else{
 
             clientHandler.writeToClient(Request.ERROR);
@@ -144,9 +161,9 @@ public class WaitingState extends GameState {
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
-            broadCastMessageToEveryone("154 START ABORDED " + 0);
             //(╯°□°)╯︵ ┻━┻
             broadCastCancel(Request.START_RESPONSE);
+            broadCastMessageToEveryone("154 START ABORDED " + 0);
             room.requestStart(false);
         }
         clientHandler.setGameState(new MenuState(clientHandler));

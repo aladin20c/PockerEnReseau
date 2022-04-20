@@ -31,6 +31,10 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else {
                 player.fold(room.getGame());
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -42,6 +46,10 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.check(room.getGame());
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -53,6 +61,10 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.call(room.getGame());
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -65,6 +77,10 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else {
                 player.raise(room.getGame(), raise);
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -72,11 +88,13 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.ACTION_RECIEVED)){
 
-            //Nothing here (probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
 
-            //Nothing here (probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
@@ -92,19 +110,25 @@ public class Playing5CardPokerState extends GameState{
             }else{
                 Card[] newCards=room.getGame().change(player,cards);
                 writeToClient("700 ACCEPTED");
+                //(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.CHANGE_RECIEVED);
                 broadCastMessage("720 "+clientHandler.getClientUsername()+" Change "+numberOfCards);
                 String cardDistribution="610 CARDS ";
                 cardDistribution+=(data[2]);
                 for(Card card:newCards){
                     cardDistribution=cardDistribution+" "+card.toString();
                 }
+                //(╯°□°)╯︵ ┻━┻
+                clientHandler.addTask(Request.CARDS_RECIEVED);
+                writeToClient(cardDistribution);
                 rotateTurn();
             }
 
 
         }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
 
-            //Nothing here (probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         }else if (messageFromClient.matches(Request.QUIT)) {
 
@@ -113,7 +137,8 @@ public class Playing5CardPokerState extends GameState{
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
-            //nothing to do here(probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
 
         }else if(messageFromClient.matches(Request.GETSTATE)) {
 
@@ -122,6 +147,45 @@ public class Playing5CardPokerState extends GameState{
         }else if(messageFromClient.matches(Request.GETALLCARDS)) {
 
             leakCards();
+
+        }else if(messageFromClient.matches(Request.GETPLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(Player player : room.getGame().getPlayers()){
+                playerList.append(" ").append(player.getName());
+            }
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_ACTIVE_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(ClientHandler ch : room.getClientHandlers()){
+                playerList.append(" ").append(ch.getClientUsername());
+            }
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_QUITTED_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("PLAYERS");
+            int count=0;
+            for(Player player : room.getGame().getPlayers()){
+                if(player.hasQuitted()) {
+                    playerList.append(" ").append(player.getName());
+                    count+=1;
+                }
+            }
+            playerList.insert(0,"666 "+count+" ");
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_FOLDED_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getFoldedPlayers() + " PLAYERS");
+            for(Player player : room.getGame().getPlayers()){
+                if(player.hasFolded()) {
+                    playerList.append(" ").append(player.getName());
+                }
+            }
+            writeToClient(playerList.toString());
 
         } else{
 
@@ -134,6 +198,8 @@ public class Playing5CardPokerState extends GameState{
     @Override
     public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
+        //(╯°□°)╯︵ ┻━┻
+        broadCastTask(Request.QUIT_RECIEVED);
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         player.quit(room.getGame());
         room.removeClient(clientHandler);
@@ -141,7 +207,6 @@ public class Playing5CardPokerState extends GameState{
             Server.removeRoom(room);
         }
         clientHandler.setGameState(new MenuState(clientHandler));
-        //TODO further actions
     }
 
 
@@ -154,9 +219,12 @@ public class Playing5CardPokerState extends GameState{
 
     public void rotateTurn(){
         if(room.getGame().isRoundFinished()){
+
             broadCastMessageToEveryone("server : EndGame");
             //todo
+
         }else if(!room.turnIsUpToDate()){
+
             room.updateTurn();
             switch (room.getTurn()){
                 case 0:
@@ -175,14 +243,18 @@ public class Playing5CardPokerState extends GameState{
                     break;
                 default: broadCastMessageToEveryone("server : endgame");
             }
+
         }
         String currentPlayerName=room.getGame().getCurrentPlayer().getName();
         for (ClientHandler ch:room.getClientHandlers()){
+
             if (ch.getClientUsername().equals(currentPlayerName)){
+                ch.addTask("(41[0123].*)|(710.*)");
                 ch.writeToClient("Server : It is ur turn");
             }else {
                 ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
             }
+
         }
     }
 
@@ -194,7 +266,10 @@ public class Playing5CardPokerState extends GameState{
             String cardDistribution="610 CARDS ";
             cardDistribution+=cards.length;
             for(Card card : cards) cardDistribution+=(" "+card.toString());
-            room.getClientHandler(player.getName()).writeToClient(cardDistribution);
+            ClientHandler ch=room.getClientHandler(player.getName());
+            //(╯°□°)╯︵ ┻━┻
+            ch.addTask(Request.CARDS_RECIEVED);
+            ch.writeToClient(cardDistribution);
         }
     }
 

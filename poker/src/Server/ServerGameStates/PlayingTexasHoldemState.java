@@ -36,6 +36,8 @@ public class PlayingTexasHoldemState extends GameState{
                 writeToClient(Request.INVALID);
             }else {
                 player.fold(room.getGame());
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -47,6 +49,8 @@ public class PlayingTexasHoldemState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.check(room.getGame());
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -58,6 +62,8 @@ public class PlayingTexasHoldemState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.call(room.getGame());
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -69,7 +75,9 @@ public class PlayingTexasHoldemState extends GameState{
             if(!room.getGame().canRaise(player,raise)){
                 writeToClient(Request.INVALID);
             }else {
-                player.raise(room.getGame(), raise);
+                player.raise(room.getGame(), raise);//(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -77,19 +85,21 @@ public class PlayingTexasHoldemState extends GameState{
 
         }else if(messageFromClient.matches(Request.ACTION_RECIEVED)){
 
-            //Nothing here (probably)
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
 
-            //Nothing here (probably)
+
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if (messageFromClient.matches(Request.QUIT)) {
 
             clientQuit();
+            rotateTurn();
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
-            //nothing to do here(probably)
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if(messageFromClient.matches(Request.GETSTATE)) {
 
@@ -99,9 +109,21 @@ public class PlayingTexasHoldemState extends GameState{
 
             leakCards();
 
-        }else if(messageFromClient.matches(Request.GETTABLECARDS)) {
+        }else if(messageFromClient.matches(Request.GETPLAYERS)) {
 
-            leakTable();
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(Player player : room.getGame().getPlayers()){
+                playerList.append(" ").append(player.getName());
+            }
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_ACTIVE_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            for(ClientHandler ch : room.getClientHandlers()){
+                playerList.append(" ").append(ch.getClientUsername());
+            }
+            writeToClient(playerList.toString());
 
         }else{
 
@@ -115,14 +137,16 @@ public class PlayingTexasHoldemState extends GameState{
     @Override
     public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        //(╯°□°)╯︵ ┻━┻
+        //broadCastTask(Request.QUIT_RECIEVED);
+        //broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         player.quit(room.getGame());
         room.removeClient(clientHandler);
-        if(room.numberOfClients()==0){
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        /*if(room.numberOfClients()==0){
             Server.removeRoom(room);
-        }
+        }*/
         clientHandler.setGameState(new MenuState(clientHandler));
-        //TODO further actions
     }
 
 
@@ -170,6 +194,7 @@ public class PlayingTexasHoldemState extends GameState{
         String currentPlayerName=room.getGame().getCurrentPlayer().getName();
         for (ClientHandler ch:room.getClientHandlers()){
             if (ch.getClientUsername().equals(currentPlayerName)){
+                ch.addTask("41[0123].*");
                 ch.writeToClient("Server : It is ur turn");
             }else {
                 ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
@@ -181,10 +206,12 @@ public class PlayingTexasHoldemState extends GameState{
     public void notifyCardDistribution(){
         for(Player player : room.getGame().getPlayers()){
             Card[] cards= player.getCards();
-            StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
-            cardDistribution.append(cards.length);
-            for(Card card : cards) cardDistribution.append(" ").append(card.toString());
-            room.getClientHandler(player.getName()).writeToClient(cardDistribution.toString());
+            String cardDistribution="610 CARDS ";
+            cardDistribution+=cards.length;
+            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            ClientHandler ch=room.getClientHandler(player.getName());
+            //ch.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
+            ch.writeToClient(cardDistribution);
         }
     }
 
@@ -192,6 +219,7 @@ public class PlayingTexasHoldemState extends GameState{
         Card[] cards= room.getGame().revealCards(n);
         StringBuilder cardDistribution= new StringBuilder("610 CARDS " + n);
         for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+        //broadCastTaskToEveryone(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
         broadCastMessageToEveryone(cardDistribution.toString());
     }
 
@@ -205,14 +233,11 @@ public class PlayingTexasHoldemState extends GameState{
             writeToClient(cardDistribution);
             count+=1;
         }
-    }
-
-    public void leakTable(){
-            List<Card> cards= room.getGame().getTable().getCards();
-            String cardDistribution="666 Table CARDS ";
-            cardDistribution+=cards.size();
-            for(Card card : cards) cardDistribution+=(" "+card.toString());
-            writeToClient(cardDistribution);
+        List<Card> cards= room.getGame().getTable().getCards();
+        String cardDistribution="666 Table CARDS ";
+        cardDistribution+=cards.size();
+        for(Card card : cards) cardDistribution+=(" "+card.toString());
+        writeToClient(cardDistribution);
     }
 
 }

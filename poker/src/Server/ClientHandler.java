@@ -47,7 +47,8 @@ public class ClientHandler implements Runnable{
             this.gameState=new IdentificationState(this);
 
         }catch(IOException e){
-            closeEverything();
+            //closeEverything();
+            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
         }
     }
 
@@ -57,11 +58,12 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
         }catch (IOException e){
-            closeEverything();
+            //closeEverything();
+            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
         }
     }
 
-    public void closeEverything(){
+    /*public void closeEverything(){
         removeClientHandler();
         try{
             //closing the outer wrapper will close the underlying streams (ex:outputStreamReader)
@@ -70,7 +72,8 @@ public class ClientHandler implements Runnable{
             if(timer!=null) timer.cancel();
             if(socket!=null) socket.close();//closing sockets will close socket input/output streams
         }catch (IOException e){
-            e.printStackTrace();
+            //e.printStackTrace();
+            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
         }
     }
 
@@ -78,7 +81,7 @@ public class ClientHandler implements Runnable{
         Server.removeClient(this);
         System.out.println("Server: "+clientUsername+" has left !");
         gameState.clientQuit();//fixme ________________________________________________
-    }
+    }*/
 
     @Override
     public void run(){
@@ -92,7 +95,7 @@ public class ClientHandler implements Runnable{
                 this.getGameState().analyseRequest(messageFromClient);
             }catch(Exception e){
                 //closeEverything(socket,bufferedReader,bufferedWriter);
-                e.printStackTrace();//fixme remove after tests
+                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
                 break;//when the client disconnects, we get out of the while loop
             }
         }
@@ -114,14 +117,22 @@ public class ClientHandler implements Runnable{
     }
 
     public void addTask(String string){
-        RunOutOfTimeTask task=new RunOutOfTimeTask(this,string);
-        this.taskset.add(task);
-        this.timer.schedule(task,10_000);
+        try {
+            RunOutOfTimeTask task = new RunOutOfTimeTask(this, string);
+            this.taskset.add(task);
+            this.timer.schedule(task, 10_000);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
     public void cancelTask(String string){
-        taskset.removeIf(runOutOfTimeTask -> runOutOfTimeTask.cancel(string));
-        timer.purge();
+        try {
+            taskset.removeIf(runOutOfTimeTask -> runOutOfTimeTask.cancel(string));
+            timer.purge();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
     }
 
 }

@@ -34,7 +34,8 @@ public abstract class GameState {
                     clientHandler.getBufferedWriter().flush();
                 }
             } catch (IOException e) {
-                clientHandler.closeEverything();
+                //clientHandler.closeEverything();
+                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
             }
         }
     }
@@ -46,7 +47,8 @@ public abstract class GameState {
                 clientHandler.getBufferedWriter().newLine();
                 clientHandler.getBufferedWriter().flush();
             } catch (IOException e) {
-                clientHandler.closeEverything();
+                //clientHandler.closeEverything();
+                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
             }
         }
     }
@@ -56,6 +58,12 @@ public abstract class GameState {
             if (clientHandler!=this.clientHandler) {
                     clientHandler.addTask(string);
             }
+        }
+    }
+
+    public void broadCastTaskToEveryone(String string){
+        for (ClientHandler clientHandler : room.getClientHandlers()) {
+            clientHandler.addTask(string);
         }
     }
 

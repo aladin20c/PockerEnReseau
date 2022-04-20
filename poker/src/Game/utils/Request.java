@@ -54,6 +54,7 @@ public class Request {
     public static String PLAYER_CHECK = "511 .+ CHECK";
     public static String PLAYER_CALL="512 .+ CALL";
     public static String PLAYER_RAISE = "513 .+ RAISE \\d+";
+
     public static String ACTION_RECIEVED="500 RECIEVED";
 
 
@@ -78,15 +79,15 @@ public class Request {
     public static String ERROR="999 ERROR";
     public static String INVALID="907 Invalid Command";
 
-
-
     //Cheats
     public static String GETSTATE="777 GET STATE";
     public static String GETALLCARDS="777 GET ALLCARDS";
-    public static String GETTABLECARDS="777 GET TABLE";
-
+    public static String GETPLAYERS="777 GET PLAYERS";
+    public static String GET_ACTIVE_PLAYERS="777 GET ACTIVE PLAYERS";
+    public static String GET_QUITTED_PLAYERS="777 GET QUITTED PLAYERS";
+    public static String GET_FOLDED_PLAYERS="777 GET FOLDED PLAYERS";
 
     public static String STATE="666 .+State";
-
+    public static String PLAYERS="666 \\d+ PLAYERS.*";
 
 }

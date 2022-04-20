@@ -44,7 +44,8 @@ public class Server {
                 thread.start();
             }
         }catch (IOException e){
-            closeServerSocket();
+            //closeServerSocket();
+            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
         }
     }
 
