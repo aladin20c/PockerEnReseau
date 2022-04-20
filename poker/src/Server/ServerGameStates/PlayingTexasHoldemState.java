@@ -137,15 +137,14 @@ public class PlayingTexasHoldemState extends GameState{
     @Override
     public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
-        //(╯°□°)╯︵ ┻━┻
-        //broadCastTask(Request.QUIT_RECIEVED);
-        //broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         player.quit(room.getGame());
         room.removeClient(clientHandler);
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
-        /*if(room.numberOfClients()==0){
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
+        if(room.isEmpty()){
             Server.removeRoom(room);
-        }*/
+        }
+        clientHandler.purge();
         clientHandler.setGameState(new MenuState(clientHandler));
     }
 
@@ -158,15 +157,18 @@ public class PlayingTexasHoldemState extends GameState{
     }
 
     public void rotateTurn(){
-        if(room.getGame().isRoundFinished()){
+        if(room.isEmpty()) {
+            //todo return;
+        }if(room.getGame().isRoundFinished()){
             broadCastMessageToEveryone("server : EndGame");
             //todo
-        }else if(!room.turnIsUpToDate()){
+            return;
+        }else if(!room.turnIsUpToDate()) {
             room.updateTurn();
-            switch (room.getTurn()){
+            switch (room.getTurn()) {
                 case 0:
                     broadCastMessageToEveryone("server : preflop");
-                    ((TexasHoldem)room.getGame()).fixSmallBigBlind();
+                    ((TexasHoldem) room.getGame()).fixSmallBigBlind();
                     broadCastMessageToEveryone("server : small blind and bigblind paid");
                     room.getGame().burn();
                     room.getGame().distributeCards(2);
@@ -188,30 +190,33 @@ public class PlayingTexasHoldemState extends GameState{
                     room.getGame().burn();
                     revealCards(1);
                     break;
-                default: broadCastMessageToEveryone("server : endgame");
+                default:
+                    broadCastMessageToEveryone("server : endgame");
             }
         }
-        String currentPlayerName=room.getGame().getCurrentPlayer().getName();
-        for (ClientHandler ch:room.getClientHandlers()){
-            if (ch.getClientUsername().equals(currentPlayerName)){
+
+        String currentPlayerName = room.getGame().getCurrentPlayer().getName();
+        for (ClientHandler ch : room.getClientHandlers()) {
+            if (ch.getClientUsername().equals(currentPlayerName)) {
                 ch.addTask("41[0123].*");
                 ch.writeToClient("Server : It is ur turn");
-            }else {
-                ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
+            } else {
+                ch.writeToClient("Server : It is " + currentPlayerName + "'s turn");
             }
         }
     }
 
 
+
     public void notifyCardDistribution(){
         for(Player player : room.getGame().getPlayers()){
             Card[] cards= player.getCards();
-            String cardDistribution="610 CARDS ";
-            cardDistribution+=cards.length;
-            for(Card card : cards) cardDistribution+=(" "+card.toString());
+            StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
+            cardDistribution.append(cards.length);
+            for(Card card : cards) cardDistribution.append(" ").append(card.toString());
             ClientHandler ch=room.getClientHandler(player.getName());
-            //ch.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
-            ch.writeToClient(cardDistribution);
+            //ch.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻//fixme it gives concurrent Exception??
+            ch.writeToClient(cardDistribution.toString());
         }
     }
 
@@ -219,7 +224,7 @@ public class PlayingTexasHoldemState extends GameState{
         Card[] cards= room.getGame().revealCards(n);
         StringBuilder cardDistribution= new StringBuilder("610 CARDS " + n);
         for(Card card : cards) cardDistribution.append(" ").append(card.toString());
-        //broadCastTaskToEveryone(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
+        //broadCastTaskToEveryone(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻//fixme it gives concurrent Exception??
         broadCastMessageToEveryone(cardDistribution.toString());
     }
 
@@ -227,17 +232,17 @@ public class PlayingTexasHoldemState extends GameState{
         int count=0;
         for(Player player : room.getGame().getPlayers()){
             Card[] cards= player.getCards();
-            String cardDistribution="666 "+player.getName()+" "+count+" CARDS ";
-            cardDistribution+=cards.length;
-            for(Card card : cards) cardDistribution+=(" "+card.toString());
-            writeToClient(cardDistribution);
+            StringBuilder cardDistribution= new StringBuilder("666 " + player.getName() + " " + count + " CARDS ");
+            cardDistribution.append(cards.length);
+            for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+            writeToClient(cardDistribution.toString());
             count+=1;
         }
         List<Card> cards= room.getGame().getTable().getCards();
-        String cardDistribution="666 Table CARDS ";
-        cardDistribution+=cards.size();
-        for(Card card : cards) cardDistribution+=(" "+card.toString());
-        writeToClient(cardDistribution);
+        StringBuilder cardDistribution= new StringBuilder("666 Table CARDS ");
+        cardDistribution.append(cards.size());
+        for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+        writeToClient(cardDistribution.toString());
     }
 
 }

@@ -61,6 +61,9 @@ public class Room  {
         return clientHandlers;
     }
     public int numberOfClients(){return clientHandlers.size();}
+    public boolean isEmpty(){
+        return clientHandlers.isEmpty();
+    }
     public PokerGame getGame() {return game;}
     public void setGame(PokerGame game) {this.game = game;}
 

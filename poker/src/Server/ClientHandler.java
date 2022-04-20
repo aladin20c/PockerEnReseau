@@ -7,8 +7,8 @@ import Server.ServerGameStates.IdentificationState;
 import java.io.*;
 import java.net.Socket;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Timer;
+import java.util.TimerTask;
 
 
 public class ClientHandler implements Runnable{
@@ -129,6 +129,14 @@ public class ClientHandler implements Runnable{
     public void cancelTask(String string){
         try {
             taskset.removeIf(runOutOfTimeTask -> runOutOfTimeTask.cancel(string));
+            timer.purge();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+    public void purge(){
+        try {
+            taskset.removeIf(TimerTask::cancel);
             timer.purge();
         }catch (Exception e){
             e.printStackTrace();

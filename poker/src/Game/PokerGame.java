@@ -49,6 +49,9 @@ public abstract class PokerGame {
             }
         }
     }
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
 
     /**
      * To get the index of the next player

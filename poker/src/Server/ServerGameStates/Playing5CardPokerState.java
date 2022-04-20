@@ -31,10 +31,8 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else {
                 player.fold(room.getGame());
-                //(╯°□°)╯︵ ┻━┻
-                clientHandler.cancelTask(messageFromClient);
-                //(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.ACTION_RECIEVED);
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("510 " + clientHandler.getClientUsername() + " FOLD");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -46,10 +44,8 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.check(room.getGame());
-                //(╯°□°)╯︵ ┻━┻
-                clientHandler.cancelTask(messageFromClient);
-                //(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.ACTION_RECIEVED);
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("511 "+ clientHandler.getClientUsername() +" CHECK");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -61,10 +57,8 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.INVALID);
             }else{
                 player.call(room.getGame());
-                //(╯°□°)╯︵ ┻━┻
-                clientHandler.cancelTask(messageFromClient);
-                //(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.ACTION_RECIEVED);
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("512 "+ clientHandler.getClientUsername() +" CALL");
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -76,10 +70,8 @@ public class Playing5CardPokerState extends GameState{
             if(!room.getGame().canRaise(player,raise)){
                 writeToClient(Request.INVALID);
             }else {
-                player.raise(room.getGame(), raise);
-                //(╯°□°)╯︵ ┻━┻
-                clientHandler.cancelTask(messageFromClient);
-                //(╯°□°)╯︵ ┻━┻
+                player.raise(room.getGame(), raise);//(╯°□°)╯︵ ┻━┻
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 broadCastTask(Request.ACTION_RECIEVED);
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
                 writeToClient("400 ACCEPTED");
@@ -88,13 +80,12 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.ACTION_RECIEVED)){
 
-            //(╯°□°)╯︵ ┻━┻
-            clientHandler.cancelTask(messageFromClient);
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
 
-            //(╯°□°)╯︵ ┻━┻
-            clientHandler.cancelTask(messageFromClient);
+
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
@@ -127,8 +118,7 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
 
-            //(╯°□°)╯︵ ┻━┻
-            clientHandler.cancelTask(messageFromClient);
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if (messageFromClient.matches(Request.QUIT)) {
 
@@ -137,12 +127,11 @@ public class Playing5CardPokerState extends GameState{
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
-            //(╯°□°)╯︵ ┻━┻
-            clientHandler.cancelTask(messageFromClient);
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         }else if(messageFromClient.matches(Request.GETSTATE)) {
 
-            writeToClient("666 Playing5CardPokerState");
+            writeToClient("666 PlayingTexasHoldemState");
 
         }else if(messageFromClient.matches(Request.GETALLCARDS)) {
 
@@ -164,30 +153,7 @@ public class Playing5CardPokerState extends GameState{
             }
             writeToClient(playerList.toString());
 
-        }else if(messageFromClient.matches(Request.GET_QUITTED_PLAYERS)) {
-
-            StringBuilder playerList= new StringBuilder("PLAYERS");
-            int count=0;
-            for(Player player : room.getGame().getPlayers()){
-                if(player.hasQuitted()) {
-                    playerList.append(" ").append(player.getName());
-                    count+=1;
-                }
-            }
-            playerList.insert(0,"666 "+count+" ");
-            writeToClient(playerList.toString());
-
-        }else if(messageFromClient.matches(Request.GET_FOLDED_PLAYERS)) {
-
-            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getFoldedPlayers() + " PLAYERS");
-            for(Player player : room.getGame().getPlayers()){
-                if(player.hasFolded()) {
-                    playerList.append(" ").append(player.getName());
-                }
-            }
-            writeToClient(playerList.toString());
-
-        } else{
+        }else{
 
             clientHandler.writeToClient(Request.ERROR);
 
@@ -198,14 +164,14 @@ public class Playing5CardPokerState extends GameState{
     @Override
     public void clientQuit() {
         writeToClient(Request.QUIT_ACCEPTED);
-        //(╯°□°)╯︵ ┻━┻
-        broadCastTask(Request.QUIT_RECIEVED);
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
+        broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         player.quit(room.getGame());
         room.removeClient(clientHandler);
-        if(room.numberOfClients()==0){
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
+        if(room.isEmpty()){
             Server.removeRoom(room);
         }
+        clientHandler.purge();
         clientHandler.setGameState(new MenuState(clientHandler));
     }
 
@@ -218,11 +184,12 @@ public class Playing5CardPokerState extends GameState{
     }
 
     public void rotateTurn(){
-        if(room.getGame().isRoundFinished()){
-
+        if(room.isEmpty()) {
+            //todo return;
+        }if(room.getGame().isRoundFinished()){
             broadCastMessageToEveryone("server : EndGame");
             //todo
-
+            return;
         }else if(!room.turnIsUpToDate()){
 
             room.updateTurn();

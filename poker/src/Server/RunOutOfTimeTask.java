@@ -22,6 +22,7 @@ public class RunOutOfTimeTask extends TimerTask {
 
     @Override
     public void run() {
+        System.out.println(clientHandler.getClientUsername()+" u should have hit "+cancel);//fixme remeove when done
         clientHandler.getGameState().clientQuit();
     }
 }
