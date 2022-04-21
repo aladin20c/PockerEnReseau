@@ -7,6 +7,8 @@ import Game.Player;
 import Game.PokerGame;
 import Game.utils.Request;
 
+import java.util.ArrayList;
+
 
 public class Playing5CardPokerState extends GameState{
 
@@ -136,6 +138,20 @@ public class Playing5CardPokerState extends GameState{
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
             rotateTurn();
+        }else if(comingMessage.matches(Request.WINNERS)){
+
+            String[] data=comingMessage.split("\\s+");
+            for (int i=1;i<data.length-1;i++){
+                currentGame.getWinners().add(currentGame.getPlayer(data[i]));
+            }
+
+        }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
+
+            String[] data=comingMessage.split("\\s+");
+            Player player=currentGame.getPlayer(data[1]);
+            for (int i=4;i<data.length;i++){
+                player.getHand().add(new Card(data[i]));
+            }
 
         }else if(comingMessage.matches(Request.STATE)){
 

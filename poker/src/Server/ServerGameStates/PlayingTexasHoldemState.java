@@ -8,13 +8,14 @@ import Server.ClientHandler;
 import Server.Room;
 import Server.Server;
 
-import java.util.ArrayList;
+
 import java.util.List;
 
 public class PlayingTexasHoldemState extends GameState{
 
 
     private Player player;
+    private boolean endgame;
 
 
     public PlayingTexasHoldemState(ClientHandler clientHandler , Room room) {
@@ -111,7 +112,7 @@ public class PlayingTexasHoldemState extends GameState{
 
         }else if(messageFromClient.matches(Request.GETPLAYERS)) {
 
-            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " ALLPLAYERS");
             for(Player player : room.getGame().getPlayers()){
                 playerList.append(" ").append(player.getName());
             }
@@ -157,11 +158,35 @@ public class PlayingTexasHoldemState extends GameState{
     }
 
     public void rotateTurn(){
-        if(room.isEmpty()) {
-            //todo return;
+        if(endgame) {
+            return;
+        }else if(room.isEmpty()) {
+            endgame=true;
+            return;
         }if(room.getGame().isRoundFinished()){
             broadCastMessageToEveryone("server : EndGame");
-            //todo
+            endgame=true;
+
+            int count=room.getGame().getPlayers().size()-room.getGame().getFoldedPlayers();
+            broadCastMessageToEveryone("810 REVEALCARD "+count);
+            room.getGame().setWinners();
+
+            String winners="810 ";
+            for (Player player : room.getGame().getWinners()){
+                winners+=player.getName()+" ";
+            }
+            winners+="WIN";
+            broadCastMessageToEveryone(winners);
+            int i=1;
+            for (Player player : room.getGame().getPlayers()){
+                if(!player.hasFolded()) {
+                    String playerinfo="810 ";
+                    playerinfo+=player.getName()+" "+i+" HAS";
+                    for (Card card : player.getCards()) playerinfo+=" "+card.toString();
+                    broadCastMessageToEveryone(playerinfo);
+                    i+=1;
+                }
+            }
             return;
         }else if(!room.turnIsUpToDate()) {
             room.updateTurn();

@@ -57,22 +57,13 @@ public abstract class PokerGame {
      * To get the index of the next player
      * @return
      */
-    /*public int nextPlayer(int i){//fixme gives error when there'S no players
-        if (players.size()==0) return -1;
+    public int nextPlayer(int i){
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;
         }else{
             return nextPlayer(n);
         }
-    }*/
-    public int nextPlayer(int n){
-        if(n>players.size()) return -1;
-        for(int i=1;i<players.size();i++){
-            int index=(n+i)%players.size();
-            if(! players.get(index).hasFolded()) return index;
-        }
-        return -1;
     }
 
 
@@ -118,14 +109,23 @@ public abstract class PokerGame {
     }
 
 
-    public static  Player winner(ArrayList<Player> players){//todo return arraylist of players
-         Player winner=players.get(0);
-         for(int i=1;i<players.size();i++){
-             if(players.get(i).getHand().compareTo(winner.getHand())==1){
-                 winner=players.get(i);
-             }
-         }
-         return winner;
+    public  void setWinners(){
+        for(Player player: players){
+            if(winners.isEmpty()){
+                winners.add(player);
+            }else{
+                int cmp=player.getHand().compareTo(winners.get(0).getHand());
+                switch (cmp){
+                    case 0 :
+                        winners.add(player);
+                        break;
+                    case 1 :
+                        winners.clear();
+                        winners.add(player);
+                        break;
+                }
+            }
+        }
     }
    
 

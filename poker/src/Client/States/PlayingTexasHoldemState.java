@@ -95,14 +95,29 @@ public class PlayingTexasHoldemState extends GameState {
         } else if (comingMessage.matches(Request.CARDS_DISTRIBUTION)) {
 
             String[] data = comingMessage.substring(10).split("\\s+");
-            Hand hand=currentGame.getPlayer(username).getHand();
+            Hand hand = currentGame.getPlayer(username).getHand();
 
-            if(hand.getCards().size()<2){
+            if (hand.getCards().size() < 2) {
                 for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
             } else {
                 for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
             }
             writeToServer(Request.CARDS_RECIEVED);
+
+        }else if(comingMessage.matches(Request.WINNERS)){
+
+                String[] data=comingMessage.split("\\s+");
+                for (int i=1;i<data.length-1;i++){
+                    currentGame.getWinners().add(currentGame.getPlayer(data[i]));
+                }
+
+        }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
+
+                String[] data=comingMessage.split("\\s+");
+                Player player=currentGame.getPlayer(data[1]);
+                for (int i=4;i<data.length;i++){
+                    player.getHand().add(new Card(data[i]));
+                }
 
         } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 

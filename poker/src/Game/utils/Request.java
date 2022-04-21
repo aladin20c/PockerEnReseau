@@ -68,6 +68,10 @@ public class Request {
     public static String CHANGE_RECIEVED="701 RECIEVED";
 
 
+    public static String WINNERS="810 .+ WIN";
+    public static String WINNERSANDCARDS="810 .+ \\d+ HAS(\\s+[DCST](\\d|1[0123]))+\\s*";
+
+
 
     //general
     public static String QUIT="210 QUIT";
@@ -82,12 +86,12 @@ public class Request {
     //Cheats
     public static String GETSTATE="777 GET STATE";
     public static String GETALLCARDS="777 GET ALLCARDS";
-    public static String GETPLAYERS="777 GET PLAYERS";
+    public static String GETPLAYERS="777 GET ALLPLAYERS";
     public static String GET_ACTIVE_PLAYERS="777 GET ACTIVE PLAYERS";
     public static String GET_QUITTED_PLAYERS="777 GET QUITTED PLAYERS";
     public static String GET_FOLDED_PLAYERS="777 GET FOLDED PLAYERS";
 
     public static String STATE="666 .+State";
-    public static String PLAYERS="666 \\d+ PLAYERS.*";
+    public static String PLAYERS="666 \\d+ ALLPLAYERS.*";
 
 }
