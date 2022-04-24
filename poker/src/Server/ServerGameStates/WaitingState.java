@@ -19,7 +19,7 @@ public class WaitingState extends GameState {
     public WaitingState(ClientHandler clientHandler, Room room) {
         super(clientHandler, room);
         this.startRequested=false;
-        this.startRequestResponse = -1;
+        this.startRequestResponse = 0;
     }
 
 
@@ -32,8 +32,7 @@ public class WaitingState extends GameState {
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
-            //(╯°□°)╯︵ ┻━┻
-            clientHandler.cancelTask(messageFromClient);
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         } else if (messageFromClient.matches(Request.START_ROUND)) {
 
@@ -46,8 +45,7 @@ public class WaitingState extends GameState {
             } else {
                 room.requestStart(true);
                 this.startRequestResponse=1;
-                //(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.START_RESPONSE);
+                broadCastTask(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("152 START REQUESTED");
             }
 
@@ -55,13 +53,12 @@ public class WaitingState extends GameState {
 
             if (!startRequested) {
                 writeToClient("158 there's no start request");
-            } else if (this.startRequestResponse != -1) {
+            } else if (this.startRequestResponse != 0) {
                 writeToClient("159 u already responded to Start request");
             }else{
                 String response = messageFromClient.substring(10);
-                this.startRequestResponse = (response.equals("YES"))? 1:0;
-                //(╯°□°)╯︵ ┻━┻
-                clientHandler.cancelTask(messageFromClient);
+                this.startRequestResponse = (response.equals("YES"))? 1:-1;
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 checkPlayersResponses();
             }
 
@@ -74,13 +71,13 @@ public class WaitingState extends GameState {
             //(╯°□°)╯︵ ┻━┻
             clientHandler.cancelTask(messageFromClient);
 
-        }else if(messageFromClient.matches(Request.GETSTATE)) {
+        }else if(messageFromClient.matches(Request.GET_STATE)) {
 
             writeToClient("666 WaitingState");
 
-        }else if(messageFromClient.matches(Request.GETPLAYERS)) {
+        }else if(messageFromClient.matches(Request.GET_ALL_PLAYERS)) {
 
-            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " ALLPLAYERS");
             for(Player player : room.getGame().getPlayers()){
                 playerList.append(" ").append(player.getName());
             }
@@ -88,7 +85,7 @@ public class WaitingState extends GameState {
 
         }else if(messageFromClient.matches(Request.GET_ACTIVE_PLAYERS)) {
 
-            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " PLAYERS");
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " ACTIVEPLAYERS");
             for(ClientHandler ch : room.getClientHandlers()){
                 playerList.append(" ").append(ch.getClientUsername());
             }
@@ -108,9 +105,9 @@ public class WaitingState extends GameState {
 
         ArrayList<String> playersWhoRefused=new ArrayList<>();
         for(ClientHandler ch : room.getClientHandlers()){
-            switch (ch.getGameState().getResponse()){
-                case -1: return;
-                case 0: playersWhoRefused.add(ch.getClientUsername());break;
+            switch (ch.getGameState().getStartResponse()){
+                case 0: return;
+                case -1: playersWhoRefused.add(ch.getClientUsername());break;
                 case 1: break;
             }
         }
@@ -154,15 +151,13 @@ public class WaitingState extends GameState {
         room.removeClient(clientHandler);
         room.getGame().removePlayer(clientHandler.getClientUsername());
         writeToClient(Request.QUIT_ACCEPTED);
-        //(╯°□°)╯︵ ┻━┻
-        broadCastTask(Request.QUIT_RECIEVED);
+        broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
 
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
-            //(╯°□°)╯︵ ┻━┻
-            broadCastCancel(Request.START_RESPONSE);
+            broadCastCancel(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
             broadCastMessageToEveryone("154 START ABORDED " + 0);
             room.requestStart(false);
         }
@@ -171,14 +166,14 @@ public class WaitingState extends GameState {
 
 
     @Override
-    public int getResponse() {
+    public int getStartResponse() {
         return startRequestResponse;
     }
     public boolean startRequested() {return startRequested;}
     public void setStartRequested(boolean startRequested) {
         this.startRequested = startRequested;
     }
-    public void setResponse(int startRequestResponse) {
+    public void setStartResponse(int startRequestResponse) {
         this.startRequestResponse = startRequestResponse;
     }
 }

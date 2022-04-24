@@ -76,6 +76,10 @@ public class Player {
         bidPerRound=0;
     }
 
+    public boolean canReplay(PokerGame game){
+        return !hasQuitted() && this.stack>=game.minBid;
+    }
+
 
 
 

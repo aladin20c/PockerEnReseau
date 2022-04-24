@@ -57,14 +57,23 @@ public abstract class PokerGame {
      * To get the index of the next player
      * @return
      */
-    public int nextPlayer(int i){
+    /*public int nextPlayer(int i){
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;
         }else{
             return nextPlayer(n);
         }
+    }*/
+    public int nextPlayer(int n){
+        if(n>players.size()) return -1;
+        for(int i=1;i<players.size();i++){
+            int index=(n+i)%players.size();
+            if(! players.get(index).hasFolded()) return index;
+        }
+        return -1;
     }
+
 
 
     public int nextPlayer(){
@@ -134,7 +143,7 @@ public abstract class PokerGame {
         for(Player p:players){
             if(p.hasQuitted()){
                 players.remove(p);
-            } else{
+            }else{
                 p.reset();
             }
         }

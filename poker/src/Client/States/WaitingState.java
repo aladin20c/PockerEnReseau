@@ -85,7 +85,7 @@ public class WaitingState extends GameState{
 
             if(!comingMessage.equals("666 WaitingState")) throw new RuntimeException("states not synchronized between server and client found server:"+comingMessage+" required WaitingState");
 
-        }else if(comingMessage.matches(Request.PLAYERS)){
+        }else if(comingMessage.matches(Request.ALL_PLAYERS)){
 
             String[] plyers=comingMessage.split("\\s+");
             if((plyers.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+plyers[1]+" required "+currentGame.getPlayers().size());

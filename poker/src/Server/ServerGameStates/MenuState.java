@@ -72,8 +72,7 @@ public class MenuState extends GameState{
 
             this.room=room;
             writeToClient("131 GAME " + room.getGame().getId() + " JOINED");
-            //(╯°□°)╯︵ ┻━┻
-            broadCastTask(Request.ACK_Player);
+            broadCastTask(Request.ACK_Player);//(╯°□°)╯︵ ┻━┻
             broadCastMessage("140 " + clientHandler.getClientUsername() + " JOINED");
 
             writeToClient("155 LIST PLAYER "+room.numberOfClients());
@@ -99,7 +98,7 @@ public class MenuState extends GameState{
             room.addClient(this.clientHandler);
             this.clientHandler.setGameState(new WaitingState(clientHandler,room));
 
-        }else if(messageFromClient.matches(Request.GETSTATE)) {
+        }else if(messageFromClient.matches(Request.GET_STATE)) {
 
             writeToClient("666 MenuState");
 

@@ -21,10 +21,11 @@ public abstract class GameState {
         this.room=null;
     }
 
+    public abstract void analyseRequest(String messageFromClient);
+
     public void writeToClient(String message){
         clientHandler.writeToClient(message);
     }
-
     public void broadCastMessage(String messageToSend){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
             try {
@@ -34,12 +35,10 @@ public abstract class GameState {
                     clientHandler.getBufferedWriter().flush();
                 }
             } catch (IOException e) {
-                //clientHandler.closeEverything();
-                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+                clientHandler.closeEverything();
             }
         }
     }
-
     public void broadCastMessageToEveryone(String messageToSend){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
             try {
@@ -47,11 +46,12 @@ public abstract class GameState {
                 clientHandler.getBufferedWriter().newLine();
                 clientHandler.getBufferedWriter().flush();
             } catch (IOException e) {
-                //clientHandler.closeEverything();
-                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+                clientHandler.closeEverything();
             }
         }
     }
+
+
 
     public void broadCastTask(String string){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
@@ -60,13 +60,11 @@ public abstract class GameState {
             }
         }
     }
-
     public void broadCastTaskToEveryone(String string){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
             clientHandler.addTask(string);
         }
     }
-
     public void broadCastCancel(String string){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
             if (clientHandler!=this.clientHandler) {
@@ -75,12 +73,19 @@ public abstract class GameState {
         }
     }
 
-    public abstract void analyseRequest(String messageFromClient);
 
     public void clientQuit(){}
 
-    public int getResponse(){
-        return 0;
+    public void setStartResponse(int response){}
+    public int getStartResponse() {
+        return -1;
+    }
+
+    public int getEndgameResponse() {
+        return -1;
+    }
+    public void setEndgameResponse(int endgameResponse) {
+
     }
 }
 

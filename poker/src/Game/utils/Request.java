@@ -6,7 +6,6 @@ public class Request {
 
     //identification
     public static String JOIN="100 HELLO PLAYER .+";
-
     public static String WELCOME="101 WELCOME .+";
     public static String LARGE_NAME="901 Too large words in command";
     public static String USED_NAME="902 This name is already used";
@@ -58,18 +57,19 @@ public class Request {
     public static String ACTION_RECIEVED="500 RECIEVED";
 
 
-    public static String CARDS_DISTRIBUTION="610 CARDS \\d+(\\s+[DCST](\\d|1[0123]))+\\s*";
+    public static String CARDS_DISTRIBUTION="610 CARDS \\d+(\\s[DCST][0-9]+)*";
     public static String CARDS_RECIEVED="600 RECIEVED";
 
 
-    public static String CHANGE="710 CHANGE \\d+(\\s+[DCST](\\d|1[0123]))+\\s*";
+    public static String CHANGE="710 CHANGE \\d+(\\s[0-9]+[DCST])*";
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
     public static String PLAYER_CHANGED_CARDS="720 .+ Change \\d+";
     public static String CHANGE_RECIEVED="701 RECIEVED";
 
 
     public static String WINNERS="810 .+ WIN";
-    public static String WINNERSANDCARDS="810 .+ \\d+ HAS(\\s+[DCST](\\d|1[0123]))+\\s*";
+    public static String WINNERSANDCARDS="810 .+ \\d+ HAS.*";
+    public static String WINRECEIVED="800 RECEIVED";
 
 
 
@@ -84,14 +84,18 @@ public class Request {
     public static String INVALID="907 Invalid Command";
 
     //Cheats
-    public static String GETSTATE="777 GET STATE";
-    public static String GETALLCARDS="777 GET ALLCARDS";
-    public static String GETPLAYERS="777 GET ALLPLAYERS";
+    public static String GET_STATE="777 GET STATE";
+    public static String GET_ALL_CARDS="777 GET ALLCARDS";
+    public static String GET_ALL_PLAYERS="777 GET ALLPLAYERS";
     public static String GET_ACTIVE_PLAYERS="777 GET ACTIVE PLAYERS";
     public static String GET_QUITTED_PLAYERS="777 GET QUITTED PLAYERS";
     public static String GET_FOLDED_PLAYERS="777 GET FOLDED PLAYERS";
 
     public static String STATE="666 .+State";
-    public static String PLAYERS="666 \\d+ ALLPLAYERS.*";
+    public static String ALL_PLAYERS="666 \\d+ ALLPLAYERS.*";
+    public static String ACTIVE_PLAYERS="666 \\d+ ACTIVEPLAYERS.*";
+    public static String QUITTED_PLAYERS="666 \\d+ QUITTEDPLAYERS.*";
+    public static String FOLDED_PLAYERS="666 \\d+ FOLDEDPLAYERS.*";
+
 
 }

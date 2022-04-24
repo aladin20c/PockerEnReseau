@@ -29,6 +29,11 @@ public class Playing5CardPokerState extends GameState{
         startGame();
     }
 
+    public void startGame(){
+        currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
+        rotateTurn();
+    }
+
 
     @Override
     public void analyseMessageToSend(String messageToSend) {
@@ -75,7 +80,7 @@ public class Playing5CardPokerState extends GameState{
         }
         else if (comingMessage.matches(Request.PLAYER_RAISE)) {
 
-            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")));
+            int raise=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("RAISE ")+6));
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" RAISE"));
             Player player = currentGame.getPlayer(username);
             player.raise(currentGame,raise);
@@ -100,11 +105,15 @@ public class Playing5CardPokerState extends GameState{
             rotateTurn();
 
 
-        }else if(comingMessage.matches(Request.CARDS_DISTRIBUTION)){
+        } else if (comingMessage.matches(Request.CARDS_DISTRIBUTION)) {
 
-            String[] data=comingMessage.substring(10).split("\\s+");
-            Hand hand=currentGame.getPlayer(username).getHand();
-            for(int i=1;i<data.length;i++) hand.add(new Card(data[i]));
+            String[] data = comingMessage.substring(10).split("\\s+");
+            Hand hand = currentGame.getPlayer(username).getHand();
+            if (hand.getCards().size() < 2) {
+                for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
+            } else {
+                for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
+            }
             writeToServer(Request.CARDS_RECIEVED);
 
         }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
@@ -144,6 +153,7 @@ public class Playing5CardPokerState extends GameState{
             for (int i=1;i<data.length-1;i++){
                 currentGame.getWinners().add(currentGame.getPlayer(data[i]));
             }
+            //todo programm reset game
 
         }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
 
@@ -155,28 +165,62 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(comingMessage.matches(Request.STATE)){
 
-            if(!comingMessage.equals("666 Playing5CardPokerState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required Playing5CardPokerState");
+            if(!comingMessage.equals("666 PlayingTexasHoldemState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required PlayingTexasHoldemState");
 
-        }else if(comingMessage.matches(Request.PLAYERS)){
+        }else if(comingMessage.matches(Request.ALL_PLAYERS)){
 
-            String[] plyers=comingMessage.split("\\s+");
-            if((plyers.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+plyers[1]+" required "+currentGame.getPlayers().size());
-            for (int i=3;i<plyers.length;i++){
-                currentGame.getPlayer(plyers[i]);
+            String[] players=comingMessage.split("\\s+");
+            if((players.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+            for (int i=3;i<players.length;i++){
+                currentGame.getPlayer(players[i]);
             }
+        }else if(comingMessage.matches(Request.ACTIVE_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(!player.hasQuitted()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to be active");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+
+        }else if(comingMessage.matches(Request.QUITTED_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(player.hasQuitted()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to have quit");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+
+        }else if(comingMessage.matches(Request.FOLDED_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(player.hasFolded()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to have folded");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
         }
     }
 
     @Override
     public void quit() {
         this.client.setGameState(new MenuState(client,username));
-    }
-
-
-
-    public void startGame(){
-        currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
-        rotateTurn();
     }
 
 

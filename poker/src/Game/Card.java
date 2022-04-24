@@ -104,7 +104,7 @@ public class Card {
      */
     public String toString(){
         int rank=(this.rank.getRank()-1)%13+1;
-        return rank+suit.getShortName();
+        return suit.getShortName()+rank;
     }
 
     public static Card createCard(String s){
@@ -173,6 +173,7 @@ public class Card {
         }
         return new Card(rank,suit);
     }
+
     public boolean equals(Object o) {
         if(!(o instanceof Card)) return false;
         Card c = (Card)o;

@@ -45,10 +45,8 @@ public class ClientHandler implements Runnable{
             this.timer=new Timer();
             this.taskset=new HashSet<>();
             this.gameState=new IdentificationState(this);
-
         }catch(IOException e){
-            //closeEverything();
-            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+            closeEverything();
         }
     }
 
@@ -58,12 +56,11 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter.newLine();
             this.bufferedWriter.flush();
         }catch (IOException e){
-            //closeEverything();
-            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+            closeEverything();
         }
     }
 
-    /*public void closeEverything(){
+    public void closeEverything(){
         removeClientHandler();
         try{
             //closing the outer wrapper will close the underlying streams (ex:outputStreamReader)
@@ -72,16 +69,15 @@ public class ClientHandler implements Runnable{
             if(timer!=null) timer.cancel();
             if(socket!=null) socket.close();//closing sockets will close socket input/output streams
         }catch (IOException e){
-            //e.printStackTrace();
-            e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+            e.printStackTrace();
         }
     }
 
     public void removeClientHandler(){
         Server.removeClient(this);
         System.out.println("Server: "+clientUsername+" has left !");
-        gameState.clientQuit();//fixme ________________________________________________
-    }*/
+        gameState.clientQuit();
+    }
 
     @Override
     public void run(){
@@ -116,6 +112,7 @@ public class ClientHandler implements Runnable{
         this.gameState = gameState;
     }
 
+    //task related methods
     public void addTask(String string){
         try {
             RunOutOfTimeTask task = new RunOutOfTimeTask(this, string);
@@ -125,7 +122,6 @@ public class ClientHandler implements Runnable{
             e.printStackTrace();
         }
     }
-
     public void cancelTask(String string){
         try {
             taskset.removeIf(runOutOfTimeTask -> runOutOfTimeTask.cancel(string));
