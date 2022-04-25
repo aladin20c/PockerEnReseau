@@ -1,12 +1,15 @@
 package Game;
 
 
+import Game.simulator.ChangeEvent;
+
+import java.util.ArrayList;
+
 public class PokerFerme extends PokerGame{
 
     public static int ANTE=0;
     public static int CHANGING_TURN=2;
-
-
+    ArrayList<ChangeEvent> changeEvents=new ArrayList<>();
 
     public PokerFerme(int id, int type, int maxPlayers, int minBid, int initStack) {
         super(id, type, maxPlayers, minBid, initStack);
@@ -16,12 +19,10 @@ public class PokerFerme extends PokerGame{
         super(type, maxPlayers, minBid, initStack);
     }
 
-
     @Override
     public boolean isRoundFinished() {
         return bidTurn>3 || players.size()-foldedPlayers<=2;
     }
-
 
     @Override
     public boolean canResetGame(){
@@ -33,10 +34,17 @@ public class PokerFerme extends PokerGame{
         }
         return  nbPlayers>=3 &&  nbPlayers<=8;
     }
+
+    @Override
     public boolean canStartGame(){
         return  players.size()>=3 &&  players.size()<=8;
     }
 
+    @Override
+    public void resetGame() {
+        super.resetGame();
+        changeEvents.clear();
+    }
 
     @Override
     public boolean canCall(Player player){
@@ -77,10 +85,9 @@ public class PokerFerme extends PokerGame{
         return false;
     }
 
-
     @Override
     public boolean canChange(Player player,Card[] cards){
-        return (cards.length>0
+        return (cards.length>=0
                 && cards.length<5
                 && player.getHand().containsAll(cards)
                 && bidTurn==CHANGING_TURN
@@ -97,6 +104,7 @@ public class PokerFerme extends PokerGame{
             newCards[i]=deck.getNextCard();
         }
         player.getHand().addAll(newCards);
+        rotate();
         return newCards;
     }
 

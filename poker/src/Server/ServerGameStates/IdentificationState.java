@@ -14,6 +14,7 @@ public class IdentificationState extends GameState{
 
     @Override
     public void analyseRequest(String messageFromClient) {
+
         if(messageFromClient.matches(Request.JOIN) ){
 
             String name=messageFromClient.substring(17);
@@ -32,8 +33,15 @@ public class IdentificationState extends GameState{
                 System.out.println(name+" has successfully connected");
                 clientHandler.setGameState(new MenuState(clientHandler));
             }
+
+        }else if(messageFromClient.matches(Request.GET_STATE)) {
+
+            writeToClient("666 IdentificationState");
+
         }else {
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 }

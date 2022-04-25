@@ -49,24 +49,28 @@ public abstract class PokerGame {
             }
         }
     }
+    public void removePlayer(Player player) {
+        players.remove(player);
+    }
 
-    /**
-     * To get the index of the next player
-     * @return
-     */
-    public int nextPlayer(int i){//fixme gives error when there'S no players
-        if (players.size()==0) return -1;
+
+    /*public int nextPlayer(int i){
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;
         }else{
             return nextPlayer(n);
         }
+    }*/
+    public int nextPlayer(int n){
+        for(int i=1;i<players.size();i++){
+            int index=(n+i)%players.size();
+            if(! players.get(index).hasFolded()) return index;
+        }
+        return n;
     }
 
-    public int nextPlayer(){
-        return nextPlayer(currentPlayer);
-    }
+
 
 
     /**
@@ -93,8 +97,10 @@ public abstract class PokerGame {
 
 
     public void rotate(){
-
-        if(isTurnFinished()){
+         if(isRoundFinished()) {
+             bidTurn=4;
+             return;
+         }else if(isTurnFinished()){
             bidTurn++;
             currentPlayer=nextPlayer(dealer);
             for(Player p : players){
@@ -106,14 +112,23 @@ public abstract class PokerGame {
     }
 
 
-    public static  Player winner(ArrayList<Player> players){//todo return arraylist of players
-         Player winner=players.get(0);
-         for(int i=1;i<players.size();i++){
-             if(players.get(i).getHand().compareTo(winner.getHand())==1){
-                 winner=players.get(i);
-             }
-         }
-         return winner;
+    public  void setWinners(){
+        for(Player player: players){
+            if(winners.isEmpty()){
+                winners.add(player);
+            }else{
+                int cmp=player.getHand().compareTo(winners.get(0).getHand());
+                switch (cmp){
+                    case 0 :
+                        winners.add(player);
+                        break;
+                    case 1 :
+                        winners.clear();
+                        winners.add(player);
+                        break;
+                }
+            }
+        }
     }
    
 
@@ -122,7 +137,7 @@ public abstract class PokerGame {
         for(Player p:players){
             if(p.hasQuitted()){
                 players.remove(p);
-            } else{
+            }else{
                 p.reset();
             }
         }
@@ -253,15 +268,17 @@ public abstract class PokerGame {
         return players.get(currentPlayer).getName().equals(name);
     }
 
+    public int getFoldedPlayers() {return foldedPlayers;}
+
     /**--------------------------------- methods to override ---------------------------------*/
 
+    public Card[] revealCards(int mbcards){return null;}
     public boolean canChange(Player player,Card[] cards){
         return false;
     }
     public Card[] change(Player player,Card[] cards){
         return null;
     }
-    public Card[] revealCards(int mbcards){return null;}
     public abstract boolean isRoundFinished();
     public abstract boolean canResetGame();
     public abstract boolean canStartGame();

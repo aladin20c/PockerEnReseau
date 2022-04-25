@@ -1,5 +1,6 @@
 package Server.ServerGameStates;
 
+import Game.Player;
 import Game.utils.Request;
 import Server.ClientHandler;
 import Server.Room;
@@ -18,7 +19,7 @@ public class WaitingState extends GameState {
     public WaitingState(ClientHandler clientHandler, Room room) {
         super(clientHandler, room);
         this.startRequested=false;
-        this.startRequestResponse = -1;
+        this.startRequestResponse = 0;
     }
 
 
@@ -31,18 +32,20 @@ public class WaitingState extends GameState {
 
         }else if (messageFromClient.matches(Request.ACK_Player)) {
 
+            clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
         } else if (messageFromClient.matches(Request.START_ROUND)) {
 
             if (startRequested) {
                 writeToClient("155 start already requested");
             } else if (!room.isAdmin(clientHandler)) {
-                writeToClient("157 u are not the admin");
+                writeToClient("156 u are not the admin");
             } else if (!room.getGame().canStartGame()) {
-                writeToClient("158 not enough players");
+                writeToClient("157 not enough players");
             } else {
                 room.requestStart(true);
                 this.startRequestResponse=1;
+                broadCastTask(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("152 START REQUESTED");
             }
 
@@ -50,11 +53,12 @@ public class WaitingState extends GameState {
 
             if (!startRequested) {
                 writeToClient("158 there's no start request");
-            } else if (this.startRequestResponse != -1) {
-                writeToClient("158 u already responded to Start request");
+            } else if (this.startRequestResponse != 0) {
+                writeToClient("159 u already responded to Start request");
             }else{
                 String response = messageFromClient.substring(10);
-                this.startRequestResponse = (response.equals("YES"))? 1:0;
+                this.startRequestResponse = (response.equals("YES"))? 1:-1;
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 checkPlayersResponses();
             }
 
@@ -64,10 +68,33 @@ public class WaitingState extends GameState {
 
         } else if (messageFromClient.matches(Request.QUIT_RECIEVED)) {
 
-            //nothing to do here(probably)
+            //(╯°□°)╯︵ ┻━┻
+            clientHandler.cancelTask(messageFromClient);
+
+        }else if(messageFromClient.matches(Request.GET_STATE)) {
+
+            writeToClient("666 WaitingState");
+
+        }else if(messageFromClient.matches(Request.GET_ALL_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " ALLPLAYERS");
+            for(Player player : room.getGame().getPlayers()){
+                playerList.append(" ").append(player.getName());
+            }
+            writeToClient(playerList.toString());
+
+        }else if(messageFromClient.matches(Request.GET_ACTIVE_PLAYERS)) {
+
+            StringBuilder playerList= new StringBuilder("666 " + room.getGame().getPlayers().size() + " ACTIVEPLAYERS");
+            for(ClientHandler ch : room.getClientHandlers()){
+                playerList.append(" ").append(ch.getClientUsername());
+            }
+            writeToClient(playerList.toString());
 
         }else{
+
             clientHandler.writeToClient(Request.ERROR);
+
         }
     }
 
@@ -78,9 +105,9 @@ public class WaitingState extends GameState {
 
         ArrayList<String> playersWhoRefused=new ArrayList<>();
         for(ClientHandler ch : room.getClientHandlers()){
-            switch (ch.getGameState().getResponse()){
-                case -1: return;
-                case 0: playersWhoRefused.add(ch.getClientUsername());break;
+            switch (ch.getGameState().getStartResponse()){
+                case 0: return;
+                case -1: playersWhoRefused.add(ch.getClientUsername());break;
                 case 1: break;
             }
         }
@@ -121,15 +148,17 @@ public class WaitingState extends GameState {
 
     @Override
     public void clientQuit() {
-        writeToClient(Request.QUIT_ACCEPTED);
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         room.removeClient(clientHandler);
         room.getGame().removePlayer(clientHandler.getClientUsername());
+        writeToClient(Request.QUIT_ACCEPTED);
+        broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
 
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
-            broadCastMessageToEveryone("153 GAME ABORDED " + 0);
+            broadCastCancel(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
+            broadCastMessageToEveryone("154 START ABORDED " + 0);
             room.requestStart(false);
         }
         clientHandler.setGameState(new MenuState(clientHandler));
@@ -137,14 +166,14 @@ public class WaitingState extends GameState {
 
 
     @Override
-    public int getResponse() {
+    public int getStartResponse() {
         return startRequestResponse;
     }
     public boolean startRequested() {return startRequested;}
     public void setStartRequested(boolean startRequested) {
         this.startRequested = startRequested;
     }
-    public void setResponse(int startRequestResponse) {
+    public void setStartResponse(int startRequestResponse) {
         this.startRequestResponse = startRequestResponse;
     }
 }

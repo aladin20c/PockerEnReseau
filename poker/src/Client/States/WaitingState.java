@@ -78,9 +78,20 @@ public class WaitingState extends GameState{
 
             String name = comingMessage.substring(4, comingMessage.length()-5);
             Player player=currentGame.getPlayer(name);
-            player.quit(currentGame);
+            currentGame.removePlayer(player);
             writeToServer(Request.QUIT_RECIEVED);
 
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 WaitingState")) throw new RuntimeException("states not synchronized between server and client found server:"+comingMessage+" required WaitingState");
+
+        }else if(comingMessage.matches(Request.ALL_PLAYERS)){
+
+            String[] plyers=comingMessage.split("\\s+");
+            if((plyers.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+plyers[1]+" required "+currentGame.getPlayers().size());
+            for (int i=3;i<plyers.length;i++){
+                currentGame.getPlayer(plyers[i]);
+            }
         }
     }
 

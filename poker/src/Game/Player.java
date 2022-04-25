@@ -61,11 +61,12 @@ public class Player {
     }
 
     public void quit(PokerGame round){
+        this.played=true;
         this.isFold=true;
         this.isQuit=true;
         round.incFolderPlayers();
         if(round.getCurrentPlayer()==this){
-            round.setCurrentPlayer(round.nextPlayer());
+            round.rotate();
         }
     }
 
@@ -74,6 +75,10 @@ public class Player {
         isFold=false;
         played=false;
         bidPerRound=0;
+    }
+
+    public boolean canReplay(PokerGame game){
+        return !hasQuitted() && this.stack>=game.minBid;
     }
 
 
@@ -97,7 +102,6 @@ public class Player {
     public void setBidPerRound(int bidAmount) {
         this.bidPerRound = bidAmount;
     }
-
     public void setUserHand(Hand userHand) {
         this.userHand = userHand;
     }

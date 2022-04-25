@@ -33,7 +33,7 @@ public class Hand implements Comparable<Hand> {
 
     public boolean containsAll(Card[] cards){
         for (Card card : cards){
-            if(! this.cards.contains(card)) return false;
+            if(!this.cards.contains(card)) return false;
         }
         return true;
     }
@@ -89,15 +89,6 @@ public class Hand implements Comparable<Hand> {
         cards.remove(c);
         otherHand.add(c);
         return true;
-    }
-
-    /**
-     * Make all the cards visible
-     */
-    public void flipCards(){
-        for(Card c:cards){
-            c.flipCard();
-        }
     }
 
     /**

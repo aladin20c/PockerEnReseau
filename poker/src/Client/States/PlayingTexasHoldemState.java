@@ -5,12 +5,14 @@ import Game.*;
 import Game.utils.Request;
 
 
+
 public class PlayingTexasHoldemState extends GameState {
 
     private int turn;
     private String username;
     private PokerGame currentGame;
     private String futureAction;
+    private boolean endgame;
 
 
 
@@ -20,9 +22,14 @@ public class PlayingTexasHoldemState extends GameState {
         this.currentGame = currentGame;
         this.futureAction = "";
         this.turn=-1;
+        this.endgame=false;
         startGame();
     }
 
+    public void startGame(){
+        currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
+        rotateTurn();
+    }
 
     @Override
     public void analyseMessageToSend(String messageToSend) {
@@ -95,16 +102,16 @@ public class PlayingTexasHoldemState extends GameState {
         } else if (comingMessage.matches(Request.CARDS_DISTRIBUTION)) {
 
             String[] data = comingMessage.substring(10).split("\\s+");
-            Hand hand=currentGame.getPlayer(username).getHand();
+            Hand hand = currentGame.getPlayer(username).getHand();
 
-            if(hand.getCards().size()<2){
+            if (hand.getCards().size() < 2) {
                 for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
             } else {
                 for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
             }
             writeToServer(Request.CARDS_RECIEVED);
 
-        } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
+        }else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
             quit();
 
@@ -116,6 +123,85 @@ public class PlayingTexasHoldemState extends GameState {
             writeToServer(Request.QUIT_RECIEVED);
             rotateTurn();
 
+        }else if(comingMessage.matches(Request.WINNERS)){
+
+            /**String[] data=comingMessage.split("\\s+");
+            for (int i=1;i<data.length-1;i++){
+                currentGame.getWinners().add(currentGame.getPlayer(data[i]));
+            }
+            endgame=true;
+            writeToServer(Request.WINRECEIVED);
+
+            Timer timer=new Timer(true);
+            timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            currentGame.resetGame();
+                            rotateTurn();
+                        }
+                    },15_000);*/
+
+
+        }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
+
+            String[] data=comingMessage.split("\\s+");
+            Player player=currentGame.getPlayer(data[1]);
+            for (int i=4;i<data.length;i++){
+                player.getHand().add(new Card(data[i]));
+            }
+
+        }else if(comingMessage.matches(Request.STATE)){
+
+            if(!comingMessage.equals("666 PlayingTexasHoldemState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required PlayingTexasHoldemState");
+
+        }else if(comingMessage.matches(Request.ALL_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            if((players.length-3)!=currentGame.getPlayers().size()) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+            for (int i=3;i<players.length;i++){
+                currentGame.getPlayer(players[i]);
+            }
+        }else if(comingMessage.matches(Request.ACTIVE_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(!player.hasQuitted()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to be active");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+
+        }else if(comingMessage.matches(Request.QUITTED_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(player.hasQuitted()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to have quit");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
+
+        }else if(comingMessage.matches(Request.FOLDED_PLAYERS)){
+
+            String[] players=comingMessage.split("\\s+");
+            int count=0;
+            for (int i=3;i<players.length;i++){
+                Player player=currentGame.getPlayer(players[i]);
+                if(player.hasFolded()) {
+                    count++;
+                }else {
+                    throw new RuntimeException(players[i]+" supposed to have folded");
+                }
+            }
+            if((players.length-3)!=count) throw new RuntimeException("different players length between server and client found server"+players[1]+" required "+currentGame.getPlayers().size());
         }
     }
 
@@ -124,15 +210,15 @@ public class PlayingTexasHoldemState extends GameState {
         this.client.setGameState(new MenuState(client, username));
     }
 
-    public void startGame(){
-        currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
-        rotateTurn();
-    }
 
 
     public void rotateTurn(){
-        if(currentGame.isRoundFinished()){
+        if(endgame){
+            return;
+        }else if(currentGame.isRoundFinished()){
             System.out.println("client : endgame");
+            endgame=true;
+            return;
         }else if(turn!=currentGame.getBidTurn()){
             turn=currentGame.getBidTurn();
             switch (turn) {
@@ -149,7 +235,9 @@ public class PlayingTexasHoldemState extends GameState {
                 case 3:
                     System.out.println("client : river : fourth betting round");
                     break;
-                default: System.out.println("client : endgame");
+                default:
+                    endgame=true;
+                    System.out.println("client : endgame");
             }
         }
         if(currentGame.isCurrentPlayer(username)) {
