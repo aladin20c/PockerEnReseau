@@ -12,7 +12,7 @@ public class Request {
 
     //menu
     public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 6 STACK 10000
-    public static String INCORRECT_VALUE="903 Incorrect value";
+    public static String INCORRECT_VALUE="903 Incorrect value";//110 CREATE 0 PLAYER 3 MIN 6 STACK 10000
     public static String INCORRECT_PLAYERS="904 Incorrect number of players";
     public static String INCORRECT_BET="905 Incorrect minimal bet";
     public static String INCORRECT_STACK="906 Incorrect stack";
@@ -22,7 +22,7 @@ public class Request {
     public static String LIST_LENGTH="120 NUMBER -?\\d+";
     public static String ROOM_INFOS="121 MESS\\s+-?\\d+\\s+ID\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+\\s+-?\\d+";
 
-    public static String JOIN_ROOM="130 JOIN -?\\d+";
+    public static String JOIN_ROOM="130 JOIN -?\\d+";// 130 JOIN 1
     public static String ROOM_JOINED="131 GAME -?\\d+ JOINED";
 
 
@@ -63,7 +63,7 @@ public class Request {
 
     public static String CHANGE="710 CHANGE \\d+(\\s[0-9]+[DCST])*";
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
-    public static String PLAYER_CHANGED_CARDS="720 .+ Change \\d+";
+    public static String PLAYER_CHANGED_CARDS="720 .+ CHANGE \\d+";
     public static String CHANGE_RECIEVED="701 RECIEVED";
 
 

@@ -7,25 +7,26 @@ import Game.Player;
 import Game.PokerGame;
 import Game.utils.Request;
 
-import java.util.ArrayList;
 
 
 public class Playing5CardPokerState extends GameState{
 
-    int turn;
+    private int turn;
     private String username;
     private PokerGame currentGame;
     private String futureAction;
     private String futureChange;
+    private boolean endgame;
 
 
     public Playing5CardPokerState(Client client, String username, PokerGame currentGame) {
         super(client);
         this.username = username;
         this.currentGame = currentGame;
-        this.futureAction="";
+        this.futureAction = "";
         this.futureChange="";
         this.turn=-1;
+        this.endgame=false;
         startGame();
     }
 
@@ -37,16 +38,19 @@ public class Playing5CardPokerState extends GameState{
 
     @Override
     public void analyseMessageToSend(String messageToSend) {
-        if(messageToSend.matches(Request.FOLD)){
-            futureAction="510 "+username+" FOLD";
-        }else if(messageToSend.matches(Request.CHECK)){
-            futureAction="511 "+username+" CHECK";
-        }else if(messageToSend.matches(Request.CALL)){
-            futureAction="512 "+username+" CALL";
-        }else if(messageToSend.matches(Request.RAISE)){
+        if (messageToSend.matches(Request.FOLD)) {
+            futureAction ="FOLD";
+        } else if (messageToSend.matches(Request.CHECK)) {
+            futureAction = "CHECK";
+        } else if (messageToSend.matches(Request.CALL)) {
+            futureAction = "CALL";
+        } else if (messageToSend.matches(Request.RAISE)) {
             int raise = Integer.parseInt(messageToSend.substring(10));
-            futureAction="513 "+username+" RAISE "+raise;
-        }else if(messageToSend.matches(Request.CHANGE)){
+            futureAction = "RAISE " + raise;
+        }
+
+
+        else if(messageToSend.matches(Request.CHANGE)){
             futureChange=messageToSend.substring(11);
         }
     }
@@ -109,6 +113,7 @@ public class Playing5CardPokerState extends GameState{
 
             String[] data = comingMessage.substring(10).split("\\s+");
             Hand hand = currentGame.getPlayer(username).getHand();
+
             if (hand.getCards().size() < 2) {
                 for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
             } else {
@@ -136,24 +141,36 @@ public class Playing5CardPokerState extends GameState{
             writeToServer(Request.CHANGE_RECIEVED);
             rotateTurn();
 
-        } else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
+        }else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
 
             quit();
 
         } else if (comingMessage.matches(Request.PLAYER_QUIT)) {
 
-            String username = comingMessage.substring(4, comingMessage.length()-5);
-            Player player = currentGame.getPlayer(username);
+            String name = comingMessage.substring(4, comingMessage.length()-5);
+            Player player=currentGame.getPlayer(name);
             player.quit(currentGame);
             writeToServer(Request.QUIT_RECIEVED);
             rotateTurn();
+
         }else if(comingMessage.matches(Request.WINNERS)){
 
-            String[] data=comingMessage.split("\\s+");
-            for (int i=1;i<data.length-1;i++){
-                currentGame.getWinners().add(currentGame.getPlayer(data[i]));
+            /**String[] data=comingMessage.split("\\s+");
+             for (int i=1;i<data.length-1;i++){
+             currentGame.getWinners().add(currentGame.getPlayer(data[i]));
+             }
+             endgame=true;
+             writeToServer(Request.WINRECEIVED);
+
+             Timer timer=new Timer(true);
+             timer.schedule(new TimerTask() {
+            @Override
+            public void run() {
+            currentGame.resetGame();
+            rotateTurn();
             }
-            //todo programm reset game
+            },15_000);*/
+
 
         }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
 
@@ -220,14 +237,18 @@ public class Playing5CardPokerState extends GameState{
 
     @Override
     public void quit() {
-        this.client.setGameState(new MenuState(client,username));
+        this.client.setGameState(new MenuState(client, username));
     }
 
 
-    public void rotateTurn(){
-        if(currentGame.isRoundFinished()){
-            System.out.println("client : endgame");
 
+    public void rotateTurn(){
+        if(endgame){
+            return;
+        }else if(currentGame.isRoundFinished()){
+            System.out.println("client : endgame");
+            endgame=true;
+            return;
         }else if(turn!=currentGame.getBidTurn()){
             turn=currentGame.getBidTurn();
             switch (turn) {
@@ -243,15 +264,15 @@ public class Playing5CardPokerState extends GameState{
                 case 3:
                     System.out.println("client : third betting round");
                     break;
-                default: System.out.println("client : endgame");
+                default:
+                    endgame=true;
+                    System.out.println("client : endgame");
             }
         }
-
         if(currentGame.isCurrentPlayer(username)) {
             System.out.println("client : It is ur turn");
         }else{
             System.out.println("client : It is "+currentGame.getCurrentPlayer().getName()+"'s turn");
         }
     }
-
 }

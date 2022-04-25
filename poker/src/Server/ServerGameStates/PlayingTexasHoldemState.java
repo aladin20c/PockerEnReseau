@@ -101,9 +101,7 @@ public class PlayingTexasHoldemState extends GameState{
 
         }else if(messageFromClient.matches(Request.CARDS_RECIEVED)){
 
-
             clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
-
 
         }else if (messageFromClient.matches(Request.QUIT)) {
 
@@ -115,7 +113,7 @@ public class PlayingTexasHoldemState extends GameState{
 
         }else if(messageFromClient.matches(Request.WINRECEIVED)) {
 
-            if(room.isEndgame()){
+            /**if(room.isEndgame()){
                 this.endgameResponse=1;
                 if(room.isAdmin(clientHandler)){
                     Timer timer=new Timer(true);
@@ -128,7 +126,7 @@ public class PlayingTexasHoldemState extends GameState{
                 }
             }else {
                 writeToClient(Request.ERROR);
-            }
+            }*/
 
         }else if(messageFromClient.matches(Request.GET_STATE)) {
 
@@ -181,11 +179,12 @@ public class PlayingTexasHoldemState extends GameState{
 
     @Override
     public void clientQuit() {
+        boolean current=room.getGame().getCurrentPlayer().getName().equals(clientHandler.getClientUsername());
         player.quit(room.getGame());
         room.removeClient(clientHandler);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
-        if(room.getGame().getCurrentPlayer().getName().equals(clientHandler.getClientUsername())){
+        if(current){
             rotateTurn();
         }
         writeToClient(Request.QUIT_ACCEPTED);

@@ -53,10 +53,7 @@ public abstract class PokerGame {
         players.remove(player);
     }
 
-    /**
-     * To get the index of the next player
-     * @return
-     */
+
     /*public int nextPlayer(int i){
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
@@ -66,19 +63,14 @@ public abstract class PokerGame {
         }
     }*/
     public int nextPlayer(int n){
-        if(n>players.size()) return -1;
         for(int i=1;i<players.size();i++){
             int index=(n+i)%players.size();
             if(! players.get(index).hasFolded()) return index;
         }
-        return -1;
+        return n;
     }
 
 
-
-    public int nextPlayer(){
-        return nextPlayer(currentPlayer);
-    }
 
 
     /**
@@ -105,8 +97,10 @@ public abstract class PokerGame {
 
 
     public void rotate(){
-
-        if(isTurnFinished()){
+         if(isRoundFinished()) {
+             bidTurn=4;
+             return;
+         }else if(isTurnFinished()){
             bidTurn++;
             currentPlayer=nextPlayer(dealer);
             for(Player p : players){
@@ -278,13 +272,13 @@ public abstract class PokerGame {
 
     /**--------------------------------- methods to override ---------------------------------*/
 
+    public Card[] revealCards(int mbcards){return null;}
     public boolean canChange(Player player,Card[] cards){
         return false;
     }
     public Card[] change(Player player,Card[] cards){
         return null;
     }
-    public Card[] revealCards(int mbcards){return null;}
     public abstract boolean isRoundFinished();
     public abstract boolean canResetGame();
     public abstract boolean canStartGame();

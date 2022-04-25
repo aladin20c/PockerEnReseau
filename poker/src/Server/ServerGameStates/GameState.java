@@ -51,8 +51,6 @@ public abstract class GameState {
         }
     }
 
-
-
     public void broadCastTask(String string){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
             if (clientHandler!=this.clientHandler) {

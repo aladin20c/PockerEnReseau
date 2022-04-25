@@ -7,15 +7,19 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class Playing5CardPokerState extends GameState{
 
     private Player player;
-    private boolean endgame;
+    private int endgameResponse;
 
 
     public Playing5CardPokerState(ClientHandler clientHandler , Room room) {
         super(clientHandler, room);
         this.player=room.getGame().getPlayer(clientHandler.getClientUsername());
+        this.endgameResponse=0;
         startGame();
     }
 
@@ -137,7 +141,20 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.WINRECEIVED)) {
 
-            //fixme tocomplete
+            /**if(room.isEndgame()){
+                this.endgameResponse=1;
+                if(room.isAdmin(clientHandler)){
+                    Timer timer=new Timer(true);
+                    timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            room.resetGame();
+                        }
+                    },15_000);
+                }
+            }else {
+                writeToClient(Request.ERROR);
+            }*/
 
         }else if(messageFromClient.matches(Request.GET_STATE)) {
 
@@ -189,11 +206,12 @@ public class Playing5CardPokerState extends GameState{
 
     @Override
     public void clientQuit() {
+        boolean current=room.getGame().getCurrentPlayer().getName().equals(clientHandler.getClientUsername());
         player.quit(room.getGame());
         room.removeClient(clientHandler);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
-        if(room.getGame().getCurrentPlayer().getName().equals(clientHandler.getClientUsername())){
+        if(current){
             rotateTurn();
         }
         writeToClient(Request.QUIT_ACCEPTED);
@@ -206,11 +224,11 @@ public class Playing5CardPokerState extends GameState{
 
 
     public void rotateTurn(){
-        if(endgame) {
+        if(room.isEndgame()) {
             return;
         }else if(room.getGame().isRoundFinished()){
             broadCastMessageToEveryone("server : EndGame");
-            endgame=true;
+            room.setEndgame(true);
             declareWin();
             return;
         }else if(!room.turnIsUpToDate()) {
@@ -233,7 +251,7 @@ public class Playing5CardPokerState extends GameState{
                     break;
                 default:
                     broadCastMessageToEveryone("server : endgame");
-                    endgame=true;
+                    room.setEndgame(true);
                     declareWin();
                     return;
             }
@@ -298,4 +316,7 @@ public class Playing5CardPokerState extends GameState{
             }
         }
     }
+
+
+
 }

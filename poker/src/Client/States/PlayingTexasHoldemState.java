@@ -5,6 +5,7 @@ import Game.*;
 import Game.utils.Request;
 
 
+
 public class PlayingTexasHoldemState extends GameState {
 
     private int turn;
@@ -124,13 +125,22 @@ public class PlayingTexasHoldemState extends GameState {
 
         }else if(comingMessage.matches(Request.WINNERS)){
 
-            String[] data=comingMessage.split("\\s+");
+            /**String[] data=comingMessage.split("\\s+");
             for (int i=1;i<data.length-1;i++){
                 currentGame.getWinners().add(currentGame.getPlayer(data[i]));
             }
             endgame=true;
             writeToServer(Request.WINRECEIVED);
-            //todo programm reset game
+
+            Timer timer=new Timer(true);
+            timer.schedule(new TimerTask() {
+                        @Override
+                        public void run() {
+                            currentGame.resetGame();
+                            rotateTurn();
+                        }
+                    },15_000);*/
+
 
         }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
 
@@ -208,6 +218,7 @@ public class PlayingTexasHoldemState extends GameState {
         }else if(currentGame.isRoundFinished()){
             System.out.println("client : endgame");
             endgame=true;
+            return;
         }else if(turn!=currentGame.getBidTurn()){
             turn=currentGame.getBidTurn();
             switch (turn) {
