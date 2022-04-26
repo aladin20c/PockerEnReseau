@@ -1,10 +1,8 @@
 package Client.States;
 
 import Client.Client;
-import Game.Card;
-import Game.Hand;
-import Game.Player;
-import Game.PokerGame;
+import Game.*;
+import Game.simulator.ChangeEvent;
 import Game.utils.Request;
 
 
@@ -12,7 +10,7 @@ import Game.utils.Request;
 public class Playing5CardPokerState extends GameState{
 
     private int turn;
-    private String username;
+    private final String username;
     private PokerGame currentGame;
     private String futureAction;
     private String futureChange;
@@ -114,11 +112,24 @@ public class Playing5CardPokerState extends GameState{
             String[] data = comingMessage.substring(10).split("\\s+");
             Hand hand = currentGame.getPlayer(username).getHand();
 
-            if (hand.getCards().size() < 2) {
-                for (int i = 1; i < data.length; i++) hand.add(new Card(data[i]));
-            } else {
-                for (int i = 1; i < data.length; i++) currentGame.getTable().add(new Card(data[i]));
+            ChangeEvent event=null;
+            boolean drawingEvent=false;
+
+            if (!hand.getCards().isEmpty() && hand.getCards().size() < 5){
+                drawingEvent=true;
+                for(ChangeEvent e : ((PokerFerme)currentGame).changeEvents){
+                    if(e.player.getName().equals(username)) event=e;
+                }
             }
+
+            for (int i = 1; i < data.length; i++) {
+                Card c=new Card(data[i]);
+                if(drawingEvent && event!=null){
+                    event.addDrawnCard(c);
+                }
+                hand.add(c);
+            }
+
             writeToServer(Request.CARDS_RECIEVED);
 
         }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
@@ -129,7 +140,11 @@ public class Playing5CardPokerState extends GameState{
             for(int i=1;i<data.length;i++){
                 cards[i-1]=new Card(data[i]);
             }
-            currentGame.getPlayer(username).getHand().removeAll(cards);
+            Player p= currentGame.getPlayer(username);
+            p.getHand().removeAll(cards);
+            ChangeEvent kce=new ChangeEvent(p,Integer.parseInt(data[0]));
+            kce.setDiscradedCards(cards);
+            ((PokerFerme)currentGame).addChangeEvent(kce);
             this.futureChange="";
             rotateTurn();
 
@@ -138,6 +153,7 @@ public class Playing5CardPokerState extends GameState{
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" CHANGE"));
             Player player = currentGame.getPlayer(username);
             int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE")+7));
+            ((PokerFerme)currentGame).addChangeEvent(new ChangeEvent(player,numberOfCardsChanged));
             writeToServer(Request.CHANGE_RECIEVED);
             rotateTurn();
 

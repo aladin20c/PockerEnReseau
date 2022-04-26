@@ -1,16 +1,29 @@
 package Game.simulator;
 
 import Game.Card;
+import Game.Hand;
+import Game.pokerhandranking.HandTypeRankingUtil;
 import Game.utils.Rank;
 import Game.utils.Suit;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 
-public abstract class Simulator {
+public interface Simulator {
+
+
+
+    public void simulate();
+
+    /*gives a rank to a hand strenght*/
+    public static int Rank(Hand hand){
+        //return 1;
+        hand = HandTypeRankingUtil.getBestHand(hand.getCards());
+        return hand.getHandType().getPower()*17+hand.getCards().get(0).getRank().getRank();
+    }
 
     /*return hashset containing 52 poker cards*/
-    public HashSet<Card> getCardSet(){
+    public static HashSet<Card> getCardSet(){
         HashSet<Card> set=new HashSet<>();
         for(Suit suit: Suit.values() ){
             for(Rank rank:Rank.values()){
@@ -20,20 +33,4 @@ public abstract class Simulator {
         return set;
     }
 
-    /*gives a rank to a hand strenght*/
-    public int Rank(ArrayList<Card> cards,ArrayList<Card> cards2) {
-        return 1;
-    }
-    public int Rank(ArrayList<Card> cards,ArrayList<Card> cards2,ArrayList<Card> cards3) {
-        return 1;
-    }
-
-
-    public void distributeCards(ArrayList<Card> cards, ArrayList<Card>[] hands, int perHand){
-        for(int i=0;i<perHand;i++){
-            for (ArrayList<Card> hand : hands) {
-                hand.set(i, cards.remove(0));
-            }
-        }
-    }
 }

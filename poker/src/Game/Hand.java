@@ -6,6 +6,7 @@ import Game.utils.SortBy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 
 public class Hand implements Comparable<Hand> {
 
@@ -15,6 +16,11 @@ public class Hand implements Comparable<Hand> {
     //Constructor
     public Hand(){
         cards=new ArrayList<>();
+        handType=PokerHandType.NOTHING;
+    }
+
+    public Hand(List<Card> cards){
+        this.cards=cards;
         handType=PokerHandType.NOTHING;
     }
 
@@ -64,16 +70,22 @@ public class Hand implements Comparable<Hand> {
         cards.add(c);
     }
 
-    /**
-     * To show all the faceUp cards
-     * @return
-     */
-    public String showHand(){
-        String str="";
-        for(Card c:cards){
-            str+=c.toString()+"\n";
+    public boolean isEmpty(){return cards.isEmpty();}
+
+
+    public void draw(int nbCards,ArrayList<Card> deck){
+        for (int i=0;i<nbCards;i++){
+            cards.add(deck.remove(0));
         }
-        return str;
+    }
+    public void discardAndDrawRandomlessly(int nbCards,ArrayList<Card> deck){
+        Random random=new Random();
+        for (int i=0;i<nbCards;i++){
+            deck.add(cards.remove(random.nextInt(cards.size())));
+        }
+        for (int i=0;i<nbCards;i++){
+            cards.add(deck.remove(0));
+        }
     }
 
     /**
@@ -116,6 +128,7 @@ public class Hand implements Comparable<Hand> {
         return cards.get(0).getSuit().equals(cards.get(size-1).getSuit());//If the first and last cards have the same suit
     }
 
+
     //TODO verify with all possibilities (check for flush hand (done))
     @Override
     public int compareTo(Hand hand) {
@@ -148,7 +161,7 @@ public class Hand implements Comparable<Hand> {
      * @return
      */
     public Card removeCard(String s){
-        Card c = Card.createCard(s);
+        Card c = new Card(s);
         for(Card card : cards){
             if(card.equals(c)){
                 cards.remove(card);

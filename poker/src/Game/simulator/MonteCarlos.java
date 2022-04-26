@@ -16,7 +16,7 @@ public class MonteCarlos {
 
 
 
-    public static void simulateFiveCardPoker(){
+    public static void simulateFiveCardPokerAnte(){
 
         //preparing simulation variables
         Map<PokerHandType, Integer> handTypeCountMap = new HashMap<>();
@@ -32,12 +32,15 @@ public class MonteCarlos {
             //create deck
             deck = new Deck();
 
+
+
             // deal a 5 card hand from the top of the deck
             hand = HandTypeRankingUtil.getBestHand(deck.getNextCards(5));
 
+
+
             //analyse handType
             handType= hand.getHandType();
-
             Integer count = handTypeCountMap.getOrDefault(handType,0);
             handTypeCountMap.put(handType, ++count);
         }
@@ -60,13 +63,7 @@ public class MonteCarlos {
 
 
 
-
-
-
-
-
-
-    public static void simulateTexasHoldem(){
+    public static void simulateFiveCardPokerDraw(Hand ourHand){
 
         //preparing simulation variables
         Map<PokerHandType, Integer> handTypeCountMap = new HashMap<>();
@@ -101,17 +98,7 @@ public class MonteCarlos {
             handTypeCountMap.put(handType, ++count);
         }
 
-        Map<PokerHandType, Float> expectedProbabilities = new HashMap<>();
-        long numberOfPossibleFiveCardHands = (52L * 51 * 50 * 49 * 48 * 47 * 46) / (7 * 6 * 5 * 4 * 3 * 2);
-        expectedProbabilities.put(PokerHandType.STRAIGHT_FLUSH,    0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FLUSH,           0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.STRAIGHT,       0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FOUR_OF_A_KIND,   0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FULL_HOUSE,      0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.THREE_OF_A_KIND,0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.TWO_PAIRS,      0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.ONE_PAIR,     0f/numberOfPossibleFiveCardHands);
-        printResultsToConsole(handTypeCountMap,expectedProbabilities);
+        System.out.println(handTypeCountMap);
     }
 
 
@@ -141,7 +128,7 @@ public class MonteCarlos {
 
 
     public static void main(String[] args) {
-        simulateFiveCardPoker();
+        simulateFiveCardPokerAnte();
     }
 
 
