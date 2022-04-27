@@ -2,7 +2,7 @@ package Client.States;
 
 import Client.Client;
 import Game.*;
-import Game.simulator.ChangeEvent;
+import Game.utils.ChangeEvent;
 import Game.utils.Request;
 
 

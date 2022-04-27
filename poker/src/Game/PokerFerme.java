@@ -1,7 +1,7 @@
 package Game;
 
 
-import Game.simulator.ChangeEvent;
+import Game.utils.ChangeEvent;
 
 import java.util.ArrayList;
 

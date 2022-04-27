@@ -8,6 +8,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import static java.util.stream.Collectors.joining;
+
 public class Hand implements Comparable<Hand> {
 
     protected List<Card> cards;
@@ -70,14 +72,19 @@ public class Hand implements Comparable<Hand> {
         cards.add(c);
     }
 
+
     public boolean isEmpty(){return cards.isEmpty();}
 
-
-    public void draw(int nbCards,ArrayList<Card> deck){
-        for (int i=0;i<nbCards;i++){
-            cards.add(deck.remove(0));
-        }
+    @Override
+    public String toString() {
+        return cards.stream().map(Card::toString).collect(joining(" "));
     }
+
+    public int getHighestRank(){
+        return cards.get(0).getRank().getRank();
+    }
+
+
     public void discardAndDrawRandomlessly(int nbCards,ArrayList<Card> deck){
         Random random=new Random();
         for (int i=0;i<nbCards;i++){
@@ -119,13 +126,6 @@ public class Hand implements Comparable<Hand> {
 
     public boolean has5Cards(){
         return cards.size()==5;
-    }
-    //********CHECKING FOR HANS'S VALUES***********//
-
-    public boolean isFlush(){
-        sortBySuit();
-        int size= cards.size();
-        return cards.get(0).getSuit().equals(cards.get(size-1).getSuit());//If the first and last cards have the same suit
     }
 
 
@@ -170,5 +170,6 @@ public class Hand implements Comparable<Hand> {
         }
         return null;
     }
+
 
 }

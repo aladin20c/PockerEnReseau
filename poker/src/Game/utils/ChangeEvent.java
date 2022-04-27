@@ -1,4 +1,4 @@
-package Game.simulator;
+package Game.utils;
 
 import Game.Card;
 import Game.Player;
