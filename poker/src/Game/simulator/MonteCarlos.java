@@ -5,7 +5,7 @@ import Game.Deck;
 import Game.Hand;
 import Game.utils.PokerHandType;
 import Game.pokerhandranking.HandTypeRankingUtil;
-import Game.simulator.Simulator.Data;
+
 
 import java.util.*;
 
@@ -24,7 +24,7 @@ public class MonteCarlos {
         Hand hand2;
 
         //simulation loop
-        for (int i = 0; i < 10000000; i++) {
+        for (int i = 0; i < 1000000; i++) {
             if (i>100000 && i%100000 == 0) System.out.println("simulated "+i+" random poker hands ...");
             if (i>0 && i<100000 && i%10000 == 0) System.out.println("simulated "+i+" random poker hands ...");
             //create deck
@@ -55,9 +55,10 @@ public class MonteCarlos {
     }
 
 
-    public static Data simulateAnte(int turn, int nPlayers){
+    public static FiveCardSimulator.Data simulateAnte(int turn, int nPlayers){
 
         //preparing simulation variables
+        long begin=System.nanoTime();
         HashSet<Card> cardSet=Simulator.getCardSet();
         ArrayList<Card> deck;
 
@@ -65,22 +66,22 @@ public class MonteCarlos {
         int tied=0;
         int behind = 0;
 
-        //preparink oppRanks
         Card[][] hands=new Card[nPlayers][5];
         int[] ranks=new int[nPlayers];
 
 
-        //simulation loop
         for (int i = 0; i < HANDS; i++) {
-            if (i>100000 && i%100000 == 0) System.out.println("simulated "+i+" random poker hands ...");
-            if (i>0 && i<100000 && i%10000 == 0) System.out.println("simulated "+i+" random poker hands ...");
             deck=new ArrayList<>(cardSet);
+            Collections.shuffle(deck);
 
-            for (int k=0;k<nPlayers;k++){
-                for (int j=0;j<5;j++){
-                    hands[i][j]=deck.remove(0);
+
+
+            for (int j=0;j<5;j++){
+                for (int k=0;k<nPlayers;k++) {
+                    hands[(k+1)%nPlayers][j] = deck.remove(0);
                 }
             }
+
 
             for (int k=0;k<nPlayers;k++){
                 ranks[k]=Simulator.rankFiveCards(Arrays.asList(hands[k]));
@@ -105,7 +106,7 @@ public class MonteCarlos {
             }
 
             if(isbehind){
-                behind--;
+                behind++;
             }else if(istied){
                 tied++;
             }else if(isahead){
@@ -113,59 +114,13 @@ public class MonteCarlos {
             }
 
         }
+        long end=System.nanoTime();
+        double time=((double)(end-begin))/1000000000;
         System.out.println("ahead="+(double)ahead/10000);
         System.out.println("tied="+(double)tied/10000);
         System.out.println("behind="+(double)behind/10000);
-        return new Data((double)ahead/10000,(double)tied/10000,(double)behind/10000);
+        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
     }
-
-
-
-
-
-
-
-    public static void simulateFiveCardPokerDraw(Hand ourHand){
-
-        //preparing simulation variables
-        Map<PokerHandType, Integer> handTypeCountMap = new HashMap<>();
-        PokerHandType handType;
-        ArrayList<Card> cards;
-        Deck deck;
-
-
-        //simulation loop
-        for (int i = 0; i < HANDS; i++) {
-            if (i>100000 && i%100000 == 0) System.out.println("simulated "+i+" random poker hands ...");
-            if (i>0 && i<100000 && i%10000 == 0) System.out.println("simulated "+i+" random poker hands ...");
-
-            //create deck
-            deck = new Deck();
-            //burn card
-            deck.burn();
-            //deal a 2 card hand from the top of the deck
-            cards = new ArrayList<>(deck.getNextCards(2));
-            // deal a 5 card hand from the top of the deck
-            deck.burn();
-            cards.addAll(deck.getNextCards(3));
-            deck.burn();
-            cards.add(deck.getNextCard());
-            deck.burn();
-            cards.add(deck.getNextCard());
-
-            //analyse handType
-            handType = HandTypeRankingUtil.getBestHand(cards).getHandType();
-
-            Integer count = handTypeCountMap.getOrDefault(handType,0);
-            handTypeCountMap.put(handType, ++count);
-        }
-
-        System.out.println(handTypeCountMap);
-    }
-
-
-
-
 
     public static void main(String[] args) {
         testHandEvaluation();

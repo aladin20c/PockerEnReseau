@@ -47,6 +47,7 @@ public interface Simulator {
     }
 
     static int rankFiveCards(FiveCards hand) {
+        //if(hand.getCards().size()!=5) throw new RuntimeException("not 5 "+hand.getCards().size());
         return typeOfFiveCards(hand).getPower()*19+hand.getHighestRank();
     }
 
@@ -55,17 +56,31 @@ public interface Simulator {
         return typeOfFiveCards(hand).getPower()*19+hand.getHighestRank();
     }
 
-    static int rankHand(List<Card> cards) {
-        Hand hand=HandTypeRankingUtil.getBestHand(cards);
-        return hand.getHandType().getPower()*19+hand.getHighestRank();
+    static int rankTexasHoldem(List<Card> hand,List<Card> board){
+        ArrayList<Card> E=new ArrayList<>();
+        for (Card c : hand){
+            if(c!=null) E.add(c);
+        }
+        for (Card c : board){
+            if(c!=null) E.add(c);
+        }
+        Hand h=HandTypeRankingUtil.getBestHand(E);
+        return h.getHandType().getPower()*19+h.getHighestRank();
     }
 
-    /*gives a rank to a hand strenght*/
-    static int rankHand(Hand hand){
-        hand = HandTypeRankingUtil.getBestHand(hand.getCards());
-        return hand.getHandType().getPower()*17+hand.getCards().get(0).getRank().getRank();
+    static int rankTexasHoldem(List<Card> hand,List<Card> board,Card card_1,Card card_2){
+        ArrayList<Card> E=new ArrayList<>();
+        for (Card c : hand){
+            if(c!=null) E.add(c);
+        }
+        for (Card c : board){
+            if(c!=null) E.add(c);
+        }
+        if(card_1!=null) E.add(card_1);
+        if(card_2!=null) E.add(card_2);
+        Hand h=HandTypeRankingUtil.getBestHand(E);
+        return h.getHandType().getPower()*19+h.getHighestRank();
     }
-
 
     /*return hashset containing 52 poker cards*/
     static HashSet<Card> getCardSet(){
@@ -79,22 +94,5 @@ public interface Simulator {
     }
 
 
-    public static class Data{
-        double ahead;
-        double tied;
-        double behind;
-
-        public Data(double ahead, double tied, double behind) {
-            this.ahead = ahead;
-            this.tied = tied;
-            this.behind = behind;
-        }
-
-        public Data() {
-            this.ahead = -1;
-            this.tied = -1;
-            this.behind = -1;
-        }
-    }
 
 }

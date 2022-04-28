@@ -171,7 +171,7 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(comingMessage.matches(Request.WINNERS)){
 
-            /**String[] data=comingMessage.split("\\s+");
+            /*String[] data=comingMessage.split("\\s+");//todo
              for (int i=1;i<data.length-1;i++){
              currentGame.getWinners().add(currentGame.getPlayer(data[i]));
              }

@@ -9,7 +9,7 @@ import Game.utils.Request;
 public class PlayingTexasHoldemState extends GameState {
 
     private int turn;
-    private String username;
+    private final String username;
     private PokerGame currentGame;
     private String futureAction;
     private boolean endgame;
@@ -125,7 +125,7 @@ public class PlayingTexasHoldemState extends GameState {
 
         }else if(comingMessage.matches(Request.WINNERS)){
 
-            /**String[] data=comingMessage.split("\\s+");
+            /*String[] data=comingMessage.split("\\s+");//todo
             for (int i=1;i<data.length-1;i++){
                 currentGame.getWinners().add(currentGame.getPlayer(data[i]));
             }

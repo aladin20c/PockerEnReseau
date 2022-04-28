@@ -8,7 +8,7 @@ import Game.utils.Request;
 
 public class MenuState extends GameState{
 
-    private String username;
+    private final String username;
     private PokerGame futureGame;
     private PokerGame[] gamesList;
 

@@ -8,7 +8,7 @@ import Game.utils.Request;
 
 public class WaitingState extends GameState{
 
-    private String username;
+    private final String username;
     private PokerGame currentGame;
     private boolean startRequested;
 

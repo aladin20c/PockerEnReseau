@@ -3,22 +3,37 @@ package Game.simulator;
 
 import Game.Card;
 import Game.Player;
+import Game.PokerFerme;
 import Game.utils.ChangeEvent;
+
 
 import java.util.*;
 
 public class FiveCardSimulator implements Simulator{
 
 
-    public void simulate_ante(Player ourPlayer, ArrayList<Player> players){
-        MonteCarlos.simulateAnte(players.indexOf(ourPlayer)+1,players.size());
+    public static Data simulate(Player ourplayer,PokerFerme game){
+        if(game.getBidTurn()==0){
+            return simulate_ante(ourplayer,game.getPlayers());
+        }else if(game.getBidTurn()==1){
+            return simulate_first_betting_round(ourplayer, game.getPlayers());
+        }else if(game.getBidTurn()==2 || game.getBidTurn()==3){
+            simulate_rest_of_the_game(ourplayer, game.getPlayers(), game.changeEvents);
+        }else{
+            return new Data();
+        }
+        return new Data();
+    }
+
+    public static Data simulate_ante(Player ourPlayer, ArrayList<Player> players){
+        return MonteCarlos.simulateAnte(players.indexOf(ourPlayer)+1,players.size());
     }
 
 
     /*simulation for first betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_first_betting_round(Player ourPlayer, ArrayList<Player> players){
         if(ourPlayer==null || players==null || players.isEmpty()) return new Data();
-
+        long begin=System.nanoTime();
         //preparing necessary cards for simulation
         HashSet<Card> cardSet=Simulator.getCardSet();
         ourPlayer.getHand().getCards().forEach(cardSet::remove);
@@ -76,23 +91,23 @@ public class FiveCardSimulator implements Simulator{
             }
 
             if(isbehind){
-                behind--;
+                behind++;
             }else if(istied){
                 tied++;
             }else if(isahead){
                 ahead++;
             }
         }
-        System.out.println("ahead="+(double)ahead/10000);
-        System.out.println("tied="+(double)tied/10000);
-        System.out.println("behind="+(double)behind/10000);
-        return new Data((double)ahead/10000,(double)tied/10000,(double)behind/10000);
+        long end=System.nanoTime();
+        double time=((double)(end-begin))/1000000000;
+        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
     }
 
 
     /*simulation for second betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_rest_of_the_game(Player ourPlayer, ArrayList<Player> players, ArrayList<ChangeEvent> events){
 
+        long begin=System.nanoTime();
         //preparing simulation variables
         int ahead = 0;
         int tied=0;
@@ -176,7 +191,7 @@ public class FiveCardSimulator implements Simulator{
                 }
             }
             if(isbehind){
-                behind--;
+                behind++;
             }else if(istied){
                 tied++;
             }else if(isahead){
@@ -184,10 +199,9 @@ public class FiveCardSimulator implements Simulator{
             }
         }
 
-        System.out.println("ahead="+(double)ahead/10000);
-        System.out.println("tied="+(double)tied/10000);
-        System.out.println("behind="+(double)behind/10000);
-        return new Data((double)ahead/10000,(double)tied/10000,(double)behind/10000);
+        long end=System.nanoTime();
+        double time=((double)(end-begin))/1000000000;
+        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
     }
 
 
@@ -210,8 +224,44 @@ public class FiveCardSimulator implements Simulator{
         Card[] cards1={new Card("T1"),new Card("C13")};
         Card[] cards2={new Card("C6"),new Card("D6")};
         events.add(new ChangeEvent(player,2,cards1,cards2));
-        simulate_first_betting_round(player,players);
-        simulate_rest_of_the_game(player,players,events);
+        System.out.println( simulate_first_betting_round(player,players));
+        System.out.println( simulate_rest_of_the_game(player,players,events));
+    }
+
+
+    static class Data{
+        int tries;
+        double time;
+        double ahead;
+        double tied;
+        double behind;
+
+
+        public Data(int tries ,double time, double ahead, double tied, double behind) {
+            this.tries=tries;
+            this.time=time;
+            this.ahead = ahead;
+            this.tied = tied;
+            this.behind = behind;
+        }
+
+        public Data() {
+            this.time=0;
+            this.ahead = -1;
+            this.tied = -1;
+            this.behind = -1;
+        }
+
+        @Override
+        public String toString() {
+            return "Data{" +
+                    "tries=" + tries +
+                    ", time=" + time +
+                    ", ahead=" + ahead +
+                    ", tied=" + tied +
+                    ", behind=" + behind +
+                    '}';
+        }
     }
 
 

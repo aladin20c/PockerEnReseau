@@ -1,7 +1,6 @@
 package Game.simulator;
 
 import Game.Card;
-import Game.utils.PokerHandType;
 import Game.utils.Rank;
 
 import java.util.ArrayList;
@@ -62,18 +61,13 @@ public class FiveCards {
 			}
 		}
 		if (straight_1) return true;
-		if (hasAces()){
-			return cards.get(0).getRank()== Rank.DEUCE && cards.get(1).getRank()== Rank.THREE && cards.get(2).getRank()== Rank.FOUR && cards.get(3).getRank()== Rank.FIVE;
-		}
-		return false;
-
+		return cards.get(0).getRank()== Rank.DEUCE && cards.get(1).getRank()== Rank.THREE && cards.get(2).getRank()== Rank.FOUR && cards.get(3).getRank()== Rank.FIVE && cards.get(4).getRank()== Rank.ACE;
 	}
 
 	public boolean addCard(Card c){
 		cards.add(c);
-		cards.forEach(card -> {
-			kinds[card.getRank().getRank()] += 1;
-		});
+		kinds[c.getRank().getRank()] += 1;
+		Collections.sort(cards);
 		return true;
 	}
 
@@ -82,6 +76,11 @@ public class FiveCards {
 		if(tmp) {
 			kinds[c.getRank().getRank()] -= 1;
 		}
+	}
+	public Card removeCard(int i){
+		Card c = cards.remove(i);
+		kinds[c.getRank().getRank()] -= 1;
+		return c;
 	}
 
 	public List<Card> getCards() {
@@ -102,10 +101,10 @@ public class FiveCards {
 		if(nbCards==0 || deck==null ||deck.isEmpty()) return;
 		Random random=new Random();
 		for (int i=0;i<nbCards;i++){
-			deck.add(cards.remove(random.nextInt(cards.size())));
+			deck.add(removeCard(random.nextInt(cards.size())));
 		}
 		for (int i=0;i<nbCards;i++){
-			cards.add(deck.remove(0));
+			addCard(deck.remove(0));
 		}
 	}
 

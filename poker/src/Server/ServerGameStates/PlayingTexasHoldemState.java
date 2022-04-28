@@ -10,13 +10,12 @@ import Server.Server;
 
 
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
+
 
 public class PlayingTexasHoldemState extends GameState{
 
 
-    private Player player;
+    private final Player player;
     private int endgameResponse;
 
     public PlayingTexasHoldemState(ClientHandler clientHandler , Room room) {
@@ -113,7 +112,7 @@ public class PlayingTexasHoldemState extends GameState{
 
         }else if(messageFromClient.matches(Request.WINRECEIVED)) {
 
-            /**if(room.isEndgame()){
+            /*if(room.isEndgame()){//todo
                 this.endgameResponse=1;
                 if(room.isAdmin(clientHandler)){
                     Timer timer=new Timer(true);
