@@ -2,36 +2,40 @@ package Server;
 
 
 import Game.PokerGame;
+import Game.utils.Request;
 import Server.ServerGameStates.Playing5CardPokerState;
 import Server.ServerGameStates.PlayingTexasHoldemState;
 import Server.ServerGameStates.WaitingState;
-import java.util.ArrayList;
+
+import java.util.*;
 
 
 public class Room  {
 
-    protected PokerGame game;
-    protected ArrayList<ClientHandler> clientHandlers;
+    private PokerGame game;
+    private List<ClientHandler> clientHandlers;
     private int turn;
     private boolean endgame;
+    private boolean resetIsSet;
 
 
     public Room() {
-        this.clientHandlers=new ArrayList<>();
+        this.clientHandlers= Collections.synchronizedList(new ArrayList<>());
         this.turn=-1;
         this.endgame=false;
+        this.resetIsSet=false;
     }
 
 
-    public void addClient(ClientHandler clientHandler){
+    public synchronized  void addClient(ClientHandler clientHandler){
         clientHandlers.add(clientHandler);
         game.addPlayer(clientHandler.getClientUsername());
     }
-    public void removeClient(ClientHandler clientHandler){
+    public synchronized  void removeClient(ClientHandler clientHandler){
         clientHandlers.remove(clientHandler);
     }
 
-    public ClientHandler getClientHandler(String username){
+    public synchronized  ClientHandler getClientHandler(String username){
         for(ClientHandler ch : clientHandlers){
             if(ch.getClientUsername().equals(username)) return ch;
         }
@@ -39,7 +43,7 @@ public class Room  {
     }
 
 
-    public boolean canAddNewClient(){
+    public synchronized  boolean canAddNewClient(){
         if(clientHandlers.get(0).getGameState() instanceof WaitingState){
             return !((WaitingState)clientHandlers.get(0).getGameState()).startRequested() && clientHandlers.size()<game.getMaxPlayers();
         }else {
@@ -47,7 +51,7 @@ public class Room  {
         }
     }
 
-    public void requestStart(boolean start){
+    public synchronized  void requestStart(boolean start){
         for(ClientHandler ch : clientHandlers){
             if(ch.getGameState() instanceof WaitingState) {
                 ((WaitingState) ch.getGameState()).setStartRequested(start);
@@ -56,11 +60,23 @@ public class Room  {
         }
     }
 
+    public synchronized void setResetGameTimer(){
+        if (endgame && !resetIsSet){
+            Timer timer=new Timer(true);
+            timer.schedule(new TimerTask() {
+                @Override
+                public void run() {
+                    resetGame();
+                    timer.cancel();
+                }
+            },15000);
+            resetIsSet=true;
+        }
+    }
 
 
 
-
-    public void resetGame(){
+    public synchronized  void resetGame(){
         clientHandlers.add(clientHandlers.remove(0));
         ArrayList<ClientHandler> reClientHandlers=new ArrayList<>();
         for(ClientHandler ch:clientHandlers){
@@ -74,11 +90,13 @@ public class Room  {
 
         if(game.canResetGame()){
             this.endgame=false;
+            this.resetIsSet=false;
             this.turn=-1;
             game.resetGame();
             for(ClientHandler ch : clientHandlers){
                 ch.getGameState().setEndgameResponse(0);
             }
+            clientHandlers.get(0).getGameState().broadCastMessageToEveryone(Request.GAME_STARTED);
             if(game.getType()==1){
                ((PlayingTexasHoldemState) clientHandlers.get(0).getGameState()).rotateTurn();
             }else {
@@ -91,38 +109,37 @@ public class Room  {
     public String informationToString(int index){
         return "121 MESS "+index+" ID "+game.getId()+" "+game.getType()+" "+game.getMaxPlayers()+" "+game.getMinBid()+" "+game.getInitStack()+" "+clientHandlers.size();
     }
-    public boolean isAdmin(ClientHandler clientHandler){
+    public synchronized  boolean isAdmin(ClientHandler clientHandler){
         return clientHandlers.get(0)==clientHandler;
     }
-    public ArrayList<ClientHandler> getClientHandlers() {
+    public synchronized  List<ClientHandler> getClientHandlers() {
         return clientHandlers;
     }
-    public int numberOfClients(){
+    public synchronized  int numberOfClients(){
         return clientHandlers.size();
     }
-    public boolean isEmpty(){
+    public synchronized  boolean isEmpty(){
         return clientHandlers.isEmpty();
     }
-    public PokerGame getGame() {
+    public synchronized  PokerGame getGame() {
         return game;
     }
-    public void setGame(PokerGame game) {
+    public synchronized  void setGame(PokerGame game) {
         this.game = game;
     }
-    public int getTurn() {
+    public synchronized  int getTurn() {
         return turn;
     }
-    public boolean isEndgame() {
+    public synchronized  boolean isEndgame() {
         return endgame;
     }
-    public void setEndgame(boolean endgame) {
+    public synchronized  void setEndgame(boolean endgame) {
         this.endgame = endgame;
     }
-    public boolean turnIsUpToDate(){
+    public synchronized  boolean turnIsUpToDate(){
         return turn==game.getBidTurn();
     }
-    public void updateTurn(){
+    public synchronized  void updateTurn(){
         this.turn=game.getBidTurn();
     }
-
 }

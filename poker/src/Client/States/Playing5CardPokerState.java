@@ -2,6 +2,7 @@ package Client.States;
 
 import Client.Client;
 import Game.*;
+import Game.simulator.FiveCardSimulator;
 import Game.utils.ChangeEvent;
 import Game.utils.Request;
 
@@ -24,11 +25,11 @@ public class Playing5CardPokerState extends GameState{
         this.futureAction = "";
         this.futureChange="";
         this.turn=-1;
-        this.endgame=false;
         startGame();
     }
 
     public void startGame(){
+        this.endgame=false;
         currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
         rotateTurn();
     }
@@ -171,21 +172,12 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(comingMessage.matches(Request.WINNERS)){
 
-            /*String[] data=comingMessage.split("\\s+");//todo
-             for (int i=1;i<data.length-1;i++){
-             currentGame.getWinners().add(currentGame.getPlayer(data[i]));
-             }
-             endgame=true;
-             writeToServer(Request.WINRECEIVED);
-
-             Timer timer=new Timer(true);
-             timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-            currentGame.resetGame();
-            rotateTurn();
+            String[] data=comingMessage.split("\\s+");
+            for (int i=1;i<data.length-1;i++){
+                currentGame.getWinners().add(currentGame.getPlayer(data[i]));
             }
-            },15_000);*/
+            endgame=true;
+            writeToServer(Request.WINRECEIVED);
 
 
         }else if(comingMessage.matches(Request.WINNERSANDCARDS)){
@@ -195,6 +187,11 @@ public class Playing5CardPokerState extends GameState{
             for (int i=4;i<data.length;i++){
                 player.getHand().add(new Card(data[i]));
             }
+
+        }else if(comingMessage.matches(Request.GAME_STARTED)){
+
+            currentGame.resetGame();
+            startGame();
 
         }else if(comingMessage.matches(Request.STATE)){
 
@@ -287,6 +284,7 @@ public class Playing5CardPokerState extends GameState{
         }
         if(currentGame.isCurrentPlayer(username)) {
             System.out.println("client : It is ur turn");
+            System.out.println(FiveCardSimulator.simulate(currentGame.getPlayer(username),(PokerFerme) currentGame));
         }else{
             System.out.println("client : It is "+currentGame.getCurrentPlayer().getName()+"'s turn");
         }

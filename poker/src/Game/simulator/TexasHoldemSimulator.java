@@ -26,7 +26,7 @@ public class TexasHoldemSimulator implements Simulator{
     public static TexasHoldemSimulator.Data naive_simulation(Player ourPlayer, Hand tablehand, ArrayList<Player> players){
         int tries=100000;
         long begin=System.nanoTime();
-        if(players==null || ourPlayer==null || tablehand==null ||ourPlayer.getHand().nbCards()!=2) return new Data();
+        if(players==null || ourPlayer==null || tablehand==null ||ourPlayer.getHand().nbCards()!=2 || ourPlayer.hasFolded()) return new Data();
         int nb=tablehand.nbCards();
         if(nb!=0 && nb!=3 && nb!=4 && nb!=5) return new Data();
         //preparing necessary cards for simulation

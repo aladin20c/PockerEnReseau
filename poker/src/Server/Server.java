@@ -96,7 +96,7 @@ public class Server {
     }
     public static Room getRoom(int id) {
         for(Room room : rooms){
-            if(room.game.getId()==id) return room;
+            if(room.getGame().getId()==id) return room;
         }
         return null;
     }
