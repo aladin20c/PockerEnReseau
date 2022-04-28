@@ -15,12 +15,12 @@ public class CardsManipUtil {
      * @return
      */
     public static Map<Rank, List<Card>> rankClassification(List<Card> cards) {
-        Map<Rank, List<Card>> rankDistribution = new HashMap<Rank, List<Card>>();
+        Map<Rank, List<Card>> rankDistribution = new HashMap<>();
         for (Card c : cards) {
             if (rankDistribution.containsKey(c.getRank())) {
                 rankDistribution.get(c.getRank()).add(c);
             } else {
-                List<Card> l = new ArrayList<Card>();
+                List<Card> l = new ArrayList<>();
                 l.add(c);
                 rankDistribution.put(c.getRank(), l);
             }
@@ -35,12 +35,12 @@ public class CardsManipUtil {
      * @return
      */
     public static Map<Suit, List<Card>> suitClassification(List<Card> cards) {
-        Map<Suit, List<Card>> suitDistribution = new HashMap<Suit, List<Card>>();
+        Map<Suit, List<Card>> suitDistribution = new HashMap<>();
         for (Card c : cards) {
             if (suitDistribution.containsKey(c.getSuit())) {
                 suitDistribution.get(c.getSuit()).add(c);
             } else {
-                List<Card> l = new ArrayList<Card>();
+                List<Card> l = new ArrayList<>();
                 l.add(c);
                 suitDistribution.put(c.getSuit(), l);
             }
@@ -56,16 +56,12 @@ public class CardsManipUtil {
      * @return
      */
     public static List<Card> merge(List<Card> hand, List<Card> table) {
-        List<Card> merge = new ArrayList<Card>();
+        List<Card> merge = new ArrayList<>();
         if(hand!=null ) {
-            for (Card c : hand) {
-                merge.add(c);
-            }
+            merge.addAll(hand);
         }
         if( table!=null){
-            for (Card c : table) {
-                merge.add(c);
-            }
+            merge.addAll(table);
         }
         return merge;
     }
@@ -158,7 +154,7 @@ public class CardsManipUtil {
 
     public static List<Card> removeDuplicatesAndSortByRank(List<Card> cards){
         List<Card> sorted=sortBy(SortBy.RANK,cards);
-        List<Card> sortedByRankWithoutDuplicates =new ArrayList<Card>();
+        List<Card> sortedByRankWithoutDuplicates =new ArrayList<>();
         for(int i=0;i<sorted.size()-1;i++){
             if(sorted.get(i).getRank()!=sorted.get(i+1).getRank()){
                 sortedByRankWithoutDuplicates.add(sorted.get(i));
@@ -173,7 +169,7 @@ public class CardsManipUtil {
     }
 
     public static List<Card> sortBy(SortBy sort, List<Card> cards){
-        List<Card> copy=new ArrayList<Card>(cards);
+        List<Card> copy=new ArrayList<>(cards);
         Collections.sort(copy,sort.getComparator());
         return copy;
     }

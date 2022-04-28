@@ -6,142 +6,124 @@ import Game.Hand;
 import Game.utils.PokerHandType;
 import Game.pokerhandranking.HandTypeRankingUtil;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.*;
+
 
 public class MonteCarlos {
 
     private static final int HANDS = 1000000;
 
 
-
-    public static void simulateFiveCardPoker(){
+    public static void testHandEvaluation(){
 
         //preparing simulation variables
-        Map<PokerHandType, Integer> handTypeCountMap = new HashMap<>();
         PokerHandType handType;
         Deck deck;
-        Hand hand;
-
+        FiveCards hand1;
+        Hand hand2;
 
         //simulation loop
-        for (int i = 0; i < HANDS; i++) {
+        for (int i = 0; i < 1000000; i++) {
             if (i>100000 && i%100000 == 0) System.out.println("simulated "+i+" random poker hands ...");
             if (i>0 && i<100000 && i%10000 == 0) System.out.println("simulated "+i+" random poker hands ...");
             //create deck
             deck = new Deck();
 
+
+
             // deal a 5 card hand from the top of the deck
-            hand = HandTypeRankingUtil.getBestHand(deck.getNextCards(5));
+            ArrayList<Card> cadrds=deck.getNextCards(5);
 
-            //analyse handType
-            handType= hand.getHandType();
+            hand1 = new FiveCards(cadrds);
+            handType= Simulator.typeOfFiveCards(hand1);
 
-            Integer count = handTypeCountMap.getOrDefault(handType,0);
-            handTypeCountMap.put(handType, ++count);
+            hand2=HandTypeRankingUtil.getBestHand(cadrds);
+
+            if(handType!=hand2.getHandType()){
+                System.out.println("first hand "+handType.getName());
+                System.out.println("second hand "+hand2.getHandType().getName());
+                StringBuilder cards= new StringBuilder("cards : ");
+                for (Card c : cadrds){
+                    cards.append(c.toString()).append(" ");
+                }
+                System.out.println(cards);
+                throw new RuntimeException("different hands");
+            }
         }
-
-        // statically initialize all the expected (theoretical) probabilities for each type of hand
-        Map<PokerHandType, Float> expectedProbabilities = new HashMap<>();
-        long numberOfPossibleFiveCardHands = (52 * 51 * 50 * 49 * 48) / (5 * 4 * 3 * 2);
-        expectedProbabilities.put(PokerHandType.STRAIGHT_FLUSH,    40F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FLUSH,           5108F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.STRAIGHT,       10200F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FOUR_OF_A_KIND,   624F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FULL_HOUSE,      3744F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.THREE_OF_A_KIND,54912F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.TWO_PAIRS,      123552F/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.ONE_PAIR,     1098240F/numberOfPossibleFiveCardHands);
-        printResultsToConsole(handTypeCountMap,expectedProbabilities);
+        System.out.println("correct hand evaluation for five card hands");
     }
 
 
-
-
-
-
-
-
-
-
-
-    public static void simulateTexasHoldem(){
+    public static FiveCardSimulator.Data simulateAnte(int turn, int nPlayers){
 
         //preparing simulation variables
-        Map<PokerHandType, Integer> handTypeCountMap = new HashMap<>();
-        PokerHandType handType;
-        ArrayList<Card> cards;
-        Deck deck;
+        long begin=System.nanoTime();
+        HashSet<Card> cardSet=Simulator.getCardSet();
+        ArrayList<Card> deck;
+
+        int ahead = 0;
+        int tied=0;
+        int behind = 0;
+
+        Card[][] hands=new Card[nPlayers][5];
+        int[] ranks=new int[nPlayers];
 
 
-        //simulation loop
         for (int i = 0; i < HANDS; i++) {
-            if (i>100000 && i%100000 == 0) System.out.println("simulated "+i+" random poker hands ...");
-            if (i>0 && i<100000 && i%10000 == 0) System.out.println("simulated "+i+" random poker hands ...");
-
-            //create deck
-            deck = new Deck();
-            //burn card
-            deck.burn();
-            //deal a 2 card hand from the top of the deck
-            cards = new ArrayList<>(deck.getNextCards(2));
-            // deal a 5 card hand from the top of the deck
-            deck.burn();
-            cards.addAll(deck.getNextCards(3));
-            deck.burn();
-            cards.add(deck.getNextCard());
-            deck.burn();
-            cards.add(deck.getNextCard());
-
-            //analyse handType
-            handType = HandTypeRankingUtil.getBestHand(cards).getHandType();
-
-            Integer count = handTypeCountMap.getOrDefault(handType,0);
-            handTypeCountMap.put(handType, ++count);
-        }
-
-        Map<PokerHandType, Float> expectedProbabilities = new HashMap<>();
-        long numberOfPossibleFiveCardHands = (52L * 51 * 50 * 49 * 48 * 47 * 46) / (7 * 6 * 5 * 4 * 3 * 2);
-        expectedProbabilities.put(PokerHandType.STRAIGHT_FLUSH,    0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FLUSH,           0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.STRAIGHT,       0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FOUR_OF_A_KIND,   0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.FULL_HOUSE,      0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.THREE_OF_A_KIND,0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.TWO_PAIRS,      0f/numberOfPossibleFiveCardHands);
-        expectedProbabilities.put(PokerHandType.ONE_PAIR,     0f/numberOfPossibleFiveCardHands);
-        printResultsToConsole(handTypeCountMap,expectedProbabilities);
-    }
+            deck=new ArrayList<>(cardSet);
+            Collections.shuffle(deck);
 
 
 
-    private static void printResultsToConsole(Map<PokerHandType, Integer> handTypeCountMap,Map<PokerHandType, Float> expectedProbabilities) {
-        System.out.println("Probabilities:");
-        float totalActualProbabilities = 0F;
-        for (PokerHandType handType:  PokerHandType.values()) {
-            String handTypeLabel = handType.getName();
-            Integer handTypeCount = handTypeCountMap.get(handType);
-            if (handTypeCount == null) {  // we never actually got any hands of this type
-                handTypeCount = 0;
+            for (int j=0;j<5;j++){
+                for (int k=0;k<nPlayers;k++) {
+                    hands[(k+1)%nPlayers][j] = deck.remove(0);
+                }
             }
-            float actualProbability = ((float) handTypeCount) / (float) HANDS;
-            totalActualProbabilities += actualProbability;
-            if (handType != PokerHandType.NOTHING) {
-                float expectedProbability = expectedProbabilities.getOrDefault(handType,0F);
-                float deviation = (actualProbability - expectedProbability) / expectedProbability;
-                System.out.println("\t" + handTypeLabel + "\t\t:   " + handTypeCount + " of  " + HANDS + ":  actual= " + 100 * actualProbability + "%    " +
-                        "expected= " + 100 * expectedProbability + "%   deviation= " + 100 * deviation + "%");
-            } else {
-                System.out.println("\t" + handTypeLabel + "\t\t:   " + handTypeCount + " of  " + HANDS + ":  actual= " + 100 * actualProbability + "%    ");
-            }
-        }
-        System.out.println("\nTotal of all actual proabilities= "+100 * totalActualProbabilities +"%");
-    }
 
+
+            for (int k=0;k<nPlayers;k++){
+                ranks[k]=Simulator.rankFiveCards(Arrays.asList(hands[k]));
+            }
+
+            //ranking hands
+            boolean isahead=false;
+            boolean istied=false;
+            boolean isbehind=false;
+
+            int ourrank=ranks[turn-1];
+            for (int k=0;k<ranks.length;k++){
+                if(k==turn-1) continue;
+                if(ourrank<ranks[k]){
+                    isbehind=true;
+                    break;
+                }else if(ourrank==ranks[k]){
+                    istied=true;
+                }else{
+                    isahead=true;
+                }
+            }
+
+            if(isbehind){
+                behind++;
+            }else if(istied){
+                tied++;
+            }else if(isahead){
+                ahead++;
+            }
+
+        }
+        long end=System.nanoTime();
+        double time=((double)(end-begin))/1000000000;
+        System.out.println("ahead="+(double)ahead/10000);
+        System.out.println("tied="+(double)tied/10000);
+        System.out.println("behind="+(double)behind/10000);
+        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
+    }
 
     public static void main(String[] args) {
-        simulateFiveCardPoker();
+        testHandEvaluation();
     }
 
 

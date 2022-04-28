@@ -7,12 +7,10 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class Playing5CardPokerState extends GameState{
 
-    private Player player;
+    private final Player player;
     private int endgameResponse;
 
 
@@ -117,13 +115,13 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient("700 ACCEPTED");
                 broadCastTask(Request.CHANGE_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("720 "+clientHandler.getClientUsername()+" Change "+numberOfCards);
-                String cardDistribution="610 CARDS ";
-                cardDistribution+=(data[2]);
+                StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
+                cardDistribution.append(data[2]);
                 for(Card card:newCards){
-                    cardDistribution=cardDistribution+" "+card.toString();
+                    cardDistribution.append(" ").append(card.toString());
                 }
                 clientHandler.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
-                writeToClient(cardDistribution);
+                writeToClient(cardDistribution.toString());
                 rotateTurn();
             }
 
@@ -141,7 +139,7 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.WINRECEIVED)) {
 
-            /**if(room.isEndgame()){
+            /*if(room.isEndgame()){//todo
                 this.endgameResponse=1;
                 if(room.isAdmin(clientHandler)){
                     Timer timer=new Timer(true);
@@ -287,10 +285,10 @@ public class Playing5CardPokerState extends GameState{
         int count=0;
         for(Player player : room.getGame().getPlayers()){
             Card[] cards= player.getCards();
-            String cardDistribution="666 "+player.getName()+" "+count+" CARDS ";
-            cardDistribution+=cards.length;
-            for(Card card : cards) cardDistribution+=(" "+card.toString());
-            writeToClient(cardDistribution);
+            StringBuilder cardDistribution= new StringBuilder("666 " + player.getName() + " " + count + " CARDS ");
+            cardDistribution.append(cards.length);
+            for(Card card : cards) cardDistribution.append(" ").append(card.toString());
+            writeToClient(cardDistribution.toString());
             count+=1;
         }
     }
@@ -299,19 +297,19 @@ public class Playing5CardPokerState extends GameState{
         int count=room.getGame().getPlayers().size()-room.getGame().getFoldedPlayers();
         broadCastMessageToEveryone("810 REVEALCARD "+count);
         room.getGame().setWinners();
-        String winners="810 ";
+        StringBuilder winners= new StringBuilder("810 ");
         for (Player player : room.getGame().getWinners()){
-            winners+=player.getName()+" ";
+            winners.append(player.getName()).append(" ");
         }
-        winners+="WIN";
-        broadCastMessageToEveryone(winners);
+        winners.append("WIN");
+        broadCastMessageToEveryone(winners.toString());
         int i=1;
         for (Player player : room.getGame().getPlayers()){
             if(!player.hasFolded()) {
-                String playerinfo="810 ";
-                playerinfo+=player.getName()+" "+i+" HAS";
-                for (Card card : player.getCards()) playerinfo+=" "+card.toString();
-                broadCastMessageToEveryone(playerinfo);
+                StringBuilder playerinfo= new StringBuilder("810 ");
+                playerinfo.append(player.getName()).append(" ").append(i).append(" HAS");
+                for (Card card : player.getCards()) playerinfo.append(" ").append(card.toString());
+                broadCastMessageToEveryone(playerinfo.toString());
                 i+=1;
             }
         }

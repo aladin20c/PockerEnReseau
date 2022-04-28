@@ -3,7 +3,7 @@ package Game;
 import Game.utils.Rank;
 import Game.utils.Suit;
 
-public class Card {
+public class Card implements Comparable<Card>{
 
     //Private fields
     private final Suit suit;
@@ -72,13 +72,16 @@ public class Card {
             case "13":
                 this.rank = Rank.KING;
                 break;
+            case "14":
+                this.rank = Rank.ACE;
+                break;
             default: throw new RuntimeException("unrecognized value");
         }
     }
 
 
 
-    //Public methods
+    public boolean isAce(){return rank==Rank.ACE;}
 
     /**
      * To get the suit
@@ -107,82 +110,21 @@ public class Card {
         return suit.getShortName()+rank;
     }
 
-    public static Card createCard(String s){
-        Suit suit=null;
-        Rank rank=null;
-        switch(s.charAt(0)){
-            case 'D':
-                suit = Suit.DIAMONDS;
-                break;
-            case 'C':
-                suit= Suit.HEARTS;
-                break;
-            case 'S':
-                suit = Suit.SPADES;
-                break;
-            case 'T':
-                suit=Suit.CLUBS;
-                break;
-
-            default:
-            //Lancer une exception
-        }
-        switch(s.substring(1)){
-            case "1":
-                rank = Rank.ACE;
-                break;
-            case "2":
-                rank = Rank.DEUCE;
-                break;
-            case "3":
-                rank = Rank.THREE;
-                break;
-            case "4":
-                rank = Rank.FOUR;
-                break;
-            case "5":
-                rank = Rank.FIVE;
-                break;
-            case "6":
-                rank = Rank.SIX;
-                break;
-            case "7":
-                rank = Rank.SEVEN;
-                break;
-            case "8":
-                rank = Rank.EIGHT;
-                break;
-            case "9":
-                rank = Rank.NINE;
-                break;
-            case "10":
-                rank = Rank.TEN;
-                break;
-            case "11":
-                rank = Rank.JACK;
-                break;
-            case "12":
-                rank = Rank.QUEEN;
-                break;
-            case "13":
-                rank = Rank.KING;
-                break;
-            
-            default:
-            //Lancer une exception
-        }
-        return new Card(rank,suit);
-    }
-
     public boolean equals(Object o) {
         if(!(o instanceof Card)) return false;
         Card c = (Card)o;
         return this == o || (this.rank == c.rank && this.suit == c.suit);
     }
 
-    public boolean encodedTo(String s) {
-        if(s.length()!=2) return false;
-        return this.getSuit().getShortName().equals(String.valueOf(s.charAt(0))) &&
-                String.valueOf(this.getRank().getRank()).equals(String.valueOf(s.charAt(1)));
+
+    @Override
+    public int compareTo(Card o) {
+        if(rank==o.rank){
+            return 0;
+        }else if(rank.getRank()>o.rank.getRank()){
+            return 1;
+        }else{
+            return -1;
+        }
     }
 }

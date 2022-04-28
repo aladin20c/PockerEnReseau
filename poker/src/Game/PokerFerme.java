@@ -1,7 +1,7 @@
 package Game;
 
 
-import Game.simulator.ChangeEvent;
+import Game.utils.ChangeEvent;
 
 import java.util.ArrayList;
 
@@ -9,7 +9,7 @@ public class PokerFerme extends PokerGame{
 
     public static int ANTE=0;
     public static int CHANGING_TURN=2;
-    ArrayList<ChangeEvent> changeEvents=new ArrayList<>();
+    public ArrayList<ChangeEvent> changeEvents=new ArrayList<>();
 
     public PokerFerme(int id, int type, int maxPlayers, int minBid, int initStack) {
         super(id, type, maxPlayers, minBid, initStack);
@@ -106,6 +106,10 @@ public class PokerFerme extends PokerGame{
         player.getHand().addAll(newCards);
         rotate();
         return newCards;
+    }
+
+    public void addChangeEvent(ChangeEvent e){
+        changeEvents.add(e);
     }
 
 }
