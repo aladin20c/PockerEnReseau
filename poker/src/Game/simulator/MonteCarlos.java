@@ -12,9 +12,6 @@ import java.util.*;
 
 public class MonteCarlos {
 
-    private static final int HANDS = 1000000;
-
-
     public static void testHandEvaluation(){
 
         //preparing simulation variables
@@ -56,7 +53,7 @@ public class MonteCarlos {
 
 
     public static FiveCardSimulator.Data simulateAnte(int turn, int nPlayers){
-
+        int tries=100000;
         //preparing simulation variables
         long begin=System.nanoTime();
         HashSet<Card> cardSet=Simulator.getCardSet();
@@ -70,7 +67,7 @@ public class MonteCarlos {
         int[] ranks=new int[nPlayers];
 
 
-        for (int i = 0; i < HANDS; i++) {
+        for (int i = 0; i < tries; i++) {
             deck=new ArrayList<>(cardSet);
             Collections.shuffle(deck);
 
@@ -116,10 +113,7 @@ public class MonteCarlos {
         }
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        System.out.println("ahead="+(double)ahead/10000);
-        System.out.println("tied="+(double)tied/10000);
-        System.out.println("behind="+(double)behind/10000);
-        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
+        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 }

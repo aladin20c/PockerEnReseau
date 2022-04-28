@@ -54,7 +54,7 @@ public abstract class PokerGame {
     }
 
 
-    /*public int nextPlayer(int i){
+    /*public int nextPlayer(int i){//gives me error
         int n=(i+1)%players.size();
         if(!players.get(n).hasFolded()){
             return n;

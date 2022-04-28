@@ -90,8 +90,7 @@ public class ClientHandler implements Runnable{
                 messageFromClient=bufferedReader.readLine();
                 this.getGameState().analyseRequest(messageFromClient);
             }catch(Exception e){
-                //closeEverything(socket,bufferedReader,bufferedWriter);
-                e.printStackTrace();//fixme remove me after tests________fixme remove me after tests________
+                closeEverything();
                 break;//when the client disconnects, we get out of the while loop
             }
         }

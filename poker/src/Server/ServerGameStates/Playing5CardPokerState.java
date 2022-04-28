@@ -139,20 +139,12 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.WINRECEIVED)) {
 
-            /*if(room.isEndgame()){//todo
+            if(room.isEndgame()){
                 this.endgameResponse=1;
-                if(room.isAdmin(clientHandler)){
-                    Timer timer=new Timer(true);
-                    timer.schedule(new TimerTask() {
-                        @Override
-                        public void run() {
-                            room.resetGame();
-                        }
-                    },15_000);
-                }
+                room.setResetGameTimer();
             }else {
                 writeToClient(Request.ERROR);
-            }*/
+            }
 
         }else if(messageFromClient.matches(Request.GET_STATE)) {
 
@@ -314,6 +306,16 @@ public class Playing5CardPokerState extends GameState{
             }
         }
     }
+
+    @Override
+    public int getEndgameResponse() {
+        return endgameResponse;
+    }
+    @Override
+    public void setEndgameResponse(int endgameResponse) {
+        this.endgameResponse = endgameResponse;
+    }
+
 
 
 

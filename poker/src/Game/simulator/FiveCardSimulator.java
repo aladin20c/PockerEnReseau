@@ -33,6 +33,7 @@ public class FiveCardSimulator implements Simulator{
     /*simulation for first betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_first_betting_round(Player ourPlayer, ArrayList<Player> players){
         if(ourPlayer==null || players==null || players.isEmpty()||ourPlayer.getHand().nbCards()!=5 || ourPlayer.hasFolded()) return new Data();
+        int tries=100000;
         long begin=System.nanoTime();
         //preparing necessary cards for simulation
         HashSet<Card> cardSet=Simulator.getCardSet();
@@ -57,7 +58,7 @@ public class FiveCardSimulator implements Simulator{
         int opprank;
 
         //simulation
-        for(int i=0;i<1000000;i++){
+        for(int i=0;i<tries;i++){
 
             deck = new ArrayList<>(cardSet);
             Collections.shuffle(deck);
@@ -100,13 +101,14 @@ public class FiveCardSimulator implements Simulator{
         }
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
+        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 
     /*simulation for second betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_rest_of_the_game(Player ourPlayer, ArrayList<Player> players, ArrayList<ChangeEvent> events){
         if(ourPlayer==null || events==null ||players==null || players.isEmpty()||ourPlayer.getHand().nbCards()!=5 || ourPlayer.hasFolded()) return new Data();
+        int tries=100000;
         long begin=System.nanoTime();
         //preparing simulation variables
         int ahead = 0;
@@ -147,7 +149,7 @@ public class FiveCardSimulator implements Simulator{
         ArrayList<Card> deck;
 
         //simulation
-        for(int i=0;i<1000000;i++){
+        for(int i=0;i<tries;i++){
 
             //preparing deck and hands
             deck = new ArrayList<>(cardSet);
@@ -201,7 +203,7 @@ public class FiveCardSimulator implements Simulator{
 
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
+        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 
