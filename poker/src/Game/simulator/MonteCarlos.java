@@ -122,9 +122,4 @@ public class MonteCarlos {
         return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
     }
 
-    public static void main(String[] args) {
-        testHandEvaluation();
-    }
-
-
 }

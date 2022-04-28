@@ -32,7 +32,7 @@ public class FiveCardSimulator implements Simulator{
 
     /*simulation for first betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_first_betting_round(Player ourPlayer, ArrayList<Player> players){
-        if(ourPlayer==null || players==null || players.isEmpty()) return new Data();
+        if(ourPlayer==null || players==null || players.isEmpty()||ourPlayer.getHand().nbCards()!=5 || ourPlayer.hasFolded()) return new Data();
         long begin=System.nanoTime();
         //preparing necessary cards for simulation
         HashSet<Card> cardSet=Simulator.getCardSet();
@@ -106,7 +106,7 @@ public class FiveCardSimulator implements Simulator{
 
     /*simulation for second betting round five card poker we assume that dealer is the first in the list*/
     public static Data simulate_rest_of_the_game(Player ourPlayer, ArrayList<Player> players, ArrayList<ChangeEvent> events){
-
+        if(ourPlayer==null || events==null ||players==null || players.isEmpty()||ourPlayer.getHand().nbCards()!=5 || ourPlayer.hasFolded()) return new Data();
         long begin=System.nanoTime();
         //preparing simulation variables
         int ahead = 0;
@@ -204,29 +204,6 @@ public class FiveCardSimulator implements Simulator{
         return (new FiveCardSimulator.Data(1000000,time,(double)ahead/10000,(double)tied/10000,(double)behind/10000));
     }
 
-
-
-
-    public static void main(String[] args) {
-        Player player=new Player("ala",1000);
-        player.getHand().add(new Card("T1"));
-        player.getHand().add(new Card("C13"));
-        player.getHand().add(new Card("S5"));
-        player.getHand().add(new Card("S11"));
-        player.getHand().add(new Card("D3"));
-        ArrayList<Player> players=new ArrayList<>();
-        players.add(new Player("hu",976));
-        players.add(new Player("ddu",976));
-        players.add(player);
-        ArrayList<ChangeEvent> events=new ArrayList<>();
-        events.add(new ChangeEvent(players.get(1),4));
-        events.add(new ChangeEvent(players.get(0),3));
-        Card[] cards1={new Card("T1"),new Card("C13")};
-        Card[] cards2={new Card("C6"),new Card("D6")};
-        events.add(new ChangeEvent(player,2,cards1,cards2));
-        System.out.println( simulate_first_betting_round(player,players));
-        System.out.println( simulate_rest_of_the_game(player,players,events));
-    }
 
 
     static class Data{

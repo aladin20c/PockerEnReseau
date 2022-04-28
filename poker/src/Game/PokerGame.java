@@ -114,7 +114,9 @@ public abstract class PokerGame {
 
     public  void setWinners(){
         for(Player player: players){
-            if(winners.isEmpty()){
+            if(player.hasQuitted() || player.hasFolded()) {
+                continue;
+            }if(winners.isEmpty()){
                 winners.add(player);
             }else{
                 int cmp=player.getHand().compareTo(winners.get(0).getHand());
@@ -133,6 +135,8 @@ public abstract class PokerGame {
    
 
     public void resetGame(){
+        int moneyPart=this.pot/ winners.size();
+        for (Player p : winners) p.addChipsToUser(moneyPart);
         players.add(players.remove(0));
         for(Player p:players){
             if(p.hasQuitted()){
