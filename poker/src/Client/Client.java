@@ -16,6 +16,8 @@ public class Client {
     private BufferedWriter bufferedWriter;
     private GameState gameState;
 
+    private boolean isAI;
+
 
     public Client(Socket socket) {
         try {
