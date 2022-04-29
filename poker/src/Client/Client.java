@@ -3,6 +3,7 @@ package Client;
 import Client.States.GameState;
 import Client.States.IdentificationState;
 import Game.utils.Request;
+import IHM.ClientFrame;
 
 import java.io.*;
 import java.net.Socket;
@@ -25,6 +26,7 @@ public class Client {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //the client can now listen and write messages to server
+            ClientFrame clientFrame = new ClientFrame("Client",this);
             this.gameState=new IdentificationState(this);
             this.listenForMessage();
             this.sendMessage();

@@ -11,6 +11,7 @@ public class MenuState extends GameState{
     private final String username;
     private PokerGame futureGame;
     private PokerGame[] gamesList;
+    private int n=0;
 
     public MenuState(Client client, String username) {
         super(client);
@@ -47,6 +48,7 @@ public class MenuState extends GameState{
         }else if (comingMessage.matches(Request.LIST_LENGTH)) {
 
             int length = Integer.parseInt(comingMessage.substring(11));
+            n=length;
             if (length != 0) this.gamesList = new PokerGame[length];
 
         } else if (comingMessage.matches(Request.ROOM_INFOS)) {
@@ -79,5 +81,17 @@ public class MenuState extends GameState{
             if(!comingMessage.equals("666 MenuState")) throw new RuntimeException("states not synchronized between server and client found "+comingMessage+" required MenuState");
 
         }
+    }
+    public String getUserName(){
+        return username;
+    }
+    public PokerGame[] getGamesList(){
+        return gamesList;
+    }
+    public PokerGame getGamesList(int i){
+        return gamesList[i];
+    }
+    public int getN(){
+        return n;
     }
 }
