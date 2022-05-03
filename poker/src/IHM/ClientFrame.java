@@ -1,6 +1,7 @@
 package IHM;
 import Client.Client;
 import Client.States.MenuState;
+import Client.States.WaitingState;
 import Game.Player;
 import Game.PokerGame;
 
@@ -46,9 +47,10 @@ public class ClientFrame extends JFrame {
 
     private JTextField join;
     private JButton okName;
-
-    private MenuState       thisPlayer;
+    private String playerName;
+    private Player      player;
     private PokerGame game;
+    private MenuState       thisPlayer;
     private Client client;
     public ClientFrame(String title , Client client){
         super(title);
@@ -118,7 +120,7 @@ public class ClientFrame extends JFrame {
                 setPanel(joinPanel);
             }
         });
-        startGame.setText("Start the game");
+        startGame.setText("Commencer le jeu");
         startGame.setBounds(610,230,150,30);
         startGamePanel.add(startGame);
 
@@ -128,7 +130,8 @@ public class ClientFrame extends JFrame {
 
         okName = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-                String messageToSend="100 HELLO PLAYER "+join.getText();
+                playerName = join.getText();
+                String messageToSend="100 HELLO PLAYER "+playerName;
                 messageToSend=messageToSend.trim();
                 client.analyseMessageToSend(messageToSend);
                 client.writeToServer(messageToSend);
@@ -174,6 +177,10 @@ public class ClientFrame extends JFrame {
                 client.analyseMessageToSend(messageToSend);
                 client.writeToServer(messageToSend);
                 setPanel(roundPanel);
+                game = ((WaitingState)client.getGameState()).getCurrentGame();
+                player = game.getPlayer(playerName);
+                buttonRedisplay();
+                //updateSlider();
             }
         });
         createRound.setText("Créer la partie");
@@ -272,7 +279,8 @@ public class ClientFrame extends JFrame {
         }
 
         getContentPane().add( table, BorderLayout.CENTER );
-        setPanel(roundPanel);
+        setPanel(startGamePanel);
+        disableButtons();
         setResizable( false );
         setBounds( 35,20,1300,700);
         setDefaultCloseOperation( javax.swing.WindowConstants.DISPOSE_ON_CLOSE );
@@ -370,6 +378,10 @@ public class ClientFrame extends JFrame {
                     client.analyseMessageToSend(messageToSend);
                     client.writeToServer(messageToSend);
                     setPanel(roundPanel);
+                    buttonRedisplay();
+                    //updateSlider();
+                    game = ((WaitingState)client.getGameState()).getCurrentGame();
+                    player = game.getPlayer(playerName);
                 }
             });
             joinRoom.setText("Rejoindre");
@@ -396,5 +408,20 @@ public class ClientFrame extends JFrame {
         getListPanel.add(refresh);
 
         setPanel(getListPanel);
+    }
+    public void disableButtons() {
+        foldButton.setEnabled( false );
+        checkButton.setEnabled( false );
+        callButton.setEnabled( false );
+        raiseButton.setEnabled( false );
+    }
+    public void buttonRedisplay() {
+
+        if(game.canCall(player)){
+            callButton.setText( "Call" );
+        }
+        if(game.canCheck(player)){
+            checkButton.setText( "Check" );
+        }
     }
 }

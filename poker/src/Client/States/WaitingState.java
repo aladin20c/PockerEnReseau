@@ -99,4 +99,8 @@ public class WaitingState extends GameState{
     public void quit() {
         this.client.setGameState(new MenuState(client,username));
     }
+
+    public PokerGame getCurrentGame() {
+        return currentGame;
+    }
 }
