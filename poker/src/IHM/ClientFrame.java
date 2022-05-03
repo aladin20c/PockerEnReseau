@@ -42,7 +42,7 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> cardsLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> namesLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> cardsOnTable = new ArrayList<JLabel>();
-
+    private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
 
 
     private JTextField join;
@@ -196,14 +196,18 @@ public class ClientFrame extends JFrame {
             String path;
             if(i==0){
                 JLabel name = new JLabel();
-                name.setBounds(75, 220, 90, 30);
+                name.setBounds(75, 170, 90, 30);
                 namesLabels.add(name);
                 roundPanel.add(name);
+                JLabel stack= new JLabel();
+                stack.setBounds(75, 190, 90, 30);
+                stacksLabels.add(stack);
+                roundPanel.add(stack);
                 JLabel[] cards = new JLabel[5];
                 for (int j = 0; j < 5; j++) {
                     cards[j] = new JLabel();
-                    path = "/images/card_44.png";
-                    cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                    /*path = "/images/card_44.png";
+                    cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                     cards[j].setBounds(50 + (j * 15), 255, 70, 100);
                     cardsLabels.add(cards[j]);
                 }
@@ -214,14 +218,18 @@ public class ClientFrame extends JFrame {
             else{
                 if(i<5){
                     JLabel name = new JLabel();
-                    name.setBounds(100+(i*200), 20, 90, 30);
+                    name.setBounds(100+(i*200), 0, 90, 30);
                     namesLabels.add(name);
                     roundPanel.add(name);
+                    JLabel stack= new JLabel();
+                    stack.setBounds(100+(i*200), 20, 90, 30);
+                    stacksLabels.add(stack);
+                    roundPanel.add(stack);
                     JLabel[] cards = new JLabel[5];
                     for (int j = 0; j < 5; j++) {
                         cards[j] = new JLabel();
-                        path = "/images/card_back.png";
-                        cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                        /*path = "/images/card_back.png";
+                        cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                         cards[j].setBounds(80 + (j * 15) + (i*200), 55, 70, 100);
                         cardsLabels.add(cards[j]);
                     }
@@ -232,13 +240,18 @@ public class ClientFrame extends JFrame {
                 else{
                     if(i==5){
                         JLabel name = new JLabel();
-                        name.setBounds(1120, 220, 90, 30);
+                        name.setBounds(1120, 170, 90, 30);
                         roundPanel.add(name);
+                        namesLabels.add(name);
+                        JLabel stack= new JLabel();
+                        stack.setBounds(1120, 190, 90, 30);
+                        stacksLabels.add(stack);
+                        roundPanel.add(stack);
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
-                            path = "/images/card_back.png";
-                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                            /*path = "/images/card_back.png";
+                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                             cards[j].setBounds(1100 + (j * 15), 255, 70, 100);
                             cardsLabels.add(cards[j]);
                         }
@@ -248,14 +261,18 @@ public class ClientFrame extends JFrame {
                     }
                     else{
                         JLabel name = new JLabel();
-                        name.setBounds(905 -((i-6)*200), 415, 90, 30);
+                        name.setBounds(905 -((i-6)*200), 395, 90, 30);
                         namesLabels.add(name);
                         roundPanel.add(name);
+                        JLabel stack= new JLabel();
+                        stack.setBounds(905 -((i-6)*200), 415, 90, 30);
+                        stacksLabels.add(stack);
+                        roundPanel.add(stack);
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
-                            path = "/images/card_back.png";
-                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                            /*path = "/images/card_back.png";
+                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                             cards[j].setBounds(885 +(j * 15) -((i-6)*200), 450, 70, 100);
                             cardsLabels.add(cards[j]);
                         }
@@ -269,8 +286,8 @@ public class ClientFrame extends JFrame {
         JLabel[] cards = new JLabel[5];
         for (int j = 0; j < 5; j++) {
             cards[j] = new JLabel();
-            String path = "/images/card_placeholder.png";
-            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+            /*String path = "/images/card_placeholder.png";
+            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
             cards[j].setBounds(310 + (j * 150) , 255, 75, 100);
             cardsOnTable.add(cards[j]);
         }
