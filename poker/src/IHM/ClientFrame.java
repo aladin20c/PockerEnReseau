@@ -106,7 +106,7 @@ public class ClientFrame extends JFrame {
 
         messagePanel = new JPanel();
         messagePanel.setLayout( new BorderLayout() );
-        messageText = new JTextField("Send a message");
+        messageText = new JTextField();
         messageText.setEditable( false );
         messagePanel.add( messageText );
         play = new JButton(new AbstractAction() {
@@ -199,9 +199,13 @@ public class ClientFrame extends JFrame {
                 client.analyseMessageToSend(messageToSend);
                 client.writeToServer(messageToSend);
                 setPanel(roundPanel);
+                while(!(client.getGameState() instanceof WaitingState)){
+
+                }
                 game = ((WaitingState)client.getGameState()).getCurrentGame();
                 player = game.getPlayer(playerName);
                 buttonRedisplay();
+                redisplayPlayButton();
                 timer = new Timer(INTERVAL,
                         new ActionListener() {
                             public void actionPerformed(ActionEvent evt) {
@@ -377,6 +381,8 @@ public class ClientFrame extends JFrame {
         client.writeToServer(messageToSend);
 
         setPanel(getListPanel);
+        while(!(client.getGameState() instanceof MenuState)){
+        }
         int nbRooms = ((MenuState)client.getGameState()).getN();
 
         while(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null)){
@@ -429,6 +435,8 @@ public class ClientFrame extends JFrame {
                     client.writeToServer(messageToSend);
                     setPanel(roundPanel);
                     //updateSlider();
+                    while(!(client.getGameState() instanceof WaitingState)){
+                    }
                     game = ((WaitingState)client.getGameState()).getCurrentGame();
                     player = game.getPlayer(playerName);
                     buttonRedisplay();
@@ -490,6 +498,18 @@ public class ClientFrame extends JFrame {
         }
     }
     public void updatePlayer(Player player , int i , boolean showCard){
+        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+            namesLabels.get(i).setBackground(Color.WHITE);
+            stacksLabels.get(i).setBackground(Color.WHITE);
+            messageText.setBackground(Color.GREEN);
+            messageText.setText("C'est votre tour");
+        }
+        else{
+            namesLabels.get(i).setBackground(Color.BLACK);
+            stacksLabels.get(i).setBackground(Color.BLACK);
+            messageText.setBackground(Color.BLACK);
+            messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
+        }
         namesLabels.get(i).setText(player.getName());
         stacksLabels.get(i).setText(""+player.getStack());
         String path;
