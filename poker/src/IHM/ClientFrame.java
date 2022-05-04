@@ -1,14 +1,17 @@
 package IHM;
 import Client.Client;
 import Client.States.MenuState;
+import Client.States.WaitingState;
 import Game.Player;
 import Game.PokerGame;
 
 import javax.swing.*;
+import javax.swing.Timer;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
@@ -33,6 +36,7 @@ public class ClientFrame extends JFrame {
     private  JButton        raiseButton;                     // Button used to raise
     private  JPanel        table;
     private  JButton        startGame;
+    private JButton         play;
     private ArrayList<JComponent> startGamePanel = new ArrayList<JComponent>() ;
     private ArrayList<JComponent> joinPanel = new ArrayList<JComponent>() ;
     private ArrayList<JComponent> getListPanel = new ArrayList<JComponent>() ;
@@ -41,15 +45,19 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> cardsLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> namesLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> cardsOnTable = new ArrayList<JLabel>();
-
+    private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
 
 
     private JTextField join;
     private JButton okName;
-
-    private MenuState       thisPlayer;
+    private String playerName;
+    private Player      player;
     private PokerGame game;
     private Client client;
+
+    public final static int INTERVAL = 50;
+    private Timer timer;
+
     public ClientFrame(String title , Client client){
         super(title);
         this.client=client;
@@ -107,25 +115,41 @@ public class ClientFrame extends JFrame {
         bankText = new JTextField("Bank ");
         potText = new JTextField("Pot ");
         betText = new JTextField("Bet");
+        yourBetText = new JTextField("Your bet");
 
         bankText.setEditable( false );
         potText.setEditable( false );
         betText.setEditable( false );
+        yourBetText.setEditable(false);
 
         cashPanel.add( bankText );
         cashPanel.add( potText );
         cashPanel.add( betText );
+        cashPanel.add(yourBetText);
 
         messagePanel = new JPanel();
         messagePanel.setLayout( new BorderLayout() );
-        messageText = new JTextField("Send a message");
+        messageText = new JTextField();
         messageText.setEditable( false );
         messagePanel.add( messageText );
-
-        yourBetText = new JTextField("Your bet");
-        yourBetText.setPreferredSize( new Dimension( 325,1 ) );
-        yourBetText.setEditable( false );
-        messagePanel.add( yourBetText, BorderLayout.EAST );
+        play = new JButton(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                timer = new Timer(INTERVAL,
+                        new ActionListener() {
+                            public void actionPerformed(ActionEvent evt) {
+                                for(int i =0 ; i<game.getPlayers().size() ; i++){
+                                    updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                }
+                                setPanel(roundPanel);
+                            }
+                        });
+                timer.start();
+            }
+        });
+        play.setText("Jouer");
+        play.setPreferredSize( new Dimension( 90,1 ) );
+        play.setEnabled( false );
+        messagePanel.add( play, BorderLayout.WEST);
 
         bottomPanel.add( cashPanel );
         bottomPanel.add( messagePanel );
@@ -141,7 +165,7 @@ public class ClientFrame extends JFrame {
                 setPanel(joinPanel);
             }
         });
-        startGame.setText("Start the game");
+        startGame.setText("Commencer le jeu");
         startGame.setBounds(610,230,150,30);
         startGamePanel.add(startGame);
 
@@ -151,8 +175,16 @@ public class ClientFrame extends JFrame {
 
         okName = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
+<<<<<<< HEAD
                 String messageToSend="100 HELLO PLAYER "+join.getText();
                 client.sendMessage(messageToSend);
+=======
+                playerName = join.getText();
+                String messageToSend="100 HELLO PLAYER "+playerName;
+                messageToSend=messageToSend.trim();
+                client.analyseMessageToSend(messageToSend);
+                client.writeToServer(messageToSend);
+>>>>>>> b07e02b86347e6aa0fd4e8a4ec9c1b187942be04
                 getList();
             }
         });
@@ -193,6 +225,25 @@ public class ClientFrame extends JFrame {
                 String messageToSend="110 CREATE "+typeText.getText()+" PLAYER "+nbPlayerText.getText()+" MIN "+minBetText.getText()+" STACK "+stackText.getText();
                 client.sendMessage(messageToSend);
                 setPanel(roundPanel);
+                while(!(client.getGameState() instanceof WaitingState)){
+
+                }
+                game = ((WaitingState)client.getGameState()).getCurrentGame();
+                player = game.getPlayer(playerName);
+                buttonRedisplay();
+                redisplayPlayButton();
+                timer = new Timer(INTERVAL,
+                        new ActionListener() {
+                            public void actionPerformed(ActionEvent evt) {
+                                for(int i =0 ; i<game.getPlayers().size() ; i++){
+                                    updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                }
+                                setPanel(roundPanel);
+                            }
+                        });
+                timer.start();
+
+                //updateSlider();
             }
         });
         createRound.setText("Créer la partie");
@@ -208,9 +259,13 @@ public class ClientFrame extends JFrame {
             String path;
             if(i==0){
                 JLabel name = new JLabel();
-                name.setBounds(75, 220, 90, 30);
+                name.setBounds(75, 170, 90, 30);
                 namesLabels.add(name);
                 roundPanel.add(name);
+                JLabel stack= new JLabel();
+                stack.setBounds(75, 190, 90, 30);
+                stacksLabels.add(stack);
+                roundPanel.add(stack);
                 JLabel[] cards = new JLabel[5];
                 for (int j = 0; j < 5; j++) {
                     cards[j] = new JLabel();
@@ -226,9 +281,13 @@ public class ClientFrame extends JFrame {
             else{
                 if(i<5){
                     JLabel name = new JLabel();
-                    name.setBounds(100+(i*200), 20, 90, 30);
+                    name.setBounds(100+(i*200), 0, 90, 30);
                     namesLabels.add(name);
                     roundPanel.add(name);
+                    JLabel stack= new JLabel();
+                    stack.setBounds(100+(i*200), 20, 90, 30);
+                    stacksLabels.add(stack);
+                    roundPanel.add(stack);
                     JLabel[] cards = new JLabel[5];
                     for (int j = 0; j < 5; j++) {
                         cards[j] = new JLabel();
@@ -244,8 +303,13 @@ public class ClientFrame extends JFrame {
                 else{
                     if(i==5){
                         JLabel name = new JLabel();
-                        name.setBounds(1120, 220, 90, 30);
+                        name.setBounds(1120, 170, 90, 30);
                         roundPanel.add(name);
+                        namesLabels.add(name);
+                        JLabel stack= new JLabel();
+                        stack.setBounds(1120, 190, 90, 30);
+                        stacksLabels.add(stack);
+                        roundPanel.add(stack);
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
@@ -260,9 +324,13 @@ public class ClientFrame extends JFrame {
                     }
                     else{
                         JLabel name = new JLabel();
-                        name.setBounds(905 -((i-6)*200), 415, 90, 30);
+                        name.setBounds(905 -((i-6)*200), 395, 90, 30);
                         namesLabels.add(name);
                         roundPanel.add(name);
+                        JLabel stack= new JLabel();
+                        stack.setBounds(905 -((i-6)*200), 415, 90, 30);
+                        stacksLabels.add(stack);
+                        roundPanel.add(stack);
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
@@ -281,8 +349,8 @@ public class ClientFrame extends JFrame {
         JLabel[] cards = new JLabel[5];
         for (int j = 0; j < 5; j++) {
             cards[j] = new JLabel();
-            String path = "/images/card_placeholder.png";
-            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+            /*String path = "/images/card_placeholder.png";
+            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
             cards[j].setBounds(310 + (j * 150) , 255, 75, 100);
             cardsOnTable.add(cards[j]);
         }
@@ -292,6 +360,10 @@ public class ClientFrame extends JFrame {
 
         getContentPane().add( table, BorderLayout.CENTER );
         setPanel(startGamePanel);
+<<<<<<< HEAD
+=======
+        disableButtons();
+>>>>>>> b07e02b86347e6aa0fd4e8a4ec9c1b187942be04
         setResizable( false );
         setBounds( 35,20,1300,700);
         setDefaultCloseOperation( javax.swing.WindowConstants.DISPOSE_ON_CLOSE );
@@ -336,6 +408,8 @@ public class ClientFrame extends JFrame {
         client.sendMessage(messageToSend);
 
         setPanel(getListPanel);
+        while(!(client.getGameState() instanceof MenuState)){
+        }
         int nbRooms = ((MenuState)client.getGameState()).getN();
 
         while(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null)){
@@ -384,6 +458,22 @@ public class ClientFrame extends JFrame {
                     String messageToSend="130 JOIN "+index+1;
                     client.sendMessage(messageToSend);
                     setPanel(roundPanel);
+                    //updateSlider();
+                    while(!(client.getGameState() instanceof WaitingState)){
+                    }
+                    game = ((WaitingState)client.getGameState()).getCurrentGame();
+                    player = game.getPlayer(playerName);
+                    buttonRedisplay();
+                    timer = new Timer(INTERVAL,
+                            new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    for(int i =0 ; i<game.getPlayers().size() ; i++){
+                                        updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                    }
+                                    setPanel(roundPanel);
+                                }
+                            });
+                    timer.start();
                 }
             });
             joinRoom.setText("Rejoindre");
@@ -410,5 +500,54 @@ public class ClientFrame extends JFrame {
         getListPanel.add(refresh);
 
         setPanel(getListPanel);
+    }
+    public void disableButtons() {
+        foldButton.setEnabled( false );
+        checkButton.setEnabled( false );
+        callButton.setEnabled( false );
+        raiseButton.setEnabled( false );
+    }
+    public void buttonRedisplay() {
+
+        if(game.canCall(player)){
+            callButton.setEnabled(true);
+        }
+        if(game.canCheck(player)){
+            checkButton.setEnabled(true);
+        }
+    }
+    public void redisplayPlayButton(){
+        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+            play.setEnabled(true);
+        }
+    }
+    public void updatePlayer(Player player , int i , boolean showCard){
+        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+            namesLabels.get(i).setBackground(Color.WHITE);
+            stacksLabels.get(i).setBackground(Color.WHITE);
+            messageText.setBackground(Color.GREEN);
+            messageText.setText("C'est votre tour");
+        }
+        else{
+            namesLabels.get(i).setBackground(Color.BLACK);
+            stacksLabels.get(i).setBackground(Color.BLACK);
+            messageText.setBackground(Color.BLACK);
+            messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
+        }
+        namesLabels.get(i).setText(player.getName());
+        stacksLabels.get(i).setText(""+player.getStack());
+        String path;
+        for(int j=0 ; j<player.getCards().length ; j++){
+            if(showCard){
+                cardsLabels.get(j).setIcon(ResourceManager.getCardImage(player.getCards()[j]));
+            }
+            else{
+                cardsLabels.get(j).setIcon(ResourceManager.getIcon("/images/card_back.png"));
+            }
+        }
+        bankText.setText(""+player.getStack());
+        potText.setText(""+game.getPot());
+        betText.setText(""+game.getBidAmount());
+        yourBetText.setText(""+player.getBidPerRound());
     }
 }
