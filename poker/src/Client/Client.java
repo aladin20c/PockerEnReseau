@@ -64,6 +64,13 @@ public class Client {
             writeToServer(messageToSend);
         }
     }
+
+
+    public void sendMessage(String messageToSend){
+        messageToSend=messageToSend.trim();
+        analyseMessageToSend(messageToSend);
+        writeToServer(messageToSend);
+    }
     /*making a seperate thread for listening for messages that has been broadCasted*/
     public void listenForMessage(){
         new Thread(new Runnable() {

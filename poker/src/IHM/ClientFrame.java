@@ -61,19 +61,42 @@ public class ClientFrame extends JFrame {
         buttons.setLayout( new GridLayout( 1,4 ) );
 
         foldButton = new JButton( "Fold" );
-        //foldButton.addActionListener( new foldAction() );
+        foldButton.addActionListener(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                String messageToSend="410 FOLD";
+                client.sendMessage(messageToSend);
+            }
+        });
         foldButton.setFocusPainted( false );
         buttons.add( foldButton );
+
         checkButton = new JButton( "Check" );
-        //checkButton.addActionListener( new checkAction() );
+        checkButton.addActionListener(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                String messageToSend="411 CHECK";
+                client.sendMessage(messageToSend);
+            }
+        });
         checkButton.setFocusPainted( false );
         buttons.add( checkButton );
+
         callButton = new JButton( "Call" );
-        //callButton.addActionListener( new callAction() );
+        callButton.addActionListener(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                String messageToSend="412 CALL";
+                client.sendMessage(messageToSend);
+            }
+        });
         callButton.setFocusPainted( false );
         buttons.add( callButton );
+
         raiseButton = new JButton( "Raise" );
-        //callButton.addActionListener( new callAction() );
+        callButton.addActionListener(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                String messageToSend="413 RAISE "+yourBetText.getText();
+                client.sendMessage(messageToSend);
+            }
+        });
         callButton.setFocusPainted( false );
         buttons.add( raiseButton );
 
@@ -129,9 +152,7 @@ public class ClientFrame extends JFrame {
         okName = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="100 HELLO PLAYER "+join.getText();
-                messageToSend=messageToSend.trim();
-                client.analyseMessageToSend(messageToSend);
-                client.writeToServer(messageToSend);
+                client.sendMessage(messageToSend);
                 getList();
             }
         });
@@ -170,9 +191,7 @@ public class ClientFrame extends JFrame {
         JButton createRound = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="110 CREATE "+typeText.getText()+" PLAYER "+nbPlayerText.getText()+" MIN "+minBetText.getText()+" STACK "+stackText.getText();
-                messageToSend=messageToSend.trim();
-                client.analyseMessageToSend(messageToSend);
-                client.writeToServer(messageToSend);
+                client.sendMessage(messageToSend);
                 setPanel(roundPanel);
             }
         });
@@ -195,8 +214,8 @@ public class ClientFrame extends JFrame {
                 JLabel[] cards = new JLabel[5];
                 for (int j = 0; j < 5; j++) {
                     cards[j] = new JLabel();
-                    path = "/images/card_44.png";
-                    cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                    /*path = "/images/card_44.png";
+                    cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                     cards[j].setBounds(50 + (j * 15), 255, 70, 100);
                     cardsLabels.add(cards[j]);
                 }
@@ -213,8 +232,8 @@ public class ClientFrame extends JFrame {
                     JLabel[] cards = new JLabel[5];
                     for (int j = 0; j < 5; j++) {
                         cards[j] = new JLabel();
-                        path = "/images/card_back.png";
-                        cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                        /*path = "/images/card_back.png";
+                        cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                         cards[j].setBounds(80 + (j * 15) + (i*200), 55, 70, 100);
                         cardsLabels.add(cards[j]);
                     }
@@ -230,8 +249,8 @@ public class ClientFrame extends JFrame {
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
-                            path = "/images/card_back.png";
-                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                            /*path = "/images/card_back.png";
+                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                             cards[j].setBounds(1100 + (j * 15), 255, 70, 100);
                             cardsLabels.add(cards[j]);
                         }
@@ -247,8 +266,8 @@ public class ClientFrame extends JFrame {
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
-                            path = "/images/card_back.png";
-                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));
+                            /*path = "/images/card_back.png";
+                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                             cards[j].setBounds(885 +(j * 15) -((i-6)*200), 450, 70, 100);
                             cardsLabels.add(cards[j]);
                         }
@@ -272,7 +291,7 @@ public class ClientFrame extends JFrame {
         }
 
         getContentPane().add( table, BorderLayout.CENTER );
-        setPanel(roundPanel);
+        setPanel(startGamePanel);
         setResizable( false );
         setBounds( 35,20,1300,700);
         setDefaultCloseOperation( javax.swing.WindowConstants.DISPOSE_ON_CLOSE );
@@ -314,18 +333,15 @@ public class ClientFrame extends JFrame {
         getListPanel.add(stack);
 
         String messageToSend="120 GETLIST";
-        messageToSend=messageToSend.trim();
-        client.analyseMessageToSend(messageToSend);
-        client.writeToServer(messageToSend);
+        client.sendMessage(messageToSend);
 
         setPanel(getListPanel);
         int nbRooms = ((MenuState)client.getGameState()).getN();
-        /*
+
         while(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null)){
             System.out.println(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null));
-
         }
-        */
+
         for(int i=0 ; i<nbRooms ; i++){
             JTextField id1 = new JTextField();
             id1.setText(""+((MenuState)client.getGameState()).getGamesList(i).getId());
@@ -366,9 +382,7 @@ public class ClientFrame extends JFrame {
             JButton joinRoom = new JButton(new AbstractAction() {
                 public void actionPerformed(ActionEvent a) {
                     String messageToSend="130 JOIN "+index+1;
-                    messageToSend=messageToSend.trim();
-                    client.analyseMessageToSend(messageToSend);
-                    client.writeToServer(messageToSend);
+                    client.sendMessage(messageToSend);
                     setPanel(roundPanel);
                 }
             });

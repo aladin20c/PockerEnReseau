@@ -10,7 +10,6 @@ import java.util.HashSet;
 
 public class Server {
 
-
     private static HashSet<ClientHandler> clientHandlers=new HashSet<>();
     private static HashSet<Room> rooms=new HashSet<>();
     private static Server server;
