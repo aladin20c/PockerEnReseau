@@ -175,16 +175,9 @@ public class ClientFrame extends JFrame {
 
         okName = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-<<<<<<< HEAD
                 String messageToSend="100 HELLO PLAYER "+join.getText();
                 client.sendMessage(messageToSend);
-=======
-                playerName = join.getText();
-                String messageToSend="100 HELLO PLAYER "+playerName;
-                messageToSend=messageToSend.trim();
-                client.analyseMessageToSend(messageToSend);
-                client.writeToServer(messageToSend);
->>>>>>> b07e02b86347e6aa0fd4e8a4ec9c1b187942be04
+
                 getList();
             }
         });
@@ -360,10 +353,8 @@ public class ClientFrame extends JFrame {
 
         getContentPane().add( table, BorderLayout.CENTER );
         setPanel(startGamePanel);
-<<<<<<< HEAD
-=======
+
         disableButtons();
->>>>>>> b07e02b86347e6aa0fd4e8a4ec9c1b187942be04
         setResizable( false );
         setBounds( 35,20,1300,700);
         setDefaultCloseOperation( javax.swing.WindowConstants.DISPOSE_ON_CLOSE );
