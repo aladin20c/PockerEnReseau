@@ -57,7 +57,11 @@ public class ClientFrame extends JFrame {
     private Client client;
     private boolean largeName = false;
     private boolean usedName = false;
-    public boolean welcome = false;
+    private boolean welcome = false;
+    private boolean incorrectType = false;
+    private boolean incorrectPlayers = false;
+    private boolean incorrectBet = false;
+    private boolean incorrectStack = false;
 
     public final static int INTERVAL = 50;
     private Timer timer;
@@ -252,6 +256,15 @@ public class ClientFrame extends JFrame {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="110 CREATE "+typeText.getText()+" PLAYER "+nbPlayerText.getText()+" MIN "+minBetText.getText()+" STACK "+stackText.getText();
                 client.sendMessage(messageToSend);
+                while (!client.isChange()){
+                }
+                if(incorrectType){
+                    /*incorrectType=false;
+                    nameMessage.setText("La taille du nom ne doit pas dépasser 30 caractères");
+                    join.setText("");
+                    setPanel(joinPanel);*/
+                }
+
                 setPanel(roundPanel);
                 while(!(client.getGameState() instanceof WaitingState)){
 
@@ -589,5 +602,23 @@ public class ClientFrame extends JFrame {
 
     public void setWelcome(boolean welcome) {
         this.welcome = welcome;
+    }
+
+    public void setIncorrectType(boolean incorrectType) {
+        this.incorrectType = incorrectType;
+    }
+
+
+
+    public void setIncorrectBet(boolean incorrectBet) {
+        this.incorrectBet = incorrectBet;
+    }
+
+    public void setIncorrectStack(boolean incorrectStack) {
+        this.incorrectStack = incorrectStack;
+    }
+
+    public void setIncorrectPlayers(boolean incorrectPlayers) {
+        this.incorrectPlayers = incorrectPlayers;
     }
 }
