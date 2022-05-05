@@ -252,6 +252,10 @@ public class ClientFrame extends JFrame {
         createPanel.add(stackLabel);
         createPanel.add(stackText);
 
+        JLabel erreurCreateRound = new JLabel();
+        erreurCreateRound.setBounds(250,150,300,30);
+        createPanel.add(erreurCreateRound);
+
         JButton createRound = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="110 CREATE "+typeText.getText()+" PLAYER "+nbPlayerText.getText()+" MIN "+minBetText.getText()+" STACK "+stackText.getText();
@@ -259,36 +263,56 @@ public class ClientFrame extends JFrame {
                 while (!client.isChange()){
                 }
                 if(incorrectType){
-                    /*incorrectType=false;
-                    nameMessage.setText("La taille du nom ne doit pas dépasser 30 caractères");
-                    join.setText("");
-                    setPanel(joinPanel);*/
+                    incorrectType=false;
+                    erreurCreateRound.setText("Le type doit étre 1 pour Texas Hold’em ou 0 pour Poker fermé");
+                    typeText.setText("");
+                    setPanel(createPanel);
                 }
-
-                setPanel(roundPanel);
-                while(!(client.getGameState() instanceof WaitingState)){
-
+                else if(incorrectPlayers){
+                    incorrectPlayers=false;
+                    erreurCreateRound.setText("Le nombre de joueurs est incorrect");
+                    nbPlayerText.setText("");
+                    setPanel(createPanel);
                 }
-                game = ((WaitingState)client.getGameState()).getCurrentGame();
-                player = game.getPlayer(playerName);
-                buttonRedisplay();
-                redisplayPlayButton();
-                timer = new Timer(INTERVAL,
-                        new ActionListener() {
-                            public void actionPerformed(ActionEvent evt) {
-                                for(int i =0 ; i<game.getPlayers().size() ; i++){
-                                    updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                else if(incorrectBet){
+                    incorrectBet=false;
+                    erreurCreateRound.setText("L’enchère minimale est incorrect");
+                    minBetText.setText("");
+                    setPanel(createPanel);
+                }
+                else if(incorrectStack){
+                    incorrectStack=false;
+                    erreurCreateRound.setText("Le stack initial est incorrect");
+                    stackText.setText("");
+                    setPanel(createPanel);
+                }
+                else{
+                    setPanel(roundPanel);
+                    while(!(client.getGameState() instanceof WaitingState)){
+
+                    }
+                    game = ((WaitingState)client.getGameState()).getCurrentGame();
+                    player = game.getPlayer(playerName);
+                    buttonRedisplay();
+                    redisplayPlayButton();
+                    timer = new Timer(INTERVAL,
+                            new ActionListener() {
+                                public void actionPerformed(ActionEvent evt) {
+                                    for(int i =0 ; i<game.getPlayers().size() ; i++){
+                                        updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                    }
+                                    setPanel(roundPanel);
                                 }
-                                setPanel(roundPanel);
-                            }
-                        });
-                timer.start();
+                            });
+                    timer.start();
 
-                //updateSlider();
+                    //updateSlider();
+                }
+
             }
         });
         createRound.setText("Créer la partie");
-        createRound.setBounds(400,150,150,30);
+        createRound.setBounds(400,170,150,30);
         createPanel.add(createRound);
 
         JLabel dealer=new JLabel();
