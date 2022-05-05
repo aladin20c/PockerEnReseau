@@ -37,6 +37,7 @@ public class ClientFrame extends JFrame {
     private  JPanel        table;
     private  JButton        startGame;
     private JButton         play;
+    private JLabel         nameMessage;
     private ArrayList<JComponent> startGamePanel = new ArrayList<JComponent>() ;
     private ArrayList<JComponent> joinPanel = new ArrayList<JComponent>() ;
     private ArrayList<JComponent> getListPanel = new ArrayList<JComponent>() ;
@@ -54,6 +55,9 @@ public class ClientFrame extends JFrame {
     private Player      player;
     private PokerGame game;
     private Client client;
+    private boolean largeName = false;
+    private boolean usedName = false;
+    public boolean welcome = false;
 
     public final static int INTERVAL = 50;
     private Timer timer;
@@ -160,6 +164,52 @@ public class ClientFrame extends JFrame {
         table = new JPanel( null);
         table.setBackground(new Color(0, 128, 0));
 
+        join = new JTextField();
+        join.setBounds(610,230,150,30);
+        joinPanel.add(join);
+
+        JLabel nameLabel = new JLabel("Entrer votre nom :");
+        nameLabel.setBounds(635,190,150,30);
+        joinPanel.add(nameLabel);
+
+        nameMessage = new JLabel();
+        nameMessage.setBounds(550,270,300,30);
+        joinPanel.add(nameMessage);
+
+        okName = new JButton(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                playerName = join.getText();
+                String messageToSend="100 HELLO PLAYER "+playerName;
+                client.sendMessage(messageToSend);
+                while (!client.isChange()){
+
+                }
+                if(largeName){
+                    largeName=false;
+                    nameMessage.setText("La taille du nom ne doit pas dépasser 30 caractères");
+                    join.setText("");
+                    setPanel(joinPanel);
+                }
+                else{
+                    if(usedName){
+                        usedName=false;
+                        nameMessage.setText("Ce nom est déjà utilisé par un autre joueur");
+                        join.setText("");
+                        setPanel(joinPanel);
+                    }
+                    else{
+                        if(welcome){
+                            getList();
+                        }
+                    }
+                }
+            }
+        });
+        okName.setText("OK");
+        okName.setBounds(650,310,70,30);
+        joinPanel.add(okName);
+
+
         startGame = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 setPanel(joinPanel);
@@ -169,21 +219,6 @@ public class ClientFrame extends JFrame {
         startGame.setBounds(610,230,150,30);
         startGamePanel.add(startGame);
 
-        join = new JTextField();
-        join.setBounds(610,230,150,30);
-        joinPanel.add(join);
-
-        okName = new JButton(new AbstractAction() {
-            public void actionPerformed(ActionEvent a) {
-                String messageToSend="100 HELLO PLAYER "+join.getText();
-                client.sendMessage(messageToSend);
-
-                getList();
-            }
-        });
-        okName.setText("OK");
-        okName.setBounds(650,290,70,30);
-        joinPanel.add(okName);
 
         JLabel typeLabel = new JLabel("Type : ");
         typeLabel.setBounds(100,50,150,30);
@@ -369,6 +404,9 @@ public class ClientFrame extends JFrame {
         repaint();
         validate();
     }
+
+
+
     private void getList(){
         JTextField id = new JTextField("Id");
         id.setEditable(false);
@@ -540,5 +578,16 @@ public class ClientFrame extends JFrame {
         potText.setText(""+game.getPot());
         betText.setText(""+game.getBidAmount());
         yourBetText.setText(""+player.getBidPerRound());
+    }
+
+    public void setUsedName(boolean usedName) {
+        this.usedName = usedName;
+    }
+    public void setLargeName(boolean largeName) {
+        this.largeName = largeName;
+    }
+
+    public void setWelcome(boolean welcome) {
+        this.welcome = welcome;
     }
 }

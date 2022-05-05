@@ -16,8 +16,9 @@ public class Client {
     private BufferedReader bufferedReader;
     private BufferedWriter bufferedWriter;
     private GameState gameState;
-
+    private ClientFrame clientFrame;
     private boolean isAI;
+    private boolean change;
 
 
     public Client(Socket socket) {
@@ -26,7 +27,7 @@ public class Client {
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //the client can now listen and write messages to server
-            ClientFrame clientFrame = new ClientFrame("Client",this);
+            clientFrame = new ClientFrame("Client",this);
             this.gameState=new IdentificationState(this);
             this.listenForMessage();
             this.sendMessage();
@@ -80,8 +81,10 @@ public class Client {
 
                 while (socket.isConnected()){
                     try {
+                        change = false;
                         comingMessage = bufferedReader.readLine();
                         analyseComingMessage(comingMessage);
+                        change = true;
                         System.out.println(comingMessage);
                     }catch(NullPointerException e){
                         System.out.println("server has shut down");
@@ -110,6 +113,9 @@ public class Client {
         this.gameState = gameState;
     }
 
+    public ClientFrame getClientFrame() {
+        return clientFrame;
+    }
 
     public static void main(String[] args) {
         try {
@@ -122,4 +128,7 @@ public class Client {
         }
     }
 
+    public boolean isChange() {
+        return change;
+    }
 }
