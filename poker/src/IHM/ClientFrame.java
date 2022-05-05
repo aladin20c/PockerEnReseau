@@ -186,7 +186,7 @@ public class ClientFrame extends JFrame {
                 String messageToSend="100 HELLO PLAYER "+playerName;
                 client.sendMessage(messageToSend);
                 while (!client.isChange()){
-
+                    System.out.print("");
                 }
                 if(largeName){
                     largeName=false;
