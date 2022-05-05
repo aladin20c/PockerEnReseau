@@ -191,7 +191,7 @@ public class ClientFrame extends JFrame {
                 String messageToSend="100 HELLO PLAYER "+playerName;
                 client.sendMessage(messageToSend);
                 while (!client.isChange()){
-
+                    System.out.print("");
                 }
                 if(largeName){
                     largeName=false;
@@ -258,7 +258,7 @@ public class ClientFrame extends JFrame {
         createPanel.add(stackText);
 
         JLabel erreurCreateRound = new JLabel();
-        erreurCreateRound.setBounds(250,150,300,30);
+        erreurCreateRound.setBounds(250,130,400,30);
         createPanel.add(erreurCreateRound);
 
         JButton createRound = new JButton(new AbstractAction() {
@@ -294,8 +294,9 @@ public class ClientFrame extends JFrame {
                 }
                 else{*/
                     setPanel(roundPanel);
+                    System.out.print("");
                     while(!(client.getGameState() instanceof WaitingState)){
-
+                        System.out.print("");
                     }
                     game = ((WaitingState)client.getGameState()).getCurrentGame();
                     player = game.getPlayer(playerName);
@@ -509,7 +510,7 @@ public class ClientFrame extends JFrame {
         int nbRooms = ((MenuState)client.getGameState()).getN();
 
         while(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null)){
-            System.out.println(nbRooms!=0 &&(((MenuState)client.getGameState()).getGamesList()==null || ((MenuState)client.getGameState()).getGamesList(nbRooms-1)==null));
+            System.out.print("");
         }
 
         for(int i=0 ; i<nbRooms ; i++){
