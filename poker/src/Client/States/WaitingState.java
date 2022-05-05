@@ -100,6 +100,10 @@ public class WaitingState extends GameState{
         this.client.setGameState(new MenuState(client,username));
     }
 
+    public boolean getStartRequest(){
+        return startRequested;
+    }
+
     public PokerGame getCurrentGame() {
         return currentGame;
     }
