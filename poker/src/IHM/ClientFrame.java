@@ -50,8 +50,9 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> namesLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> cardsOnTable = new ArrayList<JLabel>();
     private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
-
-
+    private JButton ok;
+    private JTextField raiseAmountText;
+    private  String raiseAmount = null;
     private JTextField join;
     private JButton okName;
     private String playerName;
@@ -80,10 +81,9 @@ public class ClientFrame extends JFrame {
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout( new GridLayout( 3,1 ) );
         JPanel buttons = new JPanel();
-        buttons.setLayout( new GridLayout( 1,4 ) );
+        buttons.setLayout( new GridLayout( 1,5 ) );
 
-        foldButton = new JButton( "Fold" );
-        foldButton.addActionListener(new AbstractAction() {
+        foldButton = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="410 FOLD";
                 client.sendMessage(messageToSend);
@@ -92,9 +92,9 @@ public class ClientFrame extends JFrame {
         foldButton.setFocusPainted( false );
         buttons.add( foldButton );
 
-        checkButton = new JButton( "Check" );
-        checkButton.addActionListener(new AbstractAction() {
+        checkButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
+                System.out.println("raise cliqued ");
                 String messageToSend="411 CHECK";
                 client.sendMessage(messageToSend);
             }
@@ -102,8 +102,7 @@ public class ClientFrame extends JFrame {
         checkButton.setFocusPainted( false );
         buttons.add( checkButton );
 
-        callButton = new JButton( "Call" );
-        callButton.addActionListener(new AbstractAction() {
+        callButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 String messageToSend="412 CALL";
                 client.sendMessage(messageToSend);
@@ -112,24 +111,27 @@ public class ClientFrame extends JFrame {
         callButton.setFocusPainted( false );
         buttons.add( callButton );
 
-        raiseButton = new JButton( "Raise" );
-        callButton.addActionListener(new AbstractAction() {
+        raiseButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-                String messageToSend="413 RAISE "+yourBetText.getText();
+                String messageToSend="413 RAISE "+game.getMinBid();
                 client.sendMessage(messageToSend);
+                raiseAmountText.setText("");
             }
         });
         callButton.setFocusPainted( false );
         buttons.add( raiseButton );
 
+        raiseAmountText = new JTextField();
+        //buttons.add(raiseAmountText);
+
         cashPanel = new JPanel();
         cashPanel.setLayout( new GridLayout( 1,4 ) );
         cashPanel.setBorder( new EtchedBorder( EtchedBorder.RAISED ) );
 
-        bankText = new JTextField("Bank ");
-        potText = new JTextField("Pot ");
-        betText = new JTextField("Bet");
-        yourBetText = new JTextField("Your bet");
+        bankText = new JTextField();
+        potText = new JTextField();
+        betText = new JTextField();
+        yourBetText = new JTextField();
 
         bankText.setEditable( false );
         potText.setEditable( false );
@@ -146,26 +148,21 @@ public class ClientFrame extends JFrame {
         messageText = new JTextField();
         messageText.setEditable( false );
         messagePanel.add( messageText );
-        play = new JButton(new AbstractAction() {
+
+        ok = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
                 timer = new Timer(INTERVAL,
                         new ActionListener() {
                             public void actionPerformed(ActionEvent evt) {
-                                for(int i =0 ; i<game.getPlayers().size() ; i++){
-                                    updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
-                                }
-                                updatePlayer();
-                                setPanel(roundPanel);
+                                raiseAmount = raiseAmountText.getText();
                             }
                         });
                 timer.start();
             }
         });
-        play.setText("Jouer");
-        play.setPreferredSize( new Dimension( 90,1 ) );
-        play.setEnabled( false );
-        messagePanel.add( play, BorderLayout.WEST);
-
+        ok.setText("OK");
+        ok.setPreferredSize( new Dimension( 90,1 ) );
+        //messagePanel.add( ok, BorderLayout.EAST);
         bottomPanel.add( cashPanel );
         bottomPanel.add( messagePanel );
         bottomPanel.add( buttons );
@@ -301,7 +298,6 @@ public class ClientFrame extends JFrame {
                     }
                     game = ((WaitingState) client.getGameState()).getCurrentGame();
                     player = game.getPlayer(playerName);
-                    redisplayPlayButton();
                     if(playerName.equals(game.getPlayers().get(0).getName())) {
                         startResquest = new JButton(new AbstractAction() {
                             @Override
@@ -346,7 +342,7 @@ public class ClientFrame extends JFrame {
 
         JLabel dealer=new JLabel();
         dealer.setIcon(new ImageIcon(this.getClass().getResource("/images/button_present.png")));
-        dealer.setBounds(170,342,50,50);
+        dealer.setBounds(30,170,50,50);
         roundPanel.add(dealer);
 
         for (int i=0;i<MAX_PLAYERS;i++) {
@@ -603,16 +599,16 @@ public class ClientFrame extends JFrame {
     }
     public void disableButtons() {
         foldButton.setEnabled( false );
+        foldButton.setText("");
         checkButton.setEnabled( false );
+        checkButton.setText("");
         callButton.setEnabled( false );
+        callButton.setText("");
         raiseButton.setEnabled( false );
+        raiseButton.setText("");
     }
 
-    public void redisplayPlayButton(){
-        if(player.getName().equals((game.getCurrentPlayer().getName()))){
-            play.setEnabled(true);
-        }
-    }
+
     public void updatePlayerCards(Player p , int i , boolean showCard){
 
         if(showCard){
@@ -625,12 +621,16 @@ public class ClientFrame extends JFrame {
         }
         namesLabels.get(i).setText(p.getName());
         stacksLabels.get(i).setText(""+p.getStack());
-        String path;
         int nbCards = 0;
         if(client.getGameState() instanceof PlayingTexasHoldemState && ((PlayingTexasHoldemState)client.getGameState()).isGameStarted() ){
             nbCards = 2;
         }
-        for(int j=0 ; j<p.getCards().length/*nbCards*/ ; j++){
+        else{
+            if(client.getGameState() instanceof Playing5CardPokerState && game.getBidTurn()>=1){
+                nbCards = 5;
+            }
+        }
+        for(int j=0 ; j</*p.getCards().length*/nbCards; j++){
             if(showCard){
                 cardsLabels.get(5*i+j).setIcon(ResourceManager.getCardImage(p.getCards()[j]));
             }
@@ -643,8 +643,8 @@ public class ClientFrame extends JFrame {
 
         bankText.setText("Stack : "+player.getStack());
         potText.setText("Pot : "+game.getPot());
-        betText.setText("Enchère courante : "+game.getBidAmount());
-        yourBetText.setText(""+player.getBidPerRound());
+        betText.setText("Bet : "+game.getBidAmount());
+        yourBetText.setText("Your bet : "+player.getBidPerRound());
 
         if(player.getName().equals((game.getCurrentPlayer().getName()))){
             messageText.setForeground(Color.GREEN);
@@ -655,14 +655,22 @@ public class ClientFrame extends JFrame {
             messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
         }
         disableButtons();
+
+        if(game.canRaise(player , game.getMinBid())){
+            raiseButton.setEnabled(true);
+            raiseButton.setText("Raise");
+        }
         if(game.canCall(player)){
             callButton.setEnabled(true);
+            callButton.setText("Call");
         }
         if(game.canCheck(player)){
             checkButton.setEnabled(true);
+            checkButton.setText("Check");
         }
         if(game.canFold(player)){
             foldButton.setEnabled(true);
+            foldButton.setText("Fold");
         }
 
     }
