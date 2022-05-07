@@ -14,7 +14,7 @@ public class PlayingTexasHoldemState extends GameState {
     private PokerGame currentGame;
     private String futureAction;
     private boolean endgame;
-
+    private boolean gameStarted;
 
 
     public PlayingTexasHoldemState(Client client, String username, PokerGame currentGame) {
@@ -27,6 +27,7 @@ public class PlayingTexasHoldemState extends GameState {
     }
 
     public void startGame(){
+        gameStarted=true;
         this.endgame=false;
         currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
         rotateTurn();
@@ -242,5 +243,9 @@ public class PlayingTexasHoldemState extends GameState {
         }else{
             System.out.println("client : It is "+currentGame.getCurrentPlayer().getName()+"'s turn");
         }
+    }
+
+    public boolean isGameStarted() {
+        return gameStarted;
     }
 }

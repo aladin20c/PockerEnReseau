@@ -66,6 +66,7 @@ public class ClientFrame extends JFrame {
     private boolean incorrectBet = false;
     private boolean incorrectStack = false;
     private boolean startRqst=false;
+    private boolean stop = false;
 
     public final static int INTERVAL = 50;
     private Timer timer;
@@ -151,8 +152,9 @@ public class ClientFrame extends JFrame {
                         new ActionListener() {
                             public void actionPerformed(ActionEvent evt) {
                                 for(int i =0 ; i<game.getPlayers().size() ; i++){
-                                    updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                    updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
                                 }
+                                updatePlayer();
                                 setPanel(roundPanel);
                             }
                         });
@@ -266,8 +268,8 @@ public class ClientFrame extends JFrame {
                 String messageToSend="110 CREATE "+typeText.getText()+" PLAYER "+nbPlayerText.getText()+" MIN "+minBetText.getText()+" STACK "+stackText.getText();
                 client.sendMessage(messageToSend);
                 while (!client.isChange()){
-                    System.out.println("Join panel probleme");
-                }/*
+                    System.out.print("");
+                }
                 if(incorrectType){
                     incorrectType=false;
                     erreurCreateRound.setText("Le type doit étre 1 pour Texas Hold’em ou 0 pour Poker fermé");
@@ -292,24 +294,22 @@ public class ClientFrame extends JFrame {
                     stackText.setText("");
                     setPanel(createPanel);
                 }
-                else{*/
+                else {
                     setPanel(roundPanel);
-                    System.out.print("");
-                    while(!(client.getGameState() instanceof WaitingState)){
+                    while (!(client.getGameState() instanceof WaitingState)) {
                         System.out.print("");
                     }
-                    game = ((WaitingState)client.getGameState()).getCurrentGame();
+                    game = ((WaitingState) client.getGameState()).getCurrentGame();
                     player = game.getPlayer(playerName);
-                    buttonRedisplay();
                     redisplayPlayButton();
-                     if(playerName.equals(game.getPlayers().get(0).getName())) {
+                    if(playerName.equals(game.getPlayers().get(0).getName())) {
                         startResquest = new JButton(new AbstractAction() {
                             @Override
                             public void actionPerformed(ActionEvent actionEvent) {
                                 String messageToSend = "150 REQUEST START";
                                 client.sendMessage(messageToSend);
                                 while (!(client.getGameState() instanceof WaitingState)) {
-                                    System.out.println("start request probleme");
+                                    System.out.println(" ");
                                 }
                             }
                         });
@@ -318,7 +318,7 @@ public class ClientFrame extends JFrame {
                         startResquest.setBackground(new Color(255, 255, 0));
                         startResquest.setBounds(80, 500, 200, 50);
                         roundPanel.add(startResquest);
-                     }
+                    }
 
 
                     timer = new Timer(INTERVAL,
@@ -327,19 +327,18 @@ public class ClientFrame extends JFrame {
                                     if(client.getGameState() instanceof PlayingTexasHoldemState || client.getGameState() instanceof Playing5CardPokerState){
                                         roundPanel.remove(startResquest);
                                     }
-                                    for(int i =0 ; i<game.getPlayers().size() ; i++){
-                                        updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                    for (int i = 0; i < game.getPlayers().size(); i++) {
+                                        updatePlayerCards(game.getPlayers().get(i), i, game.getPlayers().get(i).getName().equals(player.getName()));
                                     }
+                                    updatePlayer();
                                     setPanel(roundPanel);
                                 }
                             });
                     timer.start();
-                    System.out.println(((WaitingState) client.getGameState()).getStartRequest());
-
-                    //updateSlider();
                 }
+                //updateSlider();
+            }
 
-            //}
         });
         createRound.setText("Créer la partie");
         createRound.setBounds(400,170,150,30);
@@ -560,17 +559,17 @@ public class ClientFrame extends JFrame {
                     }
                     game = ((WaitingState)client.getGameState()).getCurrentGame();
                     player = game.getPlayer(playerName);
-                    buttonRedisplay();
 
                     timer = new Timer(INTERVAL,
                             new ActionListener() {
                                 public void actionPerformed(ActionEvent evt) {
-                                    if (client.getGameState() instanceof WaitingState && ((WaitingState) client.getGameState()).getStartRequest()) {
+                                    if (client.getGameState() instanceof WaitingState && ((WaitingState) client.getGameState()).getStartRequest() && !stop) {
                                         createDialogue();
                                     }
                                     for(int i =0 ; i<game.getPlayers().size() ; i++){
-                                        updatePlayer(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
+                                        updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
                                     }
+                                    updatePlayer();
                                     setPanel(roundPanel);
                                 }
                             });
@@ -608,48 +607,64 @@ public class ClientFrame extends JFrame {
         callButton.setEnabled( false );
         raiseButton.setEnabled( false );
     }
-    public void buttonRedisplay() {
 
+    public void redisplayPlayButton(){
+        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+            play.setEnabled(true);
+        }
+    }
+    public void updatePlayerCards(Player p , int i , boolean showCard){
+
+        if(showCard){
+            namesLabels.get(i).setForeground(Color.WHITE);
+            stacksLabels.get(i).setForeground(Color.WHITE);
+        }
+        else{
+            namesLabels.get(i).setForeground(Color.BLACK);
+            stacksLabels.get(i).setForeground(Color.BLACK);
+        }
+        namesLabels.get(i).setText(p.getName());
+        stacksLabels.get(i).setText(""+p.getStack());
+        String path;
+        int nbCards = 0;
+        if(client.getGameState() instanceof PlayingTexasHoldemState && ((PlayingTexasHoldemState)client.getGameState()).isGameStarted() ){
+            nbCards = 2;
+        }
+        for(int j=0 ; j<p.getCards().length/*nbCards*/ ; j++){
+            if(showCard){
+                cardsLabels.get(5*i+j).setIcon(ResourceManager.getCardImage(p.getCards()[j]));
+            }
+            else{
+                cardsLabels.get(5*i+j).setIcon(ResourceManager.getIcon("/images/card_back.png"));
+            }
+        }
+    }
+    public void updatePlayer(){
+
+        bankText.setText("Stack : "+player.getStack());
+        potText.setText("Pot : "+game.getPot());
+        betText.setText("Enchère courante : "+game.getBidAmount());
+        yourBetText.setText(""+player.getBidPerRound());
+
+        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+            messageText.setForeground(Color.GREEN);
+            messageText.setText("C'est votre tour");
+        }
+        else{
+            messageText.setForeground(Color.BLACK);
+            messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
+        }
+        disableButtons();
         if(game.canCall(player)){
             callButton.setEnabled(true);
         }
         if(game.canCheck(player)){
             checkButton.setEnabled(true);
         }
-    }
-    public void redisplayPlayButton(){
-        if(player.getName().equals((game.getCurrentPlayer().getName()))){
-            play.setEnabled(true);
+        if(game.canFold(player)){
+            foldButton.setEnabled(true);
         }
-    }
-    public void updatePlayer(Player player , int i , boolean showCard){
-        if(player.getName().equals((game.getCurrentPlayer().getName()))){
-            namesLabels.get(i).setBackground(Color.WHITE);
-            stacksLabels.get(i).setBackground(Color.WHITE);
-            messageText.setBackground(Color.GREEN);
-            messageText.setText("C'est votre tour");
-        }
-        else{
-            namesLabels.get(i).setBackground(Color.BLACK);
-            stacksLabels.get(i).setBackground(Color.BLACK);
-            messageText.setBackground(Color.BLACK);
-            messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
-        }
-        namesLabels.get(i).setText(player.getName());
-        stacksLabels.get(i).setText(""+player.getStack());
-        String path;
-        for(int j=0 ; j<player.getCards().length ; j++){
-            if(showCard){
-                cardsLabels.get(5*i+j).setIcon(ResourceManager.getCardImage(player.getCards()[j]));
-            }
-            else{
-                cardsLabels.get(5*i+j).setIcon(ResourceManager.getIcon("/images/card_back.png"));
-            }
-        }
-        bankText.setText(""+player.getStack());
-        potText.setText(""+game.getPot());
-        betText.setText(""+game.getBidAmount());
-        yourBetText.setText(""+player.getBidPerRound());
+
     }
 
     public void setUsedName(boolean usedName) {
@@ -685,15 +700,17 @@ public class ClientFrame extends JFrame {
         do{
             reponseStartRequest=JOptionPane.showConfirmDialog(this,
                     "Êtes-vous prêt à vous lancer dans le Jeu ? \n            \"Réponse OBLIGATOIRE\" ",
-                    "Lancement de la partie",JOptionPane.YES_NO_OPTION);
+                    "Lancement de la partie "+playerName,JOptionPane.YES_NO_OPTION);
             if(reponseStartRequest==JOptionPane.YES_OPTION){
+                stop = true;
                 String messageToSend="152 START YES";
                 client.sendMessage(messageToSend);
             }else{
+                stop = true;
                 String messageToSend="152 START NO";
                 client.sendMessage(messageToSend);
             }
 
-            }while( reponseStartRequest!=JOptionPane.YES_OPTION && reponseStartRequest!=JOptionPane.NO_OPTION );
+        }while( reponseStartRequest!=JOptionPane.YES_OPTION && reponseStartRequest!=JOptionPane.NO_OPTION );
     }
 }
