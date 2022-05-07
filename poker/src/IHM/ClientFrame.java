@@ -40,7 +40,6 @@ public class ClientFrame extends JFrame {
     private  JButton        startResquest;
     private  JPanel        table;
     private  JButton        startGame;
-    private JButton         play;
     private JLabel         nameMessage;
     private ArrayList<JComponent> startGamePanel = new ArrayList<JComponent>() ;
     private ArrayList<JComponent> joinPanel = new ArrayList<JComponent>() ;
@@ -51,9 +50,7 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> namesLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> cardsOnTable = new ArrayList<JLabel>();
     private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
-    private JButton ok;
     private JTextField raiseAmountText;
-    private  String raiseAmount = "";
     private JTextField join;
     private JButton okName;
     private String playerName;
@@ -158,28 +155,7 @@ public class ClientFrame extends JFrame {
         messageText.setEditable( false );
         messagePanel.add( messageText );
 
-        ok = new JButton(new AbstractAction() {
-            public void actionPerformed(ActionEvent a) {
-                timer = new Timer(INTERVAL,
-                        new ActionListener() {
-                            public void actionPerformed(ActionEvent evt) {
-                                raiseAmount = raiseAmountText.getText();
-                            }
-                        });
-                timer.start();
-            }
-        });
-        ok.setText("OK");
-        ok.setPreferredSize( new Dimension( 90,1 ) );
-        messagePanel.add( ok, BorderLayout.EAST);
 
-        play = new JButton(new AbstractAction() {
-            public void actionPerformed(ActionEvent a) {
-            }
-        });
-        play.setEnabled(false);
-        play.setPreferredSize( new Dimension( 90,1 ) );
-        //messagePanel.add( play, BorderLayout.WEST);
 
 
         bottomPanel.add( cashPanel );
@@ -591,13 +567,6 @@ public class ClientFrame extends JFrame {
                                 public void actionPerformed(ActionEvent evt) {
                                     if (client.getGameState() instanceof WaitingState && ((WaitingState) client.getGameState()).getStartRequest() && !stop) {
                                         createDialogue();
-                                    }
-                                    if(client.getGameState().isGameStarted() && !displayPlayButton){
-                                        if(player.getName().equals((game.getCurrentPlayer().getName()))){
-                                            play.setText("Play");
-                                            play.setEnabled(true);
-                                        }
-                                        displayPlayButton = true;
                                     }
                                     for(int i =0 ; i<game.getPlayers().size() ; i++){
                                         updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
