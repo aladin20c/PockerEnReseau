@@ -14,7 +14,6 @@ public class PlayingTexasHoldemState extends GameState {
     private PokerGame currentGame;
     private String futureAction;
     private boolean endgame;
-    private boolean gameStarted;
 
 
     public PlayingTexasHoldemState(Client client, String username, PokerGame currentGame) {
@@ -247,5 +246,10 @@ public class PlayingTexasHoldemState extends GameState {
 
     public boolean isGameStarted() {
         return gameStarted;
+    }
+
+    @Override
+    public boolean isEndgame() {
+        return endgame;
     }
 }

@@ -6,6 +6,7 @@ import Client.States.PlayingTexasHoldemState;
 import Client.States.WaitingState;
 import Game.Player;
 import Game.PokerGame;
+import Game.TexasHoldem;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -52,7 +53,7 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
     private JButton ok;
     private JTextField raiseAmountText;
-    private  String raiseAmount = null;
+    private  String raiseAmount = "";
     private JTextField join;
     private JButton okName;
     private String playerName;
@@ -68,6 +69,8 @@ public class ClientFrame extends JFrame {
     private boolean incorrectStack = false;
     private boolean startRqst=false;
     private boolean stop = false;
+    private boolean displayPlayButton = false;
+    private boolean displayActionButtons = false;
 
     public final static int INTERVAL = 50;
     private Timer timer;
@@ -77,7 +80,6 @@ public class ClientFrame extends JFrame {
         super(title);
         this.client=client;
         playerText = new String[MAX_PLAYERS];
-
         JPanel bottomPanel = new JPanel();
         bottomPanel.setLayout( new GridLayout( 3,1 ) );
         JPanel buttons = new JPanel();
@@ -85,8 +87,10 @@ public class ClientFrame extends JFrame {
 
         foldButton = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
+                timer.restart();
                 String messageToSend="410 FOLD";
                 client.sendMessage(messageToSend);
+                displayActionButtons=true;
             }
         });
         foldButton.setFocusPainted( false );
@@ -94,9 +98,10 @@ public class ClientFrame extends JFrame {
 
         checkButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-                System.out.println("raise cliqued ");
+                timer.restart();
                 String messageToSend="411 CHECK";
                 client.sendMessage(messageToSend);
+                displayActionButtons=true;
             }
         });
         checkButton.setFocusPainted( false );
@@ -104,8 +109,11 @@ public class ClientFrame extends JFrame {
 
         callButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
+                System.out.println("call pressed");
+                timer.restart();
                 String messageToSend="412 CALL";
                 client.sendMessage(messageToSend);
+                displayActionButtons=true;
             }
         });
         callButton.setFocusPainted( false );
@@ -113,7 +121,8 @@ public class ClientFrame extends JFrame {
 
         raiseButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-                String messageToSend="413 RAISE "+game.getMinBid();
+                timer.restart();
+                String messageToSend="413 RAISE "+raiseAmountText.getText();
                 client.sendMessage(messageToSend);
                 raiseAmountText.setText("");
             }
@@ -122,7 +131,7 @@ public class ClientFrame extends JFrame {
         buttons.add( raiseButton );
 
         raiseAmountText = new JTextField();
-        //buttons.add(raiseAmountText);
+        buttons.add(raiseAmountText);
 
         cashPanel = new JPanel();
         cashPanel.setLayout( new GridLayout( 1,4 ) );
@@ -162,7 +171,17 @@ public class ClientFrame extends JFrame {
         });
         ok.setText("OK");
         ok.setPreferredSize( new Dimension( 90,1 ) );
-        //messagePanel.add( ok, BorderLayout.EAST);
+        messagePanel.add( ok, BorderLayout.EAST);
+
+        play = new JButton(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+            }
+        });
+        play.setEnabled(false);
+        play.setPreferredSize( new Dimension( 90,1 ) );
+        //messagePanel.add( play, BorderLayout.WEST);
+
+
         bottomPanel.add( cashPanel );
         bottomPanel.add( messagePanel );
         bottomPanel.add( buttons );
@@ -326,7 +345,20 @@ public class ClientFrame extends JFrame {
                                     for (int i = 0; i < game.getPlayers().size(); i++) {
                                         updatePlayerCards(game.getPlayers().get(i), i, game.getPlayers().get(i).getName().equals(player.getName()));
                                     }
+                                    if(game instanceof TexasHoldem){
+                                        updateTableCards();
+                                    }
+
+                                    if(player.getName().equals(game.getCurrentPlayer().getName()) && player.getHand().getCards().size()>0){
+                                        System.out.println("stop");
+                                        timer.stop();
+                                    }
                                     updatePlayer();
+                                    if(displayActionButtons){
+                                        System.out.println("restart");
+                                        timer.restart();
+                                        displayActionButtons=false;
+                                    }
                                     setPanel(roundPanel);
                                 }
                             });
@@ -439,8 +471,6 @@ public class ClientFrame extends JFrame {
         JLabel[] cards = new JLabel[5];
         for (int j = 0; j < 5; j++) {
             cards[j] = new JLabel();
-            /*String path = "/images/card_placeholder.png";
-            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
             cards[j].setBounds(310 + (j * 150) , 255, 75, 100);
             cardsOnTable.add(cards[j]);
         }
@@ -562,10 +592,27 @@ public class ClientFrame extends JFrame {
                                     if (client.getGameState() instanceof WaitingState && ((WaitingState) client.getGameState()).getStartRequest() && !stop) {
                                         createDialogue();
                                     }
+                                    if(client.getGameState().isGameStarted() && !displayPlayButton){
+                                        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+                                            play.setText("Play");
+                                            play.setEnabled(true);
+                                        }
+                                        displayPlayButton = true;
+                                    }
                                     for(int i =0 ; i<game.getPlayers().size() ; i++){
                                         updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
                                     }
+
+                                    if(player.getName().equals(game.getCurrentPlayer().getName())){
+                                        System.out.println("stop");
+                                        timer.stop();
+                                    }
                                     updatePlayer();
+                                    if(displayActionButtons){
+                                        System.out.println("restart");
+                                        timer.restart();
+                                        displayActionButtons=false;
+                                    }
                                     setPanel(roundPanel);
                                 }
                             });
@@ -635,43 +682,71 @@ public class ClientFrame extends JFrame {
                 cardsLabels.get(5*i+j).setIcon(ResourceManager.getCardImage(p.getCards()[j]));
             }
             else{
-                cardsLabels.get(5*i+j).setIcon(ResourceManager.getIcon("/images/card_back.png"));
+                if(client.getGameState().isEndgame()){
+                    cardsLabels.get(5*i+j).setIcon(ResourceManager.getCardImage(p.getCards()[j]));
+                }
+                else {
+                    cardsLabels.get(5 * i + j).setIcon(ResourceManager.getIcon("/images/card_back.png"));
+                }
             }
         }
     }
+    public void updateTableCards(){
+        for (int j = 0; j < 5; j++) {
+            String path = "/images/card_placeholder.png";
+            cardsOnTable.get(j).setIcon(new ImageIcon(this.getClass().getResource(path)));
+        }
+        for(int j=0 ; j<((TexasHoldem)game).getTable().nbCards() ; j++){
+            cardsOnTable.get(j).setIcon(ResourceManager.getCardImage(((TexasHoldem)game).getTable().getCard(j)));
+        }
+    }
     public void updatePlayer(){
-
+        if(game instanceof TexasHoldem){
+            updateTableCards();
+        }
         bankText.setText("Stack : "+player.getStack());
         potText.setText("Pot : "+game.getPot());
         betText.setText("Bet : "+game.getBidAmount());
         yourBetText.setText("Your bet : "+player.getBidPerRound());
-
-        if(player.getName().equals((game.getCurrentPlayer().getName()))){
+        if(client.getGameState().isEndgame()){
             messageText.setForeground(Color.GREEN);
-            messageText.setText("C'est votre tour");
+            String message = "Les gagnants sont : ";
+            for(int i=0 ; i<game.getWinners().size(); i++){
+                message+=""+game.getWinners().get(i).getName()+", ";
+            }
+            messageText.setText(message);
         }
         else{
-            messageText.setForeground(Color.BLACK);
-            messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
+            if(player.getName().equals((game.getCurrentPlayer().getName()))){
+                messageText.setForeground(Color.GREEN);
+                messageText.setText("C'est votre tour");
+            }
+            else{
+                messageText.setForeground(Color.BLACK);
+                messageText.setText("C'est le tour de "+game.getCurrentPlayer().getName());
+            }
         }
-        disableButtons();
 
-        if(game.canRaise(player , game.getMinBid())){
-            raiseButton.setEnabled(true);
-            raiseButton.setText("Raise");
+        disableButtons();
+        if(client.getGameState().isGameStarted()) {
+            if(player.getName().equals((game.getCurrentPlayer().getName()))){
+                raiseButton.setEnabled(true);
+                raiseButton.setText("Raise");
+            }
+            if (game.canCall(player)) {
+                callButton.setEnabled(true);
+                callButton.setText("Call");
+            }
+            if (game.canCheck(player)) {
+                checkButton.setEnabled(true);
+                checkButton.setText("Check");
+            }
+            if (game.canFold(player)) {
+                foldButton.setEnabled(true);
+                foldButton.setText("Fold");
+            }
         }
-        if(game.canCall(player)){
-            callButton.setEnabled(true);
-            callButton.setText("Call");
-        }
-        if(game.canCheck(player)){
-            checkButton.setEnabled(true);
-            checkButton.setText("Check");
-        }
-        if(game.canFold(player)){
-            foldButton.setEnabled(true);
-            foldButton.setText("Fold");
-        }
+
 
     }
 
