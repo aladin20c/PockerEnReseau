@@ -6,9 +6,7 @@ import Server.ServerGameStates.IdentificationState;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 
 public class ClientHandler implements Runnable{
@@ -33,7 +31,8 @@ public class ClientHandler implements Runnable{
     private Timer timer;
 
     //tasks: when user replies the correspending commands, the corresponding task wil be cancelled otherwise it will kick the player from the game
-    HashSet<RunOutOfTimeTask> taskset;
+    private HashSet<RunOutOfTimeTask> secondarySet;
+    private Set<RunOutOfTimeTask> taskset;
 
 
     public ClientHandler(Socket socket) {
@@ -43,7 +42,8 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.timer=new Timer();
-            this.taskset=new HashSet<>();
+            this.secondarySet=new HashSet<>();
+            this.taskset = Collections.synchronizedSet(secondarySet);
             this.gameState=new IdentificationState(this);
         }catch(IOException e){
             closeEverything();

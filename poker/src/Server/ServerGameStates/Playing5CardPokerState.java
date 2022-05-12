@@ -7,6 +7,8 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
+import java.util.Arrays;
+
 
 public class Playing5CardPokerState extends GameState{
 
@@ -98,7 +100,7 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
-            System.out.println("cards to change: "+messageFromClient);
+            System.out.println("--------server test--------: "+messageFromClient);
 
             String[] data=messageFromClient.split("\\s+");
             int numberOfCards=Integer.parseInt(data[2]);
@@ -110,7 +112,7 @@ public class Playing5CardPokerState extends GameState{
                     writeToClient(Request.ERROR);
                 }
             }
-            System.out.println();
+            System.out.println("--------server test--------: "+ Arrays.toString(data));
             if(data.length!=numberOfCards+3 || !room.getGame().canChange(player,cards)){
                 writeToClient(Request.ERROR);
             }else{
@@ -125,7 +127,9 @@ public class Playing5CardPokerState extends GameState{
                 }
                 clientHandler.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 writeToClient(cardDistribution.toString());
+                System.out.println("--------server test--------: "+cardDistribution.toString());
                 rotateTurn();
+                System.out.println("--------server test--------: succesws");
             }
 
         }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
