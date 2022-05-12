@@ -13,13 +13,11 @@ import java.util.ArrayList;
 public class WaitingState extends GameState {
 
 
-    private boolean startRequested;
     private int startRequestResponse;
 
 
     public WaitingState(ClientHandler clientHandler, Room room) {
         super(clientHandler, room);
-        this.startRequested=false;
         this.startRequestResponse = 0;
     }
 
@@ -37,14 +35,14 @@ public class WaitingState extends GameState {
 
         } else if (messageFromClient.matches(Request.START_ROUND)) {
 
-            if (startRequested) {
+            if (room.isStartRequested()) {
                 writeToClient("155 start already requested");
             } else if (!room.isAdmin(clientHandler)) {
                 writeToClient("156 u are not the admin");
             } else if (!room.getGame().canStartGame()) {
                 writeToClient("157 not enough players");
             } else {
-                room.requestStart(true);
+                room.setStartRequested(true);
                 this.startRequestResponse=1;
                 broadCastTask(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("152 START REQUESTED");
@@ -52,7 +50,7 @@ public class WaitingState extends GameState {
 
         } else if (messageFromClient.matches(Request.START_RESPONSE)) {
 
-            if (!startRequested) {
+            if (!room.isStartRequested()) {
                 writeToClient("158 there's no start request");
             } else if (this.startRequestResponse != 0) {
                 writeToClient("159 u already responded to Start request");
@@ -143,7 +141,7 @@ public class WaitingState extends GameState {
                                 + ((i * 5 + 3 < size) ? playersWhoRefused.get(i + 3) : "")
                         );
             }
-            room.requestStart(false);
+            room.setStartRequested(false);
         }
     }
 
@@ -155,10 +153,10 @@ public class WaitingState extends GameState {
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
-        }else if(startRequested){
+        }else if(room.isStartRequested()){
             broadCastCancel(Request.START_RESPONSE);//(╯°□°)╯︵ ┻━┻
             broadCastMessageToEveryone("154 START ABORDED " + 0);
-            room.requestStart(false);
+            room.setStartRequested(false);
         }
 
         try{
@@ -177,10 +175,6 @@ public class WaitingState extends GameState {
     @Override
     public int getStartResponse() {
         return startRequestResponse;
-    }
-    public boolean startRequested() {return startRequested;}
-    public void setStartRequested(boolean startRequested) {
-        this.startRequested = startRequested;
     }
     public void setStartResponse(int startRequestResponse) {
         this.startRequestResponse = startRequestResponse;

@@ -303,6 +303,7 @@ public class Playing5CardPokerState extends GameState{
     }
 
     public void declareWin(){
+        if(room.isEmpty()) return;
         int count=room.getGame().getPlayers().size()-room.getGame().getFoldedPlayers();
         broadCastMessageToEveryone("810 REVEALCARD "+count);
         room.getGame().setWinners();
