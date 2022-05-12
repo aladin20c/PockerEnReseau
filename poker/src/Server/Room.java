@@ -16,6 +16,7 @@ public class Room  {
     private PokerGame game;
     private List<ClientHandler> clientHandlers;
     private int turn;
+    private boolean startRequested;
     private boolean endgame;
     private boolean resetIsSet;
 
@@ -23,6 +24,7 @@ public class Room  {
     public Room() {
         this.clientHandlers= Collections.synchronizedList(new ArrayList<>());
         this.turn=-1;
+        this.startRequested=false;
         this.endgame=false;
         this.resetIsSet=false;
     }
@@ -40,6 +42,7 @@ public class Room  {
             }
         }
     }
+
 
     public void broadCastMessageToEveryone(String messageToSend){
         for (ClientHandler clientHandler : clientHandlers) {
@@ -75,23 +78,15 @@ public class Room  {
 
     public synchronized  boolean canAddNewClient(){
         if(clientHandlers.get(0).getGameState() instanceof WaitingState){
-            return !((WaitingState)clientHandlers.get(0).getGameState()).startRequested() && clientHandlers.size()<game.getMaxPlayers();
+            return !startRequested && clientHandlers.size()<game.getMaxPlayers();
         }else {
             return false;
         }
     }
 
 
-    public synchronized  void requestStart(boolean start){
-        for(ClientHandler ch : clientHandlers){
-            if(ch.getGameState() instanceof WaitingState) {
-                ((WaitingState) ch.getGameState()).setStartRequested(start);
-                ch.getGameState().setStartResponse(0);
-            }
-        }
-    }
     public synchronized void setResetGameTimer(){
-        if (endgame && !resetIsSet){
+        if (endgame && !resetIsSet && game.canResetGame()){
             Timer timer=new Timer(true);
             timer.schedule(new TimerTask() {
                 @Override
@@ -137,7 +132,6 @@ public class Room  {
             ch.purge();
         }
     }
-
     public synchronized String informationToString(int index){
         return "121 MESS "+index+" ID "+game.getId()+" "+game.getType()+" "+game.getMaxPlayers()+" "+game.getMinBid()+" "+game.getInitStack()+" "+clientHandlers.size();
     }
@@ -173,5 +167,19 @@ public class Room  {
     }
     public synchronized  void updateTurn(){
         this.turn=game.getBidTurn();
+    }
+
+
+
+
+    public synchronized boolean isStartRequested() {
+        return startRequested;
+    }
+
+    public synchronized void setStartRequested(boolean startRequested) {
+        this.startRequested = startRequested;
+        for (ClientHandler ch :clientHandlers){
+            ch.getGameState().setStartResponse(0);
+        }
     }
 }
