@@ -7,7 +7,6 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
-import java.util.Arrays;
 
 
 public class Playing5CardPokerState extends GameState{
@@ -82,9 +81,9 @@ public class Playing5CardPokerState extends GameState{
             if(!room.getGame().canRaise(player,raise)){
                 writeToClient(Request.INVALID);
             }else {
-                player.raise(room.getGame(), raise);//(╯°□°)╯︵ ┻━┻
+                player.raise(room.getGame(), raise);
                 clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.ACTION_RECIEVED);
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -100,8 +99,6 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
-            System.out.println("--------server test--------: "+messageFromClient);
-
             String[] data=messageFromClient.split("\\s+");
             int numberOfCards=Integer.parseInt(data[2]);
             Card[] cards=new Card[numberOfCards];
@@ -112,14 +109,15 @@ public class Playing5CardPokerState extends GameState{
                     writeToClient(Request.ERROR);
                 }
             }
-            System.out.println("--------server test--------: "+ Arrays.toString(data));
             if(data.length!=numberOfCards+3 || !room.getGame().canChange(player,cards)){
                 writeToClient(Request.ERROR);
             }else{
                 Card[] newCards=room.getGame().change(player,cards);
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 writeToClient("700 ACCEPTED");
+                System.out.println("---------------sent-test-----------------------------");
                 broadCastTask(Request.CHANGE_RECIEVED);//(╯°□°)╯︵ ┻━┻
-                broadCastMessage("720 "+clientHandler.getClientUsername()+" Change "+numberOfCards);
+                broadCastMessage("720 "+clientHandler.getClientUsername()+" CHANGE "+numberOfCards);
                 StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
                 cardDistribution.append(data[2]);
                 for(Card card:newCards){
@@ -127,12 +125,12 @@ public class Playing5CardPokerState extends GameState{
                 }
                 clientHandler.addTask(Request.CARDS_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 writeToClient(cardDistribution.toString());
-                System.out.println("--------server test--------: "+cardDistribution.toString());
                 rotateTurn();
-                System.out.println("--------server test--------: succesws");
             }
 
         }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
+
+            System.out.println("---------------recieved-test-----------------------------");
 
             clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
@@ -207,7 +205,7 @@ public class Playing5CardPokerState extends GameState{
         player.quit(room.getGame());
         room.removeClient(clientHandler);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         if(current){
             rotateTurn();
         }
@@ -260,7 +258,7 @@ public class Playing5CardPokerState extends GameState{
             if (ch.getClientUsername().equals(currentPlayerName)){
                 //todo fixme _____
                 if(room.getTurn()==2){
-                    ch.addTask("710.*");
+                    ch.addTask(Request.CHANGE);
                 }else{
                     ch.addTask("41[0123].*");
                 }

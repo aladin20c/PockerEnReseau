@@ -156,11 +156,13 @@ public class Playing5CardPokerState extends GameState{
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {
 
+            System.out.println("---------------client-test-----------------------------");
             String username = comingMessage.substring(4, comingMessage.lastIndexOf(" CHANGE"));
             Player player = currentGame.getPlayer(username);
             int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE")+7));
             ((PokerFerme)currentGame).addChangeEvent(new ChangeEvent(player,numberOfCardsChanged));
             writeToServer(Request.CHANGE_RECIEVED);
+            System.out.println("---------------client-test---------------------succ");
             rotateTurn();
 
         }else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {

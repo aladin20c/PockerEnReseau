@@ -7,6 +7,7 @@ import Server.ServerGameStates.Playing5CardPokerState;
 import Server.ServerGameStates.PlayingTexasHoldemState;
 import Server.ServerGameStates.WaitingState;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -24,6 +25,32 @@ public class Room  {
         this.turn=-1;
         this.endgame=false;
         this.resetIsSet=false;
+    }
+
+    public synchronized void broadCastMessage(String messageToSend,ClientHandler ch){
+        for (ClientHandler clientHandler : clientHandlers) {
+            try {
+                if (clientHandler!=ch) {
+                    clientHandler.getBufferedWriter().write(messageToSend);
+                    clientHandler.getBufferedWriter().newLine();
+                    clientHandler.getBufferedWriter().flush();
+                }
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
+    }
+
+    public void broadCastMessageToEveryone(String messageToSend){
+        for (ClientHandler clientHandler : clientHandlers) {
+            try {
+                clientHandler.getBufferedWriter().write(messageToSend);
+                clientHandler.getBufferedWriter().newLine();
+                clientHandler.getBufferedWriter().flush();
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
     }
 
 
@@ -63,8 +90,6 @@ public class Room  {
             }
         }
     }
-
-
     public synchronized void setResetGameTimer(){
         if (endgame && !resetIsSet){
             Timer timer=new Timer(true);
@@ -78,9 +103,6 @@ public class Room  {
             resetIsSet=true;
         }
     }
-
-
-
     public synchronized  void resetGame(){
         clientHandlers.add(clientHandlers.remove(0));
         ArrayList<ClientHandler> reClientHandlers=new ArrayList<>();

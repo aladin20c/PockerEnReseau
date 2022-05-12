@@ -45,7 +45,7 @@ public class Request {
     public static String FOLD = "410 FOLD";
     public static String CHECK = "411 CHECK";
     public static String CALL="412 CALL";
-    public static String RAISE = "413 RAISE \\d+";
+    public static String RAISE = "413 RAISE \\d+";//  413 RAISE 10
     public static String ACTION_ACCEPTED="400 ACCEPTED";
 
 
