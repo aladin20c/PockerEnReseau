@@ -52,7 +52,7 @@ public class MonteCarlos {
     }
 
 
-    public static FiveCardSimulator.Data simulateAnte(int turn, int nPlayers){
+    public static Data simulateAnte(int turn, int nPlayers){
         int tries=100000;
         //preparing simulation variables
         long begin=System.nanoTime();
@@ -113,7 +113,7 @@ public class MonteCarlos {
         }
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
+        return (new Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 }

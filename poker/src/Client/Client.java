@@ -130,16 +130,16 @@ public class Client {
         return clientFrame;
     }
 
-   /* public static void main(String[] args) {
+   public static void main(String[] args) {
         try {
 
             Socket socket = new Socket("localhost", Request.PORT);
-            Client client = new Client(socket);
+            Client client = new Client(socket,true);
 
         }catch (IOException e){
             e.printStackTrace();
         }
-    }*/
+    }
     public static void createClient(boolean gui){
         try {
 

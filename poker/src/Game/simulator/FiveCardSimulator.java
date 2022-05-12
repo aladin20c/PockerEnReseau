@@ -101,7 +101,7 @@ public class FiveCardSimulator implements Simulator{
         }
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
+        return (new Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 
@@ -203,44 +203,7 @@ public class FiveCardSimulator implements Simulator{
 
         long end=System.nanoTime();
         double time=((double)(end-begin))/1000000000;
-        return (new FiveCardSimulator.Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
-    }
-
-
-
-    static class Data{
-        int tries;
-        double time;
-        double ahead;
-        double tied;
-        double behind;
-
-
-        public Data(int tries ,double time, double ahead, double tied, double behind) {
-            this.tries=tries;
-            this.time=time;
-            this.ahead = ahead;
-            this.tied = tied;
-            this.behind = behind;
-        }
-
-        public Data() {
-            this.time=0;
-            this.ahead = -1;
-            this.tied = -1;
-            this.behind = -1;
-        }
-
-        @Override
-        public String toString() {
-            return "Data{" +
-                    "tries=" + tries +
-                    ", time=" + time +
-                    ", ahead=" + ahead +
-                    ", tied=" + tied +
-                    ", behind=" + behind +
-                    '}';
-        }
+        return (new Data(tries,time,(double)ahead*100/tries,(double)tied*100/tries,(double)behind*100/tries));
     }
 
 

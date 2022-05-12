@@ -5,8 +5,11 @@ import Client.States.Playing5CardPokerState;
 import Client.States.PlayingTexasHoldemState;
 import Client.States.WaitingState;
 import Game.Player;
+import Game.PokerFerme;
 import Game.PokerGame;
 import Game.TexasHoldem;
+import Game.simulator.FiveCardSimulator;
+import Game.simulator.TexasHoldemSimulator;
 
 import javax.swing.*;
 import javax.swing.Timer;
@@ -19,6 +22,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.net.URL;
 import java.util.*;
+
+import static Game.simulator.TexasHoldemSimulator.simulate;
 
 public class ClientFrame extends JFrame {
     private  final int  MAX_PLAYERS = 10;
@@ -77,6 +82,12 @@ public class ClientFrame extends JFrame {
     private Timer timer;
     private int reponseStartRequest=-1;
 
+    private JLabel tries;
+    private JLabel behind;
+    private JLabel time;
+    private JLabel tied;
+    private JLabel ahead;
+    private boolean updatedStatistics=false;
     public ClientFrame(String title , Client client){
         super(title);
         this.client=client;
@@ -483,7 +494,30 @@ public class ClientFrame extends JFrame {
         for (int j = 4; j >= 0; j--) {
             roundPanel.add(cards[j]);
         }
+        tries=new JLabel();
+        tries.setBounds(1100,10,250,25);
+        tries.setForeground(new Color(255, 255, 0));
+        roundPanel.add(tries);
 
+        time=new JLabel();
+        time.setBounds(1100,35,250,25);
+        time.setForeground(new Color(255, 255, 0));
+        roundPanel.add(time);
+
+        ahead=new JLabel();
+        ahead.setBounds(1100,60,250,25);
+        ahead.setForeground(new Color(255, 255, 0));
+        roundPanel.add(ahead);
+
+        tied=new JLabel();
+        tied.setBounds(1100,85,250,25);
+        tied.setForeground(new Color(255, 255, 0));
+        roundPanel.add(tied);
+
+        behind=new JLabel();
+        behind.setBounds(1100,110,250,25);
+        behind.setForeground(new Color(255, 255, 0));
+        roundPanel.add(behind);
 
         getContentPane().add( table, BorderLayout.CENTER );
         setPanel(startGamePanel);
@@ -692,6 +726,32 @@ public class ClientFrame extends JFrame {
             }
         }
     }
+    public void updateStatiscis(){
+        if(client.getGameState() instanceof  PlayingTexasHoldemState || client.getGameState() instanceof  Playing5CardPokerState){
+            String simulation="";
+            if(game instanceof TexasHoldem){
+                simulation=(TexasHoldemSimulator.simulate(game.getPlayer(playerName),(TexasHoldem) game)).toString();
+            }else{
+                simulation=(FiveCardSimulator.simulate(game.getPlayer(playerName),(PokerFerme)game)).toString();
+            }
+            if(simulation!=""){
+                String simulNecessary=simulation.substring(5,simulation.length()-1);
+                String results[]=simulNecessary.split(",");
+                for(int i=0;i<results.length;i++){
+                    String resul[]=results [i].split("=");
+                    System.out.println( resul[0]+" "+resul[1]);
+                    switch (resul[0]){
+                        case "tries":tries.setText(" Tries :"+resul[1]);break;
+                        case " time":time.setText(" Time :"+resul[1]);break;
+                        case " ahead":ahead.setText(" Ahead :"+resul[1]);break;
+                        case " tied":tied.setText(" Tied :"+resul[1]);break;
+                        case " behind":behind.setText(" Behind :"+resul[1]);break;
+                        default:;
+                    }
+                }
+            }
+        }
+    }
     public void updateTableCards(){
         for (int j = 0; j < 5; j++) {
             String path = "/images/card_placeholder.png";
@@ -704,6 +764,12 @@ public class ClientFrame extends JFrame {
     public void updatePlayer(){
         if(game instanceof TexasHoldem){
             updateTableCards();
+        }
+        if(player.getName().equals((game.getCurrentPlayer().getName())) && !updatedStatistics){
+            updateStatiscis();
+            updatedStatistics=true;
+        }else{
+            updatedStatistics=false;
         }
         bankText.setText("Stack : "+player.getStack());
         potText.setText("Pot : "+game.getPot());
