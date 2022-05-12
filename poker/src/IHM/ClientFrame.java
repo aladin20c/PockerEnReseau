@@ -50,6 +50,9 @@ public class ClientFrame extends JFrame {
     private ArrayList<JLabel> namesLabels = new ArrayList<JLabel>();
     private ArrayList<JLabel> cardsOnTable = new ArrayList<JLabel>();
     private ArrayList<JLabel> stacksLabels = new ArrayList<JLabel>();
+    private JButton changeButton;
+    private JTextField changeText;
+
     private JTextField raiseAmountText;
     private JTextField join;
     private JButton okName;
@@ -78,7 +81,7 @@ public class ClientFrame extends JFrame {
         this.client=client;
         playerText = new String[MAX_PLAYERS];
         JPanel bottomPanel = new JPanel();
-        bottomPanel.setLayout( new GridLayout( 3,1 ) );
+        bottomPanel.setLayout( new GridLayout( 4,1 ) );
         JPanel buttons = new JPanel();
         buttons.setLayout( new GridLayout( 1,5 ) );
 
@@ -155,12 +158,35 @@ public class ClientFrame extends JFrame {
         messageText.setEditable( false );
         messagePanel.add( messageText );
 
+        JPanel changePanel = new JPanel();
+        changePanel.setLayout( new GridLayout( 1,2 ) );
 
+        changeButton = new JButton(new AbstractAction() {
+            public void actionPerformed(ActionEvent a) {
+                timer.restart();
+                String cardsNames[] = changeText.getText().split(" ");
+                String messageToSend = "710 CHANGE "+cardsNames.length;
+                for(int i=0 ; i<cardsNames.length ; i++){
+                    messageToSend = messageToSend + " " + cardsNames[i];
+                }
+                System.out.println(messageToSend);
+                client.sendMessage(messageToSend);
+                changeText.setText("");
+            }
+        });
+        changeButton.setFocusPainted( false );
+        changeButton.setEnabled(false);
+        changePanel.add( changeButton );
+
+        changeText = new JTextField();
+        changePanel.add(changeText);
 
 
         bottomPanel.add( cashPanel );
         bottomPanel.add( messagePanel );
         bottomPanel.add( buttons );
+        bottomPanel.add(changePanel);
+
 
         getContentPane().add( bottomPanel, BorderLayout.SOUTH );
 
@@ -572,7 +598,7 @@ public class ClientFrame extends JFrame {
                                         updatePlayerCards(game.getPlayers().get(i) , i , game.getPlayers().get(i).getName().equals(player.getName()));
                                     }
 
-                                    if(player.getName().equals(game.getCurrentPlayer().getName())){
+                                    if(player.getName().equals(game.getCurrentPlayer().getName()) && client.getGameState().isGameStarted()){
                                         System.out.println("stop");
                                         timer.stop();
                                     }
@@ -713,6 +739,10 @@ public class ClientFrame extends JFrame {
             if (game.canFold(player)) {
                 foldButton.setEnabled(true);
                 foldButton.setText("Fold");
+            }
+            if(player.getName().equals((game.getCurrentPlayer().getName())) && game.getType()==0 &&game.getBidTurn()==2){
+                changeButton.setEnabled(true);
+                changeButton.setText("Change Cards");
             }
         }
 
