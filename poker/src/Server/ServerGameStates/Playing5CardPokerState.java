@@ -322,6 +322,7 @@ public class Playing5CardPokerState extends GameState{
                 i+=1;
             }
         }
+        room.purgeTasks();
     }
 
     @Override

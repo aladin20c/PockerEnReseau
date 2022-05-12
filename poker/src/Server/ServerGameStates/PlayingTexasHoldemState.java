@@ -307,6 +307,7 @@ public class PlayingTexasHoldemState extends GameState{
                 i+=1;
             }
         }
+        room.purgeTasks();
     }
 
     @Override

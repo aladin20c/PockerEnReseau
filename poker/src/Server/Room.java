@@ -132,6 +132,11 @@ public class Room  {
         }
     }
 
+    public synchronized void purgeTasks(){
+        for (ClientHandler ch : clientHandlers){
+            ch.purge();
+        }
+    }
 
     public synchronized String informationToString(int index){
         return "121 MESS "+index+" ID "+game.getId()+" "+game.getType()+" "+game.getMaxPlayers()+" "+game.getMinBid()+" "+game.getInitStack()+" "+clientHandlers.size();
