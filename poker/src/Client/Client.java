@@ -59,7 +59,14 @@ public class Client {
             String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
             messageToSend=messageToSend.trim();
             analyseMessageToSend(messageToSend);
-            writeToServer(messageToSend);
+            try {
+                bufferedWriter.write(messageToSend);
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
+            }catch (IOException e){
+                closeEverything(socket,bufferedReader,bufferedWriter);
+                break;
+            }
         }
     }
     /*making a seperate thread for listening for messages that has been broadCasted*/

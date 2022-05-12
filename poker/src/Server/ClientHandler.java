@@ -79,6 +79,7 @@ public class ClientHandler implements Runnable{
         gameState.clientQuit();
     }
 
+
     @Override
     public void run(){
         /*everything here is run on a seperate thread
@@ -113,8 +114,6 @@ public class ClientHandler implements Runnable{
     }
 
 
-
-
     //task related methods
     public void addTask(String string){
         try {
@@ -143,4 +142,3 @@ public class ClientHandler implements Runnable{
     }
 
 }
-//mutex java thread pour la partie serveur.

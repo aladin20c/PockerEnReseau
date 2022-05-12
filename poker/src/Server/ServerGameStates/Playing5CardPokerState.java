@@ -7,6 +7,7 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
+import java.io.IOException;
 
 
 public class Playing5CardPokerState extends GameState{
@@ -115,7 +116,6 @@ public class Playing5CardPokerState extends GameState{
                 Card[] newCards=room.getGame().change(player,cards);
                 clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 writeToClient("700 ACCEPTED");
-                System.out.println("---------------sent-test-----------------------------");
                 broadCastTask(Request.CHANGE_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("720 "+clientHandler.getClientUsername()+" CHANGE "+numberOfCards);
                 StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
@@ -129,8 +129,6 @@ public class Playing5CardPokerState extends GameState{
             }
 
         }else if(messageFromClient.matches(Request.CHANGE_RECIEVED)){
-
-            System.out.println("---------------recieved-test-----------------------------");
 
             clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
 
@@ -209,12 +207,21 @@ public class Playing5CardPokerState extends GameState{
         if(current){
             rotateTurn();
         }
-        writeToClient(Request.QUIT_ACCEPTED);
         if(room.isEmpty()){
             Server.removeRoom(room);
         }
-        clientHandler.purge();
-        clientHandler.setGameState(new MenuState(clientHandler));
+
+        try{
+            clientHandler.purge();
+            clientHandler.setGameState(new MenuState(clientHandler));
+            clientHandler.getBufferedWriter().write(Request.QUIT_ACCEPTED);
+            clientHandler.getBufferedWriter().newLine();
+            clientHandler.getBufferedWriter().flush();
+        }catch (IOException e){
+            //there must no call for close everything
+            //recursive
+        }
+
     }
 
 
