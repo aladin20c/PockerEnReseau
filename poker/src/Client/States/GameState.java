@@ -6,6 +6,7 @@ import Client.Client;
 public abstract class GameState {
 
     protected Client client;
+    protected boolean gameStarted;
 
     public GameState(Client client) {
         this.client = client;
@@ -20,4 +21,11 @@ public abstract class GameState {
     public abstract void analyseMessageToSend(String messageToSend);
     public abstract void analyseComingMessage(String comingMessage);
 
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    public boolean isEndgame() {
+        return false;
+    }
 }

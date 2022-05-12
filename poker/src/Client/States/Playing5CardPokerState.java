@@ -30,6 +30,7 @@ public class Playing5CardPokerState extends GameState{
     }
 
     public void startGame(){
+        gameStarted = true;
         this.endgame=false;
         currentGame.setCurrentPlayer(currentGame.nextPlayer(0));
         rotateTurn();
@@ -297,5 +298,13 @@ public class Playing5CardPokerState extends GameState{
         }else{
             System.out.println("client : It is "+currentGame.getCurrentPlayer().getName()+"'s turn");
         }
+    }
+    public boolean isGameStarted() {
+        return gameStarted;
+    }
+
+    @Override
+    public boolean isEndgame() {
+        return endgame;
     }
 }

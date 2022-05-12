@@ -10,7 +10,6 @@ import java.util.HashSet;
 
 public class Server {
 
-
     private static HashSet<ClientHandler> clientHandlers=new HashSet<>();
     private static HashSet<Room> rooms=new HashSet<>();
     private static Server server;
@@ -60,6 +59,15 @@ public class Server {
     }
 
     public static void main(String[] args) {
+        try{
+            ServerSocket serverSocket=new ServerSocket(Request.PORT);
+            Server server=Server.get(serverSocket);
+            server.startServer();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
+    public static void createServer() {
         try{
             ServerSocket serverSocket=new ServerSocket(Request.PORT);
             Server server=Server.get(serverSocket);
