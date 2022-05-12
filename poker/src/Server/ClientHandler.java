@@ -90,7 +90,8 @@ public class ClientHandler implements Runnable{
                 messageFromClient=bufferedReader.readLine();
                 this.getGameState().analyseRequest(messageFromClient);
             }catch(Exception e){
-                closeEverything();
+                //closeEverything();
+                e.printStackTrace();//todo remove whrn done
                 break;//when the client disconnects, we get out of the while loop
             }
         }
@@ -111,12 +112,15 @@ public class ClientHandler implements Runnable{
         this.gameState = gameState;
     }
 
+
+
+
     //task related methods
     public void addTask(String string){
         try {
             RunOutOfTimeTask task = new RunOutOfTimeTask(this, string);
             this.taskset.add(task);
-            this.timer.schedule(task, 30_000);
+            this.timer.schedule(task, 60_000);
         }catch (Exception e){
             e.printStackTrace();
         }

@@ -98,6 +98,8 @@ public class Playing5CardPokerState extends GameState{
 
         }else if(messageFromClient.matches(Request.CHANGE)){
 
+            System.out.println("cards to change: "+messageFromClient);
+
             String[] data=messageFromClient.split("\\s+");
             int numberOfCards=Integer.parseInt(data[2]);
             Card[] cards=new Card[numberOfCards];
@@ -108,6 +110,7 @@ public class Playing5CardPokerState extends GameState{
                     writeToClient(Request.ERROR);
                 }
             }
+            System.out.println();
             if(data.length!=numberOfCards+3 || !room.getGame().canChange(player,cards)){
                 writeToClient(Request.ERROR);
             }else{
@@ -251,7 +254,12 @@ public class Playing5CardPokerState extends GameState{
         for (ClientHandler ch:room.getClientHandlers()){
 
             if (ch.getClientUsername().equals(currentPlayerName)){
-                ch.addTask("(41[0123].*)|(710.*)");
+                //todo fixme _____
+                if(room.getTurn()==2){
+                    ch.addTask("710.*");
+                }else{
+                    ch.addTask("41[0123].*");
+                }
                 ch.writeToClient("Server : It is ur turn");
             }else {
                 ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");

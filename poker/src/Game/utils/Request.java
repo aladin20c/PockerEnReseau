@@ -61,7 +61,7 @@ public class Request {
     public static String CARDS_RECIEVED="600 RECIEVED";
 
 
-    public static String CHANGE="710 CHANGE \\d+(\\s[0-9]+[DCST])*";
+    public static String CHANGE="710 CHANGE \\d+(\\s[DCST][0-9]+)*";
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
     public static String PLAYER_CHANGED_CARDS="720 .+ CHANGE \\d+";
     public static String CHANGE_RECIEVED="701 RECIEVED";
@@ -96,6 +96,4 @@ public class Request {
     public static String ACTIVE_PLAYERS="666 \\d+ ACTIVEPLAYERS.*";
     public static String QUITTED_PLAYERS="666 \\d+ QUITTEDPLAYERS.*";
     public static String FOLDED_PLAYERS="666 \\d+ FOLDEDPLAYERS.*";
-
-
 }

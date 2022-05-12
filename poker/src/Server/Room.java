@@ -31,9 +31,11 @@ public class Room  {
         clientHandlers.add(clientHandler);
         game.addPlayer(clientHandler.getClientUsername());
     }
+
     public synchronized  void removeClient(ClientHandler clientHandler){
         clientHandlers.remove(clientHandler);
     }
+
 
     public synchronized  ClientHandler getClientHandler(String username){
         for(ClientHandler ch : clientHandlers){
@@ -41,6 +43,7 @@ public class Room  {
         }
         return null;
     }
+
 
 
     public synchronized  boolean canAddNewClient(){
@@ -51,6 +54,7 @@ public class Room  {
         }
     }
 
+
     public synchronized  void requestStart(boolean start){
         for(ClientHandler ch : clientHandlers){
             if(ch.getGameState() instanceof WaitingState) {
@@ -59,6 +63,7 @@ public class Room  {
             }
         }
     }
+
 
     public synchronized void setResetGameTimer(){
         if (endgame && !resetIsSet){
@@ -106,7 +111,7 @@ public class Room  {
     }
 
 
-    public String informationToString(int index){
+    public synchronized String informationToString(int index){
         return "121 MESS "+index+" ID "+game.getId()+" "+game.getType()+" "+game.getMaxPlayers()+" "+game.getMinBid()+" "+game.getInitStack()+" "+clientHandlers.size();
     }
     public synchronized  boolean isAdmin(ClientHandler clientHandler){
