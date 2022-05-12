@@ -1,5 +1,6 @@
 package Main;
 
+import Client.Client;
 import Server.Server;
 
 public class Main {
@@ -28,7 +29,7 @@ public class Main {
             Server.createServer();
         }
         if(client){
-
+            Client.createClient(gui);
         }
     }
 }

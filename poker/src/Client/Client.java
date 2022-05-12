@@ -21,13 +21,15 @@ public class Client {
     private boolean change;
 
 
-    public Client(Socket socket) {
+    public Client(Socket socket, boolean gui) {
         try {
             this.socket = socket;
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             //the client can now listen and write messages to server
-            clientFrame = new ClientFrame("Client",this);
+            if(gui){
+                clientFrame = new ClientFrame("Client",this);
+            }
             this.gameState=new IdentificationState(this);
             this.listenForMessage();
             this.sendMessage();
@@ -128,11 +130,21 @@ public class Client {
         return clientFrame;
     }
 
-    public static void main(String[] args) {
+   /* public static void main(String[] args) {
         try {
 
             Socket socket = new Socket("localhost", Request.PORT);
             Client client = new Client(socket);
+
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }*/
+    public static void createClient(boolean gui){
+        try {
+
+            Socket socket = new Socket("localhost", Request.PORT);
+            Client client = new Client(socket,gui);
 
         }catch (IOException e){
             e.printStackTrace();
