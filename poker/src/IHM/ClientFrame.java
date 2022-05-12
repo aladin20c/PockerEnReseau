@@ -362,13 +362,11 @@ public class ClientFrame extends JFrame {
 
                                     if(player.getName().equals(game.getCurrentPlayer().getName()) && client.getGameState().isGameStarted() /*&& player.getHand().getCards().size()>0*/){
                                         if(!(game.getBidTurn()==2 && change)){
-                                            System.out.println("stop");
                                             timer.stop();
                                         }
                                     }
                                     updatePlayer();
                                     if(displayActionButtons){
-                                        System.out.println("restart");
                                         timer.restart();
                                         displayActionButtons=false;
                                     }
@@ -377,7 +375,6 @@ public class ClientFrame extends JFrame {
                             });
                     timer.start();
                 }
-                //updateSlider();
             }
 
         });
@@ -426,8 +423,6 @@ public class ClientFrame extends JFrame {
                     JLabel[] cards = new JLabel[5];
                     for (int j = 0; j < 5; j++) {
                         cards[j] = new JLabel();
-                        /*path = "/images/card_back.png";
-                        cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                         cards[j].setBounds(80 + (j * 15) + (i*200), 55, 70, 100);
                         cardsLabels.add(cards[j]);
                     }
@@ -469,8 +464,6 @@ public class ClientFrame extends JFrame {
                         JLabel[] cards = new JLabel[5];
                         for (int j = 0; j < 5; j++) {
                             cards[j] = new JLabel();
-                            /*path = "/images/card_back.png";
-                            cards[j].setIcon(new ImageIcon(this.getClass().getResource(path)));*/
                             cards[j].setBounds(885 +(j * 15) -((i-6)*200), 450, 70, 100);
                             cardsLabels.add(cards[j]);
                         }
@@ -611,13 +604,11 @@ public class ClientFrame extends JFrame {
 
                                     if(player.getName().equals(game.getCurrentPlayer().getName()) && client.getGameState().isGameStarted()){
                                         if(!(game.getBidTurn()==2 && change)){
-                                            System.out.println("stop");
                                             timer.stop();
                                         }
                                     }
                                     updatePlayer();
                                     if(displayActionButtons){
-                                        System.out.println("restart");
                                         timer.restart();
                                         displayActionButtons=false;
                                     }
@@ -727,7 +718,6 @@ public class ClientFrame extends JFrame {
             messageText.setText(message);
         }
         else{
-            System.out.println("ce joueur est : "+player.getName()+" |courant : "+game.getCurrentPlayer().getName()+" ");
             if(player.getName().equals((game.getCurrentPlayer().getName()))){
                 messageText.setForeground(Color.GREEN);
                 messageText.setText("C'est votre tour");

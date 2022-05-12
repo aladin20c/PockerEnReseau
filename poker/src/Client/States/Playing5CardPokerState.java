@@ -153,6 +153,8 @@ public class Playing5CardPokerState extends GameState{
             kce.setDiscradedCards(cards);
             ((PokerFerme)currentGame).addChangeEvent(kce);
             //next turn______
+            p.setPlayed(true);
+            currentGame.rotate();
             rotateTurn();
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {

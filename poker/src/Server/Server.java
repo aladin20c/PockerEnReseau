@@ -67,6 +67,15 @@ public class Server {
             e.printStackTrace();
         }
     }
+    public static void createServer() {
+        try{
+            ServerSocket serverSocket=new ServerSocket(Request.PORT);
+            Server server=Server.get(serverSocket);
+            server.startServer();
+        }catch (IOException e){
+            e.printStackTrace();
+        }
+    }
 
 
     public static boolean containsName(String name){
