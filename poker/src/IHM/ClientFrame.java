@@ -71,6 +71,7 @@ public class ClientFrame extends JFrame {
     private boolean stop = false;
     private boolean displayPlayButton = false;
     private boolean displayActionButtons = false;
+    private boolean change = false;
 
     public final static int INTERVAL = 50;
     private Timer timer;
@@ -109,7 +110,6 @@ public class ClientFrame extends JFrame {
 
         callButton = new JButton( new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
-                System.out.println("call pressed");
                 timer.restart();
                 String messageToSend="412 CALL";
                 client.sendMessage(messageToSend);
@@ -125,6 +125,7 @@ public class ClientFrame extends JFrame {
                 String messageToSend="413 RAISE "+raiseAmountText.getText();
                 client.sendMessage(messageToSend);
                 raiseAmountText.setText("");
+                displayActionButtons=true;
             }
         });
         callButton.setFocusPainted( false );
@@ -163,15 +164,23 @@ public class ClientFrame extends JFrame {
 
         changeButton = new JButton(new AbstractAction() {
             public void actionPerformed(ActionEvent a) {
+                change = true;
                 timer.restart();
-                String cardsNames[] = changeText.getText().split(" ");
-                String messageToSend = "710 CHANGE "+cardsNames.length;
-                for(int i=0 ; i<cardsNames.length ; i++){
-                    messageToSend = messageToSend + " " + cardsNames[i];
+                String messageToSend = "710 CHANGE ";
+                if(changeText.getText().equals("")){
+                    messageToSend = messageToSend +"0";
+                }
+                else{
+                    String cardsNames[] = changeText.getText().split(" ");
+                    messageToSend = messageToSend + cardsNames.length;
+                    for(int i=0 ; i<cardsNames.length ; i++){
+                        messageToSend = messageToSend + " " + cardsNames[i];
+                    }
                 }
                 System.out.println(messageToSend);
                 client.sendMessage(messageToSend);
                 changeText.setText("");
+                displayActionButtons=true;
             }
         });
         changeButton.setFocusPainted( false );
@@ -351,9 +360,11 @@ public class ClientFrame extends JFrame {
                                         updateTableCards();
                                     }
 
-                                    if(player.getName().equals(game.getCurrentPlayer().getName()) && player.getHand().getCards().size()>0){
-                                        System.out.println("stop");
-                                        timer.stop();
+                                    if(player.getName().equals(game.getCurrentPlayer().getName()) && client.getGameState().isGameStarted() /*&& player.getHand().getCards().size()>0*/){
+                                        if(!(game.getBidTurn()==2 && change)){
+                                            System.out.println("stop");
+                                            timer.stop();
+                                        }
                                     }
                                     updatePlayer();
                                     if(displayActionButtons){
@@ -599,8 +610,10 @@ public class ClientFrame extends JFrame {
                                     }
 
                                     if(player.getName().equals(game.getCurrentPlayer().getName()) && client.getGameState().isGameStarted()){
-                                        System.out.println("stop");
-                                        timer.stop();
+                                        if(!(game.getBidTurn()==2 && change)){
+                                            System.out.println("stop");
+                                            timer.stop();
+                                        }
                                     }
                                     updatePlayer();
                                     if(displayActionButtons){
@@ -648,6 +661,8 @@ public class ClientFrame extends JFrame {
         callButton.setText("");
         raiseButton.setEnabled( false );
         raiseButton.setText("");
+        changeButton.setEnabled( false );
+        changeButton.setText("");
     }
 
 
@@ -712,6 +727,7 @@ public class ClientFrame extends JFrame {
             messageText.setText(message);
         }
         else{
+            System.out.println("ce joueur est : "+player.getName()+" |courant : "+game.getCurrentPlayer().getName()+" ");
             if(player.getName().equals((game.getCurrentPlayer().getName()))){
                 messageText.setForeground(Color.GREEN);
                 messageText.setText("C'est votre tour");

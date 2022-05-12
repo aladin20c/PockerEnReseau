@@ -148,6 +148,8 @@ public class Playing5CardPokerState extends GameState{
             kce.setDiscradedCards(cards);
             ((PokerFerme)currentGame).addChangeEvent(kce);
             this.futureChange="";
+            p.setPlayed(true);
+            currentGame.rotate();
             rotateTurn();
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {
@@ -157,6 +159,8 @@ public class Playing5CardPokerState extends GameState{
             int numberOfCardsChanged=Integer.parseInt(comingMessage.substring(comingMessage.lastIndexOf("CHANGE")+7));
             ((PokerFerme)currentGame).addChangeEvent(new ChangeEvent(player,numberOfCardsChanged));
             writeToServer(Request.CHANGE_RECIEVED);
+            player.setPlayed(true);
+            currentGame.rotate();
             rotateTurn();
 
         }else if (comingMessage.matches(Request.QUIT_ACCEPTED)) {
