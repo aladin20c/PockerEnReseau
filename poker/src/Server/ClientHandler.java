@@ -6,9 +6,7 @@ import Server.ServerGameStates.IdentificationState;
 
 import java.io.*;
 import java.net.Socket;
-import java.util.HashSet;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 
 
 public class ClientHandler implements Runnable{
@@ -33,7 +31,8 @@ public class ClientHandler implements Runnable{
     private Timer timer;
 
     //tasks: when user replies the correspending commands, the corresponding task wil be cancelled otherwise it will kick the player from the game
-    HashSet<RunOutOfTimeTask> taskset;
+    private HashSet<RunOutOfTimeTask> secondarySet;
+    private Set<RunOutOfTimeTask> taskset;
 
 
     public ClientHandler(Socket socket) {
@@ -43,7 +42,8 @@ public class ClientHandler implements Runnable{
             this.bufferedWriter = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
             this.bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             this.timer=new Timer();
-            this.taskset=new HashSet<>();
+            this.secondarySet=new HashSet<>();
+            this.taskset = Collections.synchronizedSet(secondarySet);
             this.gameState=new IdentificationState(this);
         }catch(IOException e){
             closeEverything();
@@ -79,6 +79,7 @@ public class ClientHandler implements Runnable{
         gameState.clientQuit();
     }
 
+
     @Override
     public void run(){
         /*everything here is run on a seperate thread
@@ -90,7 +91,8 @@ public class ClientHandler implements Runnable{
                 messageFromClient=bufferedReader.readLine();
                 this.getGameState().analyseRequest(messageFromClient);
             }catch(Exception e){
-                closeEverything();
+                //closeEverything();
+                e.printStackTrace();//todo remove whrn done
                 break;//when the client disconnects, we get out of the while loop
             }
         }
@@ -111,12 +113,13 @@ public class ClientHandler implements Runnable{
         this.gameState = gameState;
     }
 
+
     //task related methods
     public void addTask(String string){
         try {
             RunOutOfTimeTask task = new RunOutOfTimeTask(this, string);
             this.taskset.add(task);
-            this.timer.schedule(task, 30_000);
+            this.timer.schedule(task, 60_000);
         }catch (Exception e){
             e.printStackTrace();
         }
@@ -139,4 +142,3 @@ public class ClientHandler implements Runnable{
     }
 
 }
-//mutex java thread pour la partie serveur.

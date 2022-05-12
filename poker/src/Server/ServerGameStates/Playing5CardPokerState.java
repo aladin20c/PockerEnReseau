@@ -7,6 +7,8 @@ import Server.ClientHandler;
 import Server.Server;
 import Server.Room;
 
+import java.io.IOException;
+
 
 public class Playing5CardPokerState extends GameState{
 
@@ -80,9 +82,9 @@ public class Playing5CardPokerState extends GameState{
             if(!room.getGame().canRaise(player,raise)){
                 writeToClient(Request.INVALID);
             }else {
-                player.raise(room.getGame(), raise);//(╯°□°)╯︵ ┻━┻
+                player.raise(room.getGame(), raise);
                 clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
-                broadCastTask(Request.ACTION_RECIEVED);
+                broadCastTask(Request.ACTION_RECIEVED);//(╯°□°)╯︵ ┻━┻
                 broadCastMessage("513 " + clientHandler.getClientUsername() + " RAISE " + raise);
                 writeToClient("400 ACCEPTED");
                 rotateTurn();
@@ -112,9 +114,10 @@ public class Playing5CardPokerState extends GameState{
                 writeToClient(Request.ERROR);
             }else{
                 Card[] newCards=room.getGame().change(player,cards);
+                clientHandler.cancelTask(messageFromClient);//(╯°□°)╯︵ ┻━┻
                 writeToClient("700 ACCEPTED");
                 broadCastTask(Request.CHANGE_RECIEVED);//(╯°□°)╯︵ ┻━┻
-                broadCastMessage("720 "+clientHandler.getClientUsername()+" Change "+numberOfCards);
+                broadCastMessage("720 "+clientHandler.getClientUsername()+" CHANGE "+numberOfCards);
                 StringBuilder cardDistribution= new StringBuilder("610 CARDS ");
                 cardDistribution.append(data[2]);
                 for(Card card:newCards){
@@ -200,16 +203,25 @@ public class Playing5CardPokerState extends GameState{
         player.quit(room.getGame());
         room.removeClient(clientHandler);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         if(current){
             rotateTurn();
         }
-        writeToClient(Request.QUIT_ACCEPTED);
         if(room.isEmpty()){
             Server.removeRoom(room);
         }
-        clientHandler.purge();
-        clientHandler.setGameState(new MenuState(clientHandler));
+
+        try{
+            clientHandler.purge();
+            clientHandler.setGameState(new MenuState(clientHandler));
+            clientHandler.getBufferedWriter().write(Request.QUIT_ACCEPTED);
+            clientHandler.getBufferedWriter().newLine();
+            clientHandler.getBufferedWriter().flush();
+        }catch (IOException e){
+            //there must no call for close everything
+            //recursive
+        }
+
     }
 
 
@@ -251,7 +263,12 @@ public class Playing5CardPokerState extends GameState{
         for (ClientHandler ch:room.getClientHandlers()){
 
             if (ch.getClientUsername().equals(currentPlayerName)){
-                ch.addTask("(41[0123].*)|(710.*)");
+                //todo fixme _____
+                if(room.getTurn()==2){
+                    ch.addTask(Request.CHANGE);
+                }else{
+                    ch.addTask("41[0123].*");
+                }
                 ch.writeToClient("Server : It is ur turn");
             }else {
                 ch.writeToClient("Server : It is "+currentPlayerName+"'s turn");
@@ -305,6 +322,7 @@ public class Playing5CardPokerState extends GameState{
                 i+=1;
             }
         }
+        room.purgeTasks();
     }
 
     @Override

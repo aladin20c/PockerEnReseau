@@ -59,7 +59,14 @@ public class Client {
             String messageToSend=scanner.nextLine(); //when enter is pressed in the terminal, wht he typed will be captured here
             messageToSend=messageToSend.trim();
             analyseMessageToSend(messageToSend);
-            writeToServer(messageToSend);
+            try {
+                bufferedWriter.write(messageToSend);
+                bufferedWriter.newLine();
+                bufferedWriter.flush();
+            }catch (IOException e){
+                closeEverything(socket,bufferedReader,bufferedWriter);
+                break;
+            }
         }
     }
     /*making a seperate thread for listening for messages that has been broadCasted*/
@@ -75,10 +82,14 @@ public class Client {
                         analyseComingMessage(comingMessage);
                         System.out.println(comingMessage);
                     }catch(NullPointerException e){
+                        e.printStackTrace();//todo remove
                         System.out.println("server has shut down");
                         closeEverything(socket,bufferedReader,bufferedWriter);
+                        break;
                     }catch (IOException e){
+                        e.printStackTrace();//todo remove
                         closeEverything(socket,bufferedReader,bufferedWriter);
+                        break;
                     }
                 }
             }

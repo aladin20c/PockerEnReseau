@@ -7,6 +7,7 @@ import Server.ServerGameStates.Playing5CardPokerState;
 import Server.ServerGameStates.PlayingTexasHoldemState;
 import Server.ServerGameStates.WaitingState;
 
+import java.io.IOException;
 import java.util.*;
 
 
@@ -26,14 +27,42 @@ public class Room  {
         this.resetIsSet=false;
     }
 
+    public synchronized void broadCastMessage(String messageToSend,ClientHandler ch){
+        for (ClientHandler clientHandler : clientHandlers) {
+            try {
+                if (clientHandler!=ch) {
+                    clientHandler.getBufferedWriter().write(messageToSend);
+                    clientHandler.getBufferedWriter().newLine();
+                    clientHandler.getBufferedWriter().flush();
+                }
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
+    }
+
+    public void broadCastMessageToEveryone(String messageToSend){
+        for (ClientHandler clientHandler : clientHandlers) {
+            try {
+                clientHandler.getBufferedWriter().write(messageToSend);
+                clientHandler.getBufferedWriter().newLine();
+                clientHandler.getBufferedWriter().flush();
+            } catch (IOException e) {
+                clientHandler.closeEverything();
+            }
+        }
+    }
+
 
     public synchronized  void addClient(ClientHandler clientHandler){
         clientHandlers.add(clientHandler);
         game.addPlayer(clientHandler.getClientUsername());
     }
+
     public synchronized  void removeClient(ClientHandler clientHandler){
         clientHandlers.remove(clientHandler);
     }
+
 
     public synchronized  ClientHandler getClientHandler(String username){
         for(ClientHandler ch : clientHandlers){
@@ -41,6 +70,7 @@ public class Room  {
         }
         return null;
     }
+
 
 
     public synchronized  boolean canAddNewClient(){
@@ -51,6 +81,7 @@ public class Room  {
         }
     }
 
+
     public synchronized  void requestStart(boolean start){
         for(ClientHandler ch : clientHandlers){
             if(ch.getGameState() instanceof WaitingState) {
@@ -59,7 +90,6 @@ public class Room  {
             }
         }
     }
-
     public synchronized void setResetGameTimer(){
         if (endgame && !resetIsSet){
             Timer timer=new Timer(true);
@@ -73,9 +103,6 @@ public class Room  {
             resetIsSet=true;
         }
     }
-
-
-
     public synchronized  void resetGame(){
         clientHandlers.add(clientHandlers.remove(0));
         ArrayList<ClientHandler> reClientHandlers=new ArrayList<>();
@@ -105,8 +132,13 @@ public class Room  {
         }
     }
 
+    public synchronized void purgeTasks(){
+        for (ClientHandler ch : clientHandlers){
+            ch.purge();
+        }
+    }
 
-    public String informationToString(int index){
+    public synchronized String informationToString(int index){
         return "121 MESS "+index+" ID "+game.getId()+" "+game.getType()+" "+game.getMaxPlayers()+" "+game.getMinBid()+" "+game.getInitStack()+" "+clientHandlers.size();
     }
     public synchronized  boolean isAdmin(ClientHandler clientHandler){

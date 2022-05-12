@@ -11,8 +11,8 @@ public class Request {
     public static String USED_NAME="902 This name is already used";
 
     //menu
-    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 6 STACK 10000
-    public static String INCORRECT_VALUE="903 Incorrect value";//110 CREATE 0 PLAYER 3 MIN 6 STACK 10000
+    public static String CREATE_ROOM="110 CREATE -?\\d+ PLAYER -?\\d+ MIN -?\\d+ STACK -?\\d+";//110 CREATE 1 PLAYER 2 MIN 10 STACK 10000
+    public static String INCORRECT_VALUE="903 Incorrect value";//110 CREATE 0 PLAYER 3 MIN 10 STACK 10000
     public static String INCORRECT_PLAYERS="904 Incorrect number of players";
     public static String INCORRECT_BET="905 Incorrect minimal bet";
     public static String INCORRECT_STACK="906 Incorrect stack";
@@ -45,7 +45,7 @@ public class Request {
     public static String FOLD = "410 FOLD";
     public static String CHECK = "411 CHECK";
     public static String CALL="412 CALL";
-    public static String RAISE = "413 RAISE \\d+";
+    public static String RAISE = "413 RAISE \\d+";//  413 RAISE 10
     public static String ACTION_ACCEPTED="400 ACCEPTED";
 
 
@@ -61,7 +61,7 @@ public class Request {
     public static String CARDS_RECIEVED="600 RECIEVED";
 
 
-    public static String CHANGE="710 CHANGE \\d+(\\s[0-9]+[DCST])*";
+    public static String CHANGE="710 CHANGE \\d+(\\s[DCST][0-9]+)*";
     public static String CHANGE_ACCEPTED="700 ACCEPTED";
     public static String PLAYER_CHANGED_CARDS="720 .+ CHANGE \\d+";
     public static String CHANGE_RECIEVED="701 RECIEVED";
@@ -96,6 +96,4 @@ public class Request {
     public static String ACTIVE_PLAYERS="666 \\d+ ACTIVEPLAYERS.*";
     public static String QUITTED_PLAYERS="666 \\d+ QUITTEDPLAYERS.*";
     public static String FOLDED_PLAYERS="666 \\d+ FOLDEDPLAYERS.*";
-
-
 }
