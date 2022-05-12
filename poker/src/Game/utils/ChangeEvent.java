@@ -27,12 +27,5 @@ public class ChangeEvent {
     public void setDiscradedCards(Card[] discradedCards) {
         this.discradedCards = discradedCards;
     }
-    public void addDrawnCard(Card c){
-        for (int i=0;i<drawnCards.length;i++){
-            if(drawnCards[i]==null) {
-                drawnCards[i] = c;
-                return;
-            }
-        }
-    }
+
 }

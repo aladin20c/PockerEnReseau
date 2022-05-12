@@ -27,29 +27,17 @@ public abstract class GameState {
         clientHandler.writeToClient(message);
     }
     public void broadCastMessage(String messageToSend){
-        for (ClientHandler clientHandler : room.getClientHandlers()) {
-            try {
-                if (clientHandler!=this.clientHandler) {
-                    clientHandler.getBufferedWriter().write(messageToSend);
-                    clientHandler.getBufferedWriter().newLine();
-                    clientHandler.getBufferedWriter().flush();
-                }
-            } catch (IOException e) {
-                clientHandler.closeEverything();
-            }
+        if(room!=null) {
+            room.broadCastMessage(messageToSend, clientHandler);
         }
     }
+
     public void broadCastMessageToEveryone(String messageToSend){
-        for (ClientHandler clientHandler : room.getClientHandlers()) {
-            try {
-                clientHandler.getBufferedWriter().write(messageToSend);
-                clientHandler.getBufferedWriter().newLine();
-                clientHandler.getBufferedWriter().flush();
-            } catch (IOException e) {
-                clientHandler.closeEverything();
-            }
+        if(room!=null) {
+            room.broadCastMessageToEveryone(messageToSend);
         }
     }
+
 
     public void broadCastTask(String string){
         for (ClientHandler clientHandler : room.getClientHandlers()) {
@@ -70,7 +58,6 @@ public abstract class GameState {
             }
         }
     }
-
 
     public void clientQuit(){}
 

@@ -9,6 +9,7 @@ import Server.Room;
 import Server.Server;
 
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -174,16 +175,24 @@ public class PlayingTexasHoldemState extends GameState{
         player.quit(room.getGame());
         room.removeClient(clientHandler);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
-        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");//fixme sommmmmetimes it gives concurrent Exception??
+        broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
         if(current){
             rotateTurn();
         }
-        writeToClient(Request.QUIT_ACCEPTED);
         if(room.isEmpty()){
             Server.removeRoom(room);
         }
-        clientHandler.purge();
-        clientHandler.setGameState(new MenuState(clientHandler));
+        try{
+            clientHandler.purge();
+            clientHandler.setGameState(new MenuState(clientHandler));
+            clientHandler.getBufferedWriter().write(Request.QUIT_ACCEPTED);
+            clientHandler.getBufferedWriter().newLine();
+            clientHandler.getBufferedWriter().flush();
+        }catch (IOException e){
+            //there must no call for close everything
+            //recursive
+        }
+
     }
 
 
@@ -298,6 +307,7 @@ public class PlayingTexasHoldemState extends GameState{
                 i+=1;
             }
         }
+        room.purgeTasks();
     }
 
     @Override

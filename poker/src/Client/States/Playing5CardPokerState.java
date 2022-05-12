@@ -6,6 +6,7 @@ import Game.simulator.FiveCardSimulator;
 import Game.utils.ChangeEvent;
 import Game.utils.Request;
 
+import java.util.Arrays;
 
 
 public class Playing5CardPokerState extends GameState{
@@ -111,27 +112,28 @@ public class Playing5CardPokerState extends GameState{
 
         } else if (comingMessage.matches(Request.CARDS_DISTRIBUTION)) {
 
+
             String[] data = comingMessage.substring(10).split("\\s+");
             Hand hand = currentGame.getPlayer(username).getHand();
 
-            ChangeEvent event=null;
-            boolean drawingEvent=false;
+            Card[] cards=new Card[data.length-1];
+            for(int i=1;i<data.length;i++){
+                cards[i-1]=new Card(data[i]);
+            }
 
-            if (!hand.getCards().isEmpty() && hand.getCards().size() < 5){
-                drawingEvent=true;
+            hand.addAll(cards);
+
+
+            if(currentGame.getBidTurn()==2){
+                ChangeEvent ce=null;
                 for(ChangeEvent e : ((PokerFerme)currentGame).changeEvents){
-                    if(e.player.getName().equals(username)) event=e;
+                    if(e.player.getName().equals(username)) {
+                        ce = e;
+                        break;
+                    }
                 }
+                ce.setDrawnCards(cards);
             }
-
-            for (int i = 1; i < data.length; i++) {
-                Card c=new Card(data[i]);
-                if(drawingEvent && event!=null){
-                    event.addDrawnCard(c);
-                }
-                hand.add(c);
-            }
-
             writeToServer(Request.CARDS_RECIEVED);
 
         }else if (comingMessage.matches(Request.CHANGE_ACCEPTED)) {
@@ -142,14 +144,15 @@ public class Playing5CardPokerState extends GameState{
             for(int i=1;i<data.length;i++){
                 cards[i-1]=new Card(data[i]);
             }
+
             Player p= currentGame.getPlayer(username);
             p.getHand().removeAll(cards);
+            this.futureChange="";
+            //change event______
             ChangeEvent kce=new ChangeEvent(p,Integer.parseInt(data[0]));
             kce.setDiscradedCards(cards);
             ((PokerFerme)currentGame).addChangeEvent(kce);
-            this.futureChange="";
-            p.setPlayed(true);
-            currentGame.rotate();
+            //next turn______
             rotateTurn();
 
         }else if (comingMessage.matches(Request.PLAYER_CHANGED_CARDS)) {

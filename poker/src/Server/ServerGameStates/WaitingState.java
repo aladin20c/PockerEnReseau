@@ -7,6 +7,7 @@ import Server.Room;
 import Server.Server;
 
 
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class WaitingState extends GameState {
@@ -150,10 +151,8 @@ public class WaitingState extends GameState {
     public void clientQuit() {
         room.removeClient(clientHandler);
         room.getGame().removePlayer(clientHandler.getClientUsername());
-        writeToClient(Request.QUIT_ACCEPTED);
         broadCastTask(Request.QUIT_RECIEVED);//(╯°□°)╯︵ ┻━┻
         broadCastMessage("211 " + clientHandler.getClientUsername() + " QUIT");
-
         if(room.numberOfClients()==0) {
             Server.removeRoom(room);
         }else if(startRequested){
@@ -161,7 +160,17 @@ public class WaitingState extends GameState {
             broadCastMessageToEveryone("154 START ABORDED " + 0);
             room.requestStart(false);
         }
-        clientHandler.setGameState(new MenuState(clientHandler));
+
+        try{
+            clientHandler.purge();
+            clientHandler.setGameState(new MenuState(clientHandler));
+            clientHandler.getBufferedWriter().write(Request.QUIT_ACCEPTED);
+            clientHandler.getBufferedWriter().newLine();
+            clientHandler.getBufferedWriter().flush();
+        }catch (IOException e){
+            //there must no call for close everything
+            //recursive
+        }
     }
 
 
