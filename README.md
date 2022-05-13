@@ -14,6 +14,17 @@ Ce projet a été proposé par M. Vincent Cheval de l'Université de Paris dans 
 
 
 
+##Comment executé le jeu
+
+cd pockerenreseau/poker/out/production/poker/
+
+java Main.Main
+
+
+--server pour avoir un serveur
+--cleint pour svoir un client
+--gui pour accompagner l'interface graphique avec le client
+
 
 
 ##Statut actuel du projet:
