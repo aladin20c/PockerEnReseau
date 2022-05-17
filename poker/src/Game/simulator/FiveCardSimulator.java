@@ -18,11 +18,10 @@ public class FiveCardSimulator implements Simulator{
         }else if(game.getBidTurn()==1){
             return simulate_first_betting_round(ourplayer, game.getPlayers());
         }else if(game.getBidTurn()==2 || game.getBidTurn()==3){
-            simulate_rest_of_the_game(ourplayer, game.getPlayers(), game.changeEvents);
+            return simulate_rest_of_the_game(ourplayer, game.getPlayers(), game.changeEvents);
         }else{
             return new Data();
         }
-        return new Data();
     }
 
     public static Data simulate_ante(Player ourPlayer, ArrayList<Player> players){
