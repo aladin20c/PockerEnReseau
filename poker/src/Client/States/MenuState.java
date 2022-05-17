@@ -38,19 +38,27 @@ public class MenuState extends GameState{
     @Override
     public void analyseComingMessage(String comingMessage) {
         if(comingMessage.matches(Request.INCORRECT_VALUE)){
-            client.getClientFrame().setIncorrectType(true);
+            if(client.getClientFrame() != null) {
+                client.getClientFrame().setIncorrectType(true);
+            }
         }
         else{
             if(comingMessage.matches(Request.INCORRECT_PLAYERS)){
-                client.getClientFrame().setIncorrectPlayers(true);
+                if(client.getClientFrame() != null) {
+                    client.getClientFrame().setIncorrectPlayers(true);
+                }
             }
             else{
                 if(comingMessage.matches(Request.INCORRECT_BET)){
+                    if(client.getClientFrame() != null) {
                     client.getClientFrame().setIncorrectBet(true);
+                    }
                 }
                 else{
                     if(comingMessage.matches(Request.INCORRECT_STACK)){
-                        client.getClientFrame().setIncorrectStack(true);
+                        if(client.getClientFrame() != null) {
+                            client.getClientFrame().setIncorrectStack(true);
+                        }
                     }
                     else{
 
